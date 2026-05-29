@@ -122,14 +122,24 @@ textarea {
 }
 
 .nav a {
+  align-items: center;
   border-radius: 7px;
-  color: #e9f2ea;
-  display: block;
+  color: #c8d9ca;
+  display: flex;
+  font-size: 14px;
+  gap: 9px;
   padding: 10px 11px;
 }
 
 .nav a:hover {
   background: rgba(255, 255, 255, 0.09);
+  color: #e9f2ea;
+}
+
+.nav a.navActive {
+  background: rgba(255, 255, 255, 0.12);
+  color: #ffffff;
+  font-weight: 700;
 }
 
 .sidebarFooter {

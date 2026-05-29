@@ -1,35 +1,50 @@
-import Link from "next/link";
+"use client"
+
+import Link from "next/link"
+import { usePathname } from "next/navigation"
+import { LayoutGrid, PlusSquare, Link2, BarChart2 } from "lucide-react"
 
 const navItems = [
-  { href: "/dashboard", label: "Products" },
-  { href: "/create", label: "Create AR Page" },
-  { href: "/published-links", label: "Published Links" },
-  { href: "/analytics-billing", label: "Analytics/Billing" }
-];
+  { href: "/dashboard", label: "Products", icon: LayoutGrid },
+  { href: "/create", label: "Create AR Page", icon: PlusSquare },
+  { href: "/published-links", label: "Published Links", icon: Link2 },
+  { href: "/analytics-billing", label: "Analytics / Billing", icon: BarChart2 },
+]
 
 export function AppShell({ children }: { children: React.ReactNode }) {
+  const pathname = usePathname()
+
   return (
     <div className="appShell">
       <aside className="sidebar">
         <div className="brand">
           <span className="brandMark">AR</span>
-          <strong>Veridian AR Commerce</strong>
-          <span>Verified hosted AR product pages for furniture and home decor stores.</span>
+          <strong>Veridian</strong>
+          <span>Pilot Command Center</span>
         </div>
 
         <nav className="nav" aria-label="Primary">
-          {navItems.map((item) => (
-            <Link href={item.href} key={item.href}>
-              {item.label}
-            </Link>
-          ))}
+          {navItems.map(({ href, label, icon: Icon }) => {
+            const isActive = pathname === href || (href !== "/dashboard" && pathname.startsWith(href))
+            return (
+              <Link
+                href={href}
+                key={href}
+                className={isActive ? "navActive" : undefined}
+                aria-current={isActive ? "page" : undefined}
+              >
+                <Icon size={15} strokeWidth={2} aria-hidden />
+                {label}
+              </Link>
+            )
+          })}
         </nav>
 
         <p className="sidebarFooter">
-          Pilot Command Center for your first 10-25 products. Models are human-reviewed before publishing.
+          Models are human-reviewed before publishing. Pilot: 10–25 products.
         </p>
       </aside>
       <main className="main">{children}</main>
     </div>
-  );
+  )
 }

@@ -3,18 +3,9 @@ import { Button } from "@/components/ui/button"
 import { MarketingNav } from "@/components/marketing-nav"
 import { ProductTable } from "@/components/ProductTable"
 import { pricingPackages } from "@/lib/mock-data"
-import { CheckCircle2 } from "lucide-react"
+import { CheckCircle2, Shield } from "lucide-react"
 import type { Lang } from "@/lib/translations"
 import { translations } from "@/lib/translations"
-
-const ecomPlatforms = [
-  { name: "Shopify", logo: "https://cdn.simpleicons.org/shopify", h: "h-10" },
-  { name: "WooCommerce", logo: "https://cdn.simpleicons.org/woocommerce", h: "h-14" },
-  { name: "BigCommerce", logo: "https://cdn.simpleicons.org/bigcommerce", h: "h-10" },
-  { name: "PrestaShop", logo: "https://cdn.simpleicons.org/prestashop", h: "h-10" },
-  { name: "Squarespace", logo: "https://cdn.simpleicons.org/squarespace", h: "h-10" },
-  { name: "Wix", logo: "https://cdn.simpleicons.org/wix", h: "h-10" },
-]
 
 export function LandingPageContent({ lang }: { lang: Lang }) {
   const t = translations[lang]
@@ -24,29 +15,21 @@ export function LandingPageContent({ lang }: { lang: Lang }) {
       <MarketingNav lang={lang} />
 
       <main>
-        {/* Decorative background gradients */}
-        <div
-          aria-hidden
-          className="z-[2] absolute inset-0 pointer-events-none isolate opacity-50 contain-strict hidden lg:block"
-        >
-          <div className="w-[35rem] h-[80rem] -translate-y-[350px] absolute left-0 top-0 -rotate-45 rounded-full bg-[radial-gradient(68.54%_68.72%_at_55.02%_31.46%,hsla(150,60%,50%,.06)_0,hsla(150,30%,30%,.02)_50%,transparent_80%)]" />
-          <div className="h-[80rem] absolute left-0 top-0 w-56 -rotate-45 rounded-full bg-[radial-gradient(50%_50%_at_50%_50%,hsla(150,60%,50%,.04)_0,transparent_100%)] [translate:5%_-50%]" />
-        </div>
-
-        {/* Hero section */}
-        <section className="overflow-hidden bg-white pt-20">
-          <div className="relative mx-auto max-w-5xl px-6 py-28 lg:py-24">
-            <div className="relative z-10 mx-auto max-w-2xl text-center">
-              <p className="text-sm font-bold uppercase tracking-widest text-emerald-700 mb-4">
+        {/* ─── Hero ──────────────────────────────────────────────────── */}
+        <section className="pt-24 bg-white overflow-hidden">
+          <div className="mx-auto max-w-5xl px-6">
+            {/* Copy block */}
+            <div className="mx-auto max-w-2xl text-center pt-16 pb-10">
+              <p className="text-xs font-bold uppercase tracking-widest text-emerald-700 mb-4">
                 {t.hero.eyebrow}
               </p>
-              <h1 className="text-balance text-4xl font-semibold md:text-5xl lg:text-6xl text-zinc-900">
+              <h1 className="text-4xl font-semibold md:text-5xl lg:text-6xl text-zinc-900 text-balance leading-tight mb-6">
                 {t.hero.heading}
               </h1>
-              <p className="mx-auto my-8 max-w-xl text-lg text-zinc-500">
+              <p className="text-lg text-zinc-500 max-w-xl mx-auto leading-relaxed mb-8">
                 {t.hero.body}
               </p>
-              <div className="flex flex-wrap gap-3 justify-center">
+              <div className="flex flex-wrap gap-3 justify-center mb-10">
                 <Button asChild size="lg">
                   <Link href="/dashboard">{t.hero.cta}</Link>
                 </Button>
@@ -54,48 +37,141 @@ export function LandingPageContent({ lang }: { lang: Lang }) {
                   <Link href="/p/northline-home/arc-oak-dining-chair">{t.hero.ctaSecondary}</Link>
                 </Button>
               </div>
-            </div>
-          </div>
 
-          {/* Tilted hero visual */}
-          <div className="mx-auto -mt-16 max-w-7xl [mask-image:linear-gradient(to_bottom,black_50%,transparent_100%)]">
-            <div className="[perspective:1200px] [mask-image:linear-gradient(to_right,black_60%,transparent_100%)] -mr-16 pl-16 lg:-mr-56 lg:pl-56">
-              <div className="[transform:rotateX(20deg)]">
-                <div className="lg:h-[44rem] relative skew-x-[.36rad]">
-                  <img
-                    className="rounded-lg z-[2] relative border border-zinc-200 shadow-2xl"
-                    src="https://images.unsplash.com/photo-1555041469-a586c61ea9bc?auto=format&fit=crop&w=2880&q=75"
-                    alt="AR product page preview — modern living room furniture"
-                    width={2880}
-                    height={1620}
-                  />
+              {/* Trust strip */}
+              <div className="grid grid-cols-2 gap-x-8 gap-y-3 max-w-sm mx-auto text-left border-t border-zinc-100 pt-8">
+                {[
+                  "Built for furniture and home decor",
+                  "Human-reviewed models",
+                  "Hosted product links",
+                  "AR and store-click analytics",
+                ].map((item) => (
+                  <div key={item} className="flex items-center gap-2">
+                    <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600 shrink-0" />
+                    <span className="text-xs font-semibold text-zinc-600">{item}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Browser mockup — hosted product page preview */}
+            <div className="mx-auto max-w-4xl relative pb-0">
+              <div className="absolute inset-x-8 bottom-0 h-24 bg-emerald-900/8 blur-3xl rounded-full" />
+              <div className="relative rounded-xl border border-zinc-200 shadow-2xl overflow-hidden [mask-image:linear-gradient(to_bottom,black_70%,transparent_100%)]">
+                {/* Chrome bar */}
+                <div className="bg-zinc-800 flex items-center gap-2.5 px-4 py-3 shrink-0">
+                  <div className="flex gap-1.5">
+                    <span className="h-3 w-3 rounded-full bg-[#ff5f57]" />
+                    <span className="h-3 w-3 rounded-full bg-[#febc2e]" />
+                    <span className="h-3 w-3 rounded-full bg-[#28c840]" />
+                  </div>
+                  <div className="ml-2 flex-1 bg-zinc-700 rounded text-xs text-zinc-300 px-3 py-1 font-mono text-center max-w-xs mx-auto">
+                    veridian.ar/p/northline-home/arc-oak-chair
+                  </div>
+                </div>
+
+                {/* Page body */}
+                <div
+                  className="flex bg-[#f7f8f4]"
+                  style={{ minHeight: "300px" }}
+                >
+                  {/* 3D Viewer panel */}
+                  <div className="relative flex flex-1 items-center justify-center overflow-hidden border-r border-zinc-200 bg-gradient-to-br from-zinc-50 to-amber-50/40 min-h-[280px]">
+                    {/* Chair silhouette */}
+                    <div className="relative z-10 flex flex-col items-center select-none">
+                      {/* Back */}
+                      <div
+                        className="w-24 h-16 rounded-t-md border shadow-md"
+                        style={{
+                          background: "linear-gradient(160deg,#d4b892,#c4a07a)",
+                          borderColor: "#b08a62",
+                        }}
+                      />
+                      {/* Seat */}
+                      <div
+                        className="w-28 h-4 rounded border shadow"
+                        style={{
+                          background: "linear-gradient(180deg,#c4a07a,#b58960)",
+                          borderColor: "#9a7450",
+                          marginTop: "-1px",
+                        }}
+                      />
+                      {/* Legs */}
+                      <div className="flex gap-10 mt-0.5">
+                        <div className="flex gap-4">
+                          <div className="w-2.5 h-14 rounded-sm" style={{ background: "#7c5230" }} />
+                          <div className="w-2.5 h-11 rounded-sm" style={{ background: "#7c5230" }} />
+                        </div>
+                        <div className="flex gap-4">
+                          <div className="w-2.5 h-11 rounded-sm" style={{ background: "#7c5230" }} />
+                          <div className="w-2.5 h-14 rounded-sm" style={{ background: "#7c5230" }} />
+                        </div>
+                      </div>
+                    </div>
+                    {/* AR overlay button */}
+                    <div className="absolute bottom-4 right-4 bg-white border border-zinc-200 rounded-lg px-3 py-2 text-xs font-semibold text-zinc-700 flex items-center gap-2 shadow-sm">
+                      <span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
+                      View in your room
+                    </div>
+                    <span className="absolute bottom-4 left-4 text-xs text-zinc-400">↻ Drag to rotate</span>
+                  </div>
+
+                  {/* Product info panel — hidden on narrow screens */}
+                  <div className="hidden sm:flex bg-white p-5 flex-col gap-4 border-l border-zinc-100" style={{ width: 220, flexShrink: 0 }}>
+                    {/* Merchant brand */}
+                    <div className="flex items-center gap-2">
+                      <div className="h-6 w-6 rounded bg-zinc-900 text-white text-xs font-extrabold flex items-center justify-center shrink-0">
+                        N
+                      </div>
+                      <span className="text-xs font-semibold text-zinc-500">Northline Home</span>
+                    </div>
+
+                    {/* Product name */}
+                    <div>
+                      <h2 className="text-sm font-bold text-zinc-900 leading-tight mb-1">Arc Oak Dining Chair</h2>
+                      <p className="text-xs text-zinc-500">Solid oak, natural finish</p>
+                    </div>
+
+                    {/* Dimensions */}
+                    <div className="grid grid-cols-3 gap-1.5">
+                      {[["W", "48 cm"], ["H", "82 cm"], ["D", "52 cm"]].map(([label, value]) => (
+                        <div
+                          key={label}
+                          className="border border-zinc-100 rounded-lg p-1.5 text-center bg-zinc-50"
+                        >
+                          <div className="text-[9px] text-zinc-400 font-bold uppercase">{label}</div>
+                          <div className="text-xs font-bold text-zinc-800">{value}</div>
+                        </div>
+                      ))}
+                    </div>
+
+                    {/* Verification badge */}
+                    <div className="flex items-center gap-1.5 text-[10px] font-semibold text-emerald-700 bg-emerald-50 border border-emerald-100 rounded-lg px-2.5 py-2">
+                      <CheckCircle2 className="h-3 w-3 shrink-0" />
+                      3D preview generated and verified
+                    </div>
+
+                    {/* CTA */}
+                    <div className="bg-zinc-900 text-white text-xs font-bold text-center py-2.5 rounded-lg mt-auto">
+                      View on store →
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
           </div>
         </section>
 
-        {/* Compatible platforms strip */}
-        <section className="bg-white relative z-10 py-16 border-t border-dashed border-zinc-200">
-          <div className="m-auto max-w-5xl px-6">
-            <p className="text-center text-sm font-semibold text-zinc-400 uppercase tracking-widest mb-12">
-              {t.platforms.label}
+        {/* ─── Hosted link anywhere ──────────────────────────────────── */}
+        <section className="bg-white relative z-10 py-12 border-t border-dashed border-zinc-200">
+          <div className="mx-auto max-w-5xl px-6 text-center">
+            <p className="text-sm font-semibold text-zinc-400">
+              Add your hosted product link to any store page, email, ad, or QR code — no plugin required
             </p>
-            <div className="mx-auto flex max-w-4xl flex-wrap items-center justify-center gap-x-12 gap-y-8 sm:gap-x-16 sm:gap-y-12">
-              {ecomPlatforms.map((p) => (
-                <img
-                  key={p.name}
-                  className={`${p.h} w-auto opacity-50 grayscale hover:opacity-80 hover:grayscale-0 transition-all`}
-                  src={p.logo}
-                  alt={`${p.name} logo`}
-                  width="auto"
-                />
-              ))}
-            </div>
           </div>
         </section>
 
-        {/* Problem section */}
+        {/* ─── Problem ──────────────────────────────────────────────── */}
         <section id="features" className="bg-zinc-50 border-y border-dashed border-zinc-200">
           <div className="mx-auto max-w-5xl px-6 py-20 grid gap-12 lg:grid-cols-2 lg:items-center">
             <div>
@@ -113,10 +189,12 @@ export function LandingPageContent({ lang }: { lang: Lang }) {
           </div>
         </section>
 
-        {/* How it works */}
+        {/* ─── How It Works ─────────────────────────────────────────── */}
         <section id="how-it-works" className="mx-auto max-w-5xl px-6 py-24">
           <div className="text-center mb-16">
-            <p className="text-xs font-bold uppercase tracking-widest text-emerald-700 mb-3">{t.howItWorks.eyebrow}</p>
+            <p className="text-xs font-bold uppercase tracking-widest text-emerald-700 mb-3">
+              {t.howItWorks.eyebrow}
+            </p>
             <h2 className="text-3xl font-semibold text-zinc-900">
               {t.howItWorks.heading}
             </h2>
@@ -130,24 +208,24 @@ export function LandingPageContent({ lang }: { lang: Lang }) {
                 <span className="flex h-8 w-8 items-center justify-center rounded-md bg-zinc-100 text-sm font-bold text-zinc-700 mb-4">
                   {i + 1}
                 </span>
-                <h3 className="font-semibold text-zinc-900 mb-2">{step}</h3>
+                <h3 className="font-semibold text-zinc-900 mb-2 text-sm">{step}</h3>
                 <p className="text-sm text-zinc-500 leading-relaxed">{copy}</p>
               </article>
             ))}
           </div>
         </section>
 
-        {/* What you get */}
+        {/* ─── What You Get ─────────────────────────────────────────── */}
         <section className="bg-zinc-50 border-y border-dashed border-zinc-200">
           <div className="mx-auto max-w-5xl px-6 py-20 grid gap-12 lg:grid-cols-2 lg:items-start">
             <div>
-              <p className="text-xs font-bold uppercase tracking-widest text-emerald-700 mb-3">{t.whatYouGet.eyebrow}</p>
+              <p className="text-xs font-bold uppercase tracking-widest text-emerald-700 mb-3">
+                {t.whatYouGet.eyebrow}
+              </p>
               <h2 className="text-3xl font-semibold text-zinc-900 leading-snug mb-4">
                 {t.whatYouGet.heading}
               </h2>
-              <p className="text-zinc-500 leading-relaxed">
-                {t.whatYouGet.body}
-              </p>
+              <p className="text-zinc-500 leading-relaxed">{t.whatYouGet.body}</p>
             </div>
             <div className="grid gap-3">
               {t.features.map((item) => (
@@ -159,18 +237,25 @@ export function LandingPageContent({ lang }: { lang: Lang }) {
                   <span className="font-medium text-zinc-800 text-sm">{item}</span>
                 </div>
               ))}
+              {/* Verification badge row */}
+              <div className="flex items-center gap-3 bg-emerald-50 border border-emerald-200 rounded-xl px-4 py-3.5">
+                <Shield className="h-4 w-4 text-emerald-600 shrink-0" />
+                <span className="font-semibold text-emerald-800 text-sm">
+                  3D preview generated and verified
+                </span>
+              </div>
             </div>
           </div>
         </section>
 
-        {/* Quality section */}
+        {/* ─── Quality & Trust ──────────────────────────────────────── */}
         <section className="mx-auto max-w-5xl px-6 py-24">
           <div className="text-center mb-12">
-            <p className="text-xs font-bold uppercase tracking-widest text-emerald-700 mb-3">{t.quality.eyebrow}</p>
-            <h2 className="text-3xl font-semibold text-zinc-900 mb-4">{t.quality.heading}</h2>
-            <p className="text-zinc-500 max-w-xl mx-auto leading-relaxed">
-              {t.quality.body}
+            <p className="text-xs font-bold uppercase tracking-widest text-emerald-700 mb-3">
+              {t.quality.eyebrow}
             </p>
+            <h2 className="text-3xl font-semibold text-zinc-900 mb-4">{t.quality.heading}</h2>
+            <p className="text-zinc-500 max-w-xl mx-auto leading-relaxed">{t.quality.body}</p>
           </div>
           <div className="grid gap-3 sm:grid-cols-3 lg:grid-cols-5">
             {t.qualityChecks.map((item) => (
@@ -185,17 +270,20 @@ export function LandingPageContent({ lang }: { lang: Lang }) {
               </article>
             ))}
           </div>
+          <p className="text-center text-xs text-zinc-400 mt-8 max-w-lg mx-auto leading-relaxed">
+            Veridian&apos;s promise is a verified visual AR preview — not exact CAD geometry or manufacturing-grade precision.
+          </p>
         </section>
 
-        {/* Dashboard preview */}
+        {/* ─── Dashboard Preview ────────────────────────────────────── */}
         <section className="bg-zinc-50 border-y border-dashed border-zinc-200">
           <div className="mx-auto max-w-5xl px-6 py-20">
             <div className="text-center mb-12">
-              <p className="text-xs font-bold uppercase tracking-widest text-emerald-700 mb-3">{t.dashboard.eyebrow}</p>
-              <h2 className="text-3xl font-semibold text-zinc-900 mb-3">{t.dashboard.heading}</h2>
-              <p className="text-zinc-500 max-w-xl mx-auto leading-relaxed">
-                {t.dashboard.body}
+              <p className="text-xs font-bold uppercase tracking-widest text-emerald-700 mb-3">
+                {t.dashboard.eyebrow}
               </p>
+              <h2 className="text-3xl font-semibold text-zinc-900 mb-3">{t.dashboard.heading}</h2>
+              <p className="text-zinc-500 max-w-xl mx-auto leading-relaxed">{t.dashboard.body}</p>
             </div>
             <div className="bg-white border border-zinc-200 rounded-2xl p-6 shadow-sm space-y-6">
               <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
@@ -211,17 +299,17 @@ export function LandingPageContent({ lang }: { lang: Lang }) {
           </div>
         </section>
 
-        {/* Pricing */}
+        {/* ─── Pilot Offer / Pricing ────────────────────────────────── */}
         <section id="pricing" className="mx-auto max-w-5xl px-6 py-24">
           <div className="grid gap-12 lg:grid-cols-2 lg:items-start">
             <div>
-              <p className="text-xs font-bold uppercase tracking-widest text-emerald-700 mb-3">{t.pricing.eyebrow}</p>
+              <p className="text-xs font-bold uppercase tracking-widest text-emerald-700 mb-3">
+                {t.pricing.eyebrow}
+              </p>
               <h2 className="text-3xl font-semibold text-zinc-900 leading-snug mb-3">
                 {t.pricing.heading}
               </h2>
-              <p className="text-zinc-500 leading-relaxed">
-                {t.pricing.body}
-              </p>
+              <p className="text-zinc-500 leading-relaxed">{t.pricing.body}</p>
             </div>
             <div className="grid gap-4 sm:grid-cols-3">
               {pricingPackages.slice(0, 3).map((item) => (
@@ -229,20 +317,22 @@ export function LandingPageContent({ lang }: { lang: Lang }) {
                   key={item.id}
                   className="bg-white border border-zinc-200 rounded-xl p-5 shadow-sm hover:shadow-md hover:border-emerald-200 transition-all"
                 >
-                  <h3 className="font-semibold text-zinc-900 mb-3">{item.name}</h3>
-                  <p className="text-2xl font-bold text-zinc-900 mb-1">{item.priceRangeEur}</p>
-                  <p className="text-sm text-zinc-400">{item.billingUnit}</p>
+                  <h3 className="font-semibold text-zinc-900 mb-3 text-sm">{item.name}</h3>
+                  <p className="text-xl font-bold text-zinc-900 mb-1">{item.priceRangeEur}</p>
+                  <p className="text-xs text-zinc-400 leading-relaxed">{item.billingUnit}</p>
                 </article>
               ))}
             </div>
           </div>
         </section>
 
-        {/* FAQ */}
+        {/* ─── FAQ ──────────────────────────────────────────────────── */}
         <section id="faq" className="bg-zinc-50 border-y border-dashed border-zinc-200">
           <div className="mx-auto max-w-5xl px-6 py-20">
             <div className="text-center mb-12">
-              <p className="text-xs font-bold uppercase tracking-widest text-emerald-700 mb-3">{t.faqSection.eyebrow}</p>
+              <p className="text-xs font-bold uppercase tracking-widest text-emerald-700 mb-3">
+                {t.faqSection.eyebrow}
+              </p>
               <h2 className="text-3xl font-semibold text-zinc-900">{t.faqSection.heading}</h2>
             </div>
             <div className="space-y-3 max-w-3xl mx-auto">
@@ -251,7 +341,7 @@ export function LandingPageContent({ lang }: { lang: Lang }) {
                   key={item.question}
                   className="group bg-white border border-zinc-200 rounded-xl px-6 py-5 shadow-sm open:shadow-md transition-shadow"
                 >
-                  <summary className="cursor-pointer font-semibold text-zinc-900 list-none flex items-center justify-between gap-4">
+                  <summary className="cursor-pointer font-semibold text-zinc-900 list-none flex items-center justify-between gap-4 text-sm">
                     {item.question}
                     <span className="shrink-0 text-zinc-400 group-open:rotate-180 transition-transform text-lg leading-none">
                       ↓
@@ -264,18 +354,14 @@ export function LandingPageContent({ lang }: { lang: Lang }) {
           </div>
         </section>
 
-        {/* Final CTA */}
+        {/* ─── Final CTA ────────────────────────────────────────────── */}
         <section className="bg-emerald-950 text-white">
           <div className="mx-auto max-w-3xl px-6 py-24 text-center space-y-6">
             <p className="text-xs font-bold uppercase tracking-widest text-emerald-400">
               {t.finalCta.eyebrow}
             </p>
-            <h2 className="text-3xl font-semibold leading-snug">
-              {t.finalCta.heading}
-            </h2>
-            <p className="text-emerald-200 leading-relaxed max-w-lg mx-auto">
-              {t.finalCta.body}
-            </p>
+            <h2 className="text-3xl font-semibold leading-snug">{t.finalCta.heading}</h2>
+            <p className="text-emerald-200 leading-relaxed max-w-lg mx-auto">{t.finalCta.body}</p>
             <div className="flex flex-wrap gap-3 justify-center pt-2">
               <Button asChild size="lg" className="bg-white text-emerald-900 hover:bg-emerald-50">
                 <Link href="/dashboard">{t.finalCta.cta}</Link>
@@ -286,7 +372,9 @@ export function LandingPageContent({ lang }: { lang: Lang }) {
                 size="lg"
                 className="border-emerald-700 text-white hover:bg-emerald-900"
               >
-                <Link href="/p/northline-home/arc-oak-dining-chair">{t.finalCta.ctaSecondary}</Link>
+                <Link href="/p/northline-home/arc-oak-dining-chair">
+                  {t.finalCta.ctaSecondary}
+                </Link>
               </Button>
             </div>
           </div>
