@@ -2,13 +2,14 @@
 
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { LayoutGrid, PlusSquare, Link2, BarChart2 } from "lucide-react"
+import { LayoutGrid, PlusSquare, Link2, BarChart2, CreditCard } from "lucide-react"
 
 const navItems = [
   { href: "/dashboard", label: "Products", icon: LayoutGrid },
   { href: "/create", label: "Create AR Page", icon: PlusSquare },
   { href: "/published-links", label: "Published Links", icon: Link2 },
-  { href: "/analytics-billing", label: "Analytics / Billing", icon: BarChart2 },
+  { href: "/analytics", label: "Analytics", icon: BarChart2 },
+  { href: "/billing", label: "Billing", icon: CreditCard },
 ]
 
 export function AppShell({ children }: { children: React.ReactNode }) {
