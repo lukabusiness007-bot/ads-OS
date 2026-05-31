@@ -1,5 +1,13 @@
 import { randomUUID } from "node:crypto";
 import { NextResponse } from "next/server";
+import {
+  MAX_GENERATION_FORM_BODY_SIZE_BYTES,
+  MAX_GENERATION_PHOTO_BYTES_TOTAL,
+  MAX_GENERATION_PHOTO_SIZE_BYTES,
+  MAX_GENERATION_PHOTOS,
+  SUPPORTED_GENERATION_IMAGE_TYPES,
+  formatMegabytes
+} from "@/lib/generation-upload";
 import { createMeshyMultiImageTask, MeshyConfigurationError, MeshyRequestError } from "@/lib/providers/meshy";
 import { createProductPhotoKey, uploadR2Object } from "@/lib/storage/r2";
 import type { StartGenerationResponse } from "@/lib/types";
@@ -7,20 +15,35 @@ import type { StartGenerationResponse } from "@/lib/types";
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
-const MAX_PHOTOS = 4;
-const MAX_PHOTO_SIZE = 20 * 1024 * 1024;
-const SUPPORTED_IMAGE_TYPES = new Set(["image/jpeg", "image/png"]);
-
 export async function POST(request: Request) {
   try {
+    const bodySizeError = validateRequestBodySize(request);
+
+    if (bodySizeError) {
+      return bodySizeError;
+    }
+
     const formData = await request.formData();
     const productName = getFormString(formData, "productName") || "product";
     const files = formData.getAll("photos").filter((entry): entry is File => entry instanceof File);
 
-    if (files.length < 1 || files.length > MAX_PHOTOS) {
+    if (files.length < 1 || files.length > MAX_GENERATION_PHOTOS) {
       return NextResponse.json(
         { errorMessage: "Upload 1-4 product photos before starting generation." },
         { status: 400 }
+      );
+    }
+
+    const totalPhotoBytes = files.reduce((total, file) => total + file.size, 0);
+
+    if (totalPhotoBytes > MAX_GENERATION_PHOTO_BYTES_TOTAL) {
+      return NextResponse.json(
+        {
+          errorMessage: `The selected photos are too large together. Keep the full upload under ${formatMegabytes(
+            MAX_GENERATION_PHOTO_BYTES_TOTAL
+          )}.`
+        },
+        { status: 413 }
       );
     }
 
@@ -37,9 +60,9 @@ export async function POST(request: Request) {
         );
       }
 
-      if (file.size > MAX_PHOTO_SIZE) {
+      if (file.size > MAX_GENERATION_PHOTO_SIZE_BYTES) {
         return NextResponse.json(
-          { errorMessage: "Each photo must be 20 MB or smaller." },
+          { errorMessage: `Each photo must be ${formatMegabytes(MAX_GENERATION_PHOTO_SIZE_BYTES)} or smaller.` },
           { status: 400 }
         );
       }
@@ -78,7 +101,7 @@ function getFormString(formData: FormData, key: string) {
 function getSupportedImageType(file: File) {
   const type = file.type.toLowerCase();
 
-  if (SUPPORTED_IMAGE_TYPES.has(type)) {
+  if (SUPPORTED_GENERATION_IMAGE_TYPES.has(type)) {
     return type;
   }
 
@@ -93,6 +116,29 @@ function getSupportedImageType(file: File) {
   }
 
   return null;
+}
+
+function validateRequestBodySize(request: Request) {
+  const contentLength = request.headers.get("content-length");
+
+  if (!contentLength) {
+    return null;
+  }
+
+  const requestBytes = Number.parseInt(contentLength, 10);
+
+  if (!Number.isFinite(requestBytes) || requestBytes <= MAX_GENERATION_FORM_BODY_SIZE_BYTES) {
+    return null;
+  }
+
+  return NextResponse.json(
+    {
+      errorMessage: `This upload is too large to process. Keep the selected photos under ${formatMegabytes(
+        MAX_GENERATION_PHOTO_BYTES_TOTAL
+      )} total.`
+    },
+    { status: 413 }
+  );
 }
 
 function slugify(value: string) {

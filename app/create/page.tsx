@@ -5,12 +5,18 @@ import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { AppShell } from "@/components/AppShell";
+import {
+  MAX_GENERATION_PHOTO_BYTES_TOTAL,
+  MAX_GENERATION_PHOTO_SIZE_BYTES,
+  MAX_GENERATION_PHOTOS,
+  SUPPORTED_GENERATION_IMAGE_TYPES,
+  formatMegabytes
+} from "@/lib/generation-upload";
 import { GENERATED_PRODUCT_STORAGE_KEY, type StoredGeneratedProduct } from "@/lib/generated-product-storage";
 import { organization } from "@/lib/mock-data";
 import type { ProductCategory, StartGenerationResponse } from "@/lib/types";
 
 const categories: ProductCategory[] = ["chair", "table", "sofa", "lamp", "shelf", "small_decor"];
-const supportedImageTypes = new Set(["image/jpeg", "image/png"]);
 
 export default function CreateProductPage() {
   const router = useRouter();
@@ -55,7 +61,7 @@ export default function CreateProductPage() {
         method: "POST",
         body: formData
       });
-      const payload = (await response.json()) as Partial<StartGenerationResponse> & { errorMessage?: string };
+      const payload = await readStartGenerationPayload(response);
 
       if (!response.ok || !payload.productId || !payload.taskId) {
         throw new Error(payload.errorMessage ?? "Generation could not start.");
@@ -178,7 +184,8 @@ export default function CreateProductPage() {
             <h2>Keep the upload small and clear</h2>
             <p className="muted">
               Use one product per photo, simple backgrounds, sharp focus, and consistent lighting. Front, side, back,
-              and a three-quarter angle are the best four-photo set.
+              and a three-quarter angle are the best four-photo set. Each photo can be up to{" "}
+              {formatMegabytes(MAX_GENERATION_PHOTO_SIZE_BYTES)}.
             </p>
           </div>
 
@@ -216,7 +223,7 @@ function validatePhotos(files: File[]) {
     return "Upload at least one product photo.";
   }
 
-  if (files.length > 4) {
+  if (files.length > MAX_GENERATION_PHOTOS) {
     return "Upload no more than four photos for this generation flow.";
   }
 
@@ -224,17 +231,54 @@ function validatePhotos(files: File[]) {
     return "Use JPG or PNG photos only. WebP is blocked for this Meshy route.";
   }
 
+  const oversizedPhoto = files.find((file) => file.size > MAX_GENERATION_PHOTO_SIZE_BYTES);
+
+  if (oversizedPhoto) {
+    return `${oversizedPhoto.name} is too large. Each photo must be ${formatMegabytes(
+      MAX_GENERATION_PHOTO_SIZE_BYTES
+    )} or smaller.`;
+  }
+
+  const totalPhotoBytes = files.reduce((total, file) => total + file.size, 0);
+
+  if (totalPhotoBytes > MAX_GENERATION_PHOTO_BYTES_TOTAL) {
+    return `The selected photos are too large together. Keep the full upload under ${formatMegabytes(
+      MAX_GENERATION_PHOTO_BYTES_TOTAL
+    )}.`;
+  }
+
   return "";
 }
 
 function isSupportedPhoto(file: File) {
-  if (supportedImageTypes.has(file.type.toLowerCase())) {
+  if (SUPPORTED_GENERATION_IMAGE_TYPES.has(file.type.toLowerCase())) {
     return true;
   }
 
   const fileName = file.name.toLowerCase();
 
   return fileName.endsWith(".jpg") || fileName.endsWith(".jpeg") || fileName.endsWith(".png");
+}
+
+async function readStartGenerationPayload(response: Response) {
+  const fallbackMessage =
+    response.status === 413
+      ? `The selected photos are too large. Keep the full upload under ${formatMegabytes(
+          MAX_GENERATION_PHOTO_BYTES_TOTAL
+        )}.`
+      : "Generation could not start.";
+
+  const responseText = await response.text();
+
+  if (!responseText) {
+    return { errorMessage: fallbackMessage } as Partial<StartGenerationResponse> & { errorMessage?: string };
+  }
+
+  try {
+    return JSON.parse(responseText) as Partial<StartGenerationResponse> & { errorMessage?: string };
+  } catch {
+    return { errorMessage: fallbackMessage } as Partial<StartGenerationResponse> & { errorMessage?: string };
+  }
 }
 
 function createStoredProduct(
