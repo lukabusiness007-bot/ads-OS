@@ -51,7 +51,7 @@ export const products: Product[] = [
       thumbnailUrl: "/posters/sample-product.svg",
       fileSizeMb: 0.01,
       triangleCount: 72,
-      textureMax: 2048,
+      textureMax: 4096,
       dimensionsPresent: true,
       metadataUrl: "/metadata/sample-product.json"
     },

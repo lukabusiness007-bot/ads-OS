@@ -37,8 +37,10 @@ export function ModelViewer({ asset, alt, onInteract, onArClick }: ModelViewerPr
     "auto-rotate": true,
     reveal: "auto",
     loading: "eager",
-    "shadow-intensity": "1",
-    exposure: "0.9",
+    "environment-image": "neutral",
+    "shadow-intensity": "0.35",
+    "shadow-softness": "0.85",
+    exposure: "1",
   } satisfies React.HTMLAttributes<HTMLElement> & Record<string, unknown>
 
   return (

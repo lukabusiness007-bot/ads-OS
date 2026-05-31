@@ -106,7 +106,7 @@ async function storeMeshyTaskAssets(productId: string, taskId: string, task: Mes
     thumbnailUrl: posterUpload?.url,
     fileSizeMb: Number((glb.body.length / 1024 / 1024).toFixed(2)),
     triangleCount: 0,
-    textureMax: 2048,
+    textureMax: 4096,
     dimensionsPresent: true
   };
 }

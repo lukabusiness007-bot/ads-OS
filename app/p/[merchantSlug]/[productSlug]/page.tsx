@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { HostedProductExperience } from "@/components/HostedProductExperience";
 import { getHostedProduct, products } from "@/lib/mock-data";
+import { noIndexMetadata } from "@/lib/seo";
 
 type PublicHostedPageProps = {
   params: Promise<{
@@ -29,13 +30,15 @@ export async function generateMetadata({ params }: PublicHostedPageProps): Promi
 
   if (!product) {
     return {
-      title: "Product preview unavailable"
+      title: "Product preview unavailable",
+      robots: noIndexMetadata.robots
     };
   }
 
   return {
     title: `${product.name} | ${product.brandName}`,
     description: product.description,
+    robots: noIndexMetadata.robots,
     openGraph: {
       title: product.name,
       description: product.description,

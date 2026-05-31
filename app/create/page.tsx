@@ -8,7 +8,7 @@ import { AppShell } from "@/components/AppShell";
 import {
   MAX_GENERATION_PHOTO_BYTES_TOTAL,
   MAX_GENERATION_PHOTO_SIZE_BYTES,
-  MAX_GENERATION_PHOTOS,
+  REQUIRED_GENERATION_PHOTOS,
   SUPPORTED_GENERATION_IMAGE_TYPES,
   formatMegabytes
 } from "@/lib/generation-upload";
@@ -83,7 +83,7 @@ export default function CreateProductPage() {
           <p className="eyebrow">Create AR product</p>
           <h1>Generate a 3D model from product photos</h1>
           <p className="muted">
-            Add product details, upload 1-4 clean JPG or PNG photos, then the app creates web and AR model files.
+            Add product details, upload 4 clean JPG or PNG product photos, then the app creates web and AR model files.
           </p>
         </div>
         <Link className="button secondary" href="/dashboard">
@@ -160,7 +160,7 @@ export default function CreateProductPage() {
 
           <h2>Photos</h2>
           <div className="field">
-            <label htmlFor="photos">Upload 1-4 product photos</label>
+            <label htmlFor="photos">Upload 4 required product photos</label>
             <input
               id="photos"
               type="file"
@@ -169,6 +169,14 @@ export default function CreateProductPage() {
               onChange={handlePhotoChange}
               disabled={isSubmitting}
             />
+          </div>
+
+          <div className="toggleField">
+            <div>
+              <label htmlFor="image-enhancement">Image enhancement</label>
+              <p className="muted">Leave off for accurate colors. Turn on only when photos are dark, noisy, or low contrast.</p>
+            </div>
+            <input id="image-enhancement" name="imageEnhancement" type="checkbox" disabled={isSubmitting} />
           </div>
 
           {errorMessage && <div className="assumptionNote">{errorMessage}</div>}
@@ -183,8 +191,9 @@ export default function CreateProductPage() {
             <p className="eyebrow">Photo guidance</p>
             <h2>Keep the upload small and clear</h2>
             <p className="muted">
-              Use one product per photo, simple backgrounds, sharp focus, and consistent lighting. Front, side, back,
-              and a three-quarter angle are the best four-photo set. Each photo can be up to{" "}
+              Use one product per photo, plain neutral backgrounds, sharp focus, and the same even lighting. Front,
+              side or three-quarter, back, and top or detail views give the best color-faithful HD texture. Each photo
+              can be up to{" "}
               {formatMegabytes(MAX_GENERATION_PHOTO_SIZE_BYTES)}.
             </p>
           </div>
@@ -195,22 +204,26 @@ export default function CreateProductPage() {
 
               return (
                 <div className={photo ? "uploadSlot ready" : "uploadSlot"} key={label}>
-                  <span>{photo ? "Ready" : index === 0 ? "Needed" : "Helpful"}</span>
+                  <span>{photo ? "Ready" : "Required"}</span>
                   <strong>{label}</strong>
-                  <p className="muted">{photo ? photo.name : "JPG or PNG, one clear object, no busy scene."}</p>
+                  <p className="muted">{photo ? photo.name : "JPG or PNG, neutral light, no filters or glare."}</p>
                 </div>
               );
             })}
           </div>
 
           <div className="row">
-            <span className={photos.length ? "badge success" : "badge neutral"}>{photos.length}/4 photos selected</span>
+            <span className={photos.length === REQUIRED_GENERATION_PHOTOS ? "badge success" : "badge neutral"}>
+              {photos.length}/4 photos selected
+            </span>
             <span className="badge neutral">JPG or PNG</span>
+            <span className="badge neutral">HD texture</span>
             <span className="badge neutral">Stored in R2</span>
           </div>
 
           <div className="assumptionNote">
-            {organization.name} can review the generated model before publishing the hosted AR page.
+            {organization.name} can review generated color, material, and shape fidelity before publishing the hosted AR
+            page.
           </div>
         </aside>
       </section>
@@ -219,12 +232,8 @@ export default function CreateProductPage() {
 }
 
 function validatePhotos(files: File[]) {
-  if (files.length < 1) {
-    return "Upload at least one product photo.";
-  }
-
-  if (files.length > MAX_GENERATION_PHOTOS) {
-    return "Upload no more than four photos for this generation flow.";
+  if (files.length !== REQUIRED_GENERATION_PHOTOS) {
+    return "Upload exactly 4 product photos: front, side or three-quarter, back, and top or detail.";
   }
 
   if (files.some((file) => !isSupportedPhoto(file))) {

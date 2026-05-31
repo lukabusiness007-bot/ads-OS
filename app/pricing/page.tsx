@@ -1,12 +1,39 @@
+import type { Metadata } from "next"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { MarketingNav } from "@/components/marketing-nav"
 import { billingTiers, modelCreationAddons, overagePrices } from "@/lib/mock-data"
 import { CheckCircle2, ArrowRight } from "lucide-react"
+import {
+  breadcrumbJsonLd,
+  buildSeoMetadata,
+  jsonLd,
+  marketingAlternates,
+  webApplicationJsonLd
+} from "@/lib/seo"
+
+export const metadata: Metadata = buildSeoMetadata({
+  title: "Furniture AR Pricing For 3D Product Pages",
+  description:
+    "Start with 10 furniture products and prove shopper engagement before scaling. Veridian pricing combines hosted AR pages with approved model creation.",
+  path: "/pricing",
+  lang: "en",
+  alternates: marketingAlternates("/pricing", "/sr/pricing")
+})
 
 export default function PricingPage() {
   return (
     <div className="min-h-screen bg-white">
+      <script type="application/ld+json" dangerouslySetInnerHTML={jsonLd(webApplicationJsonLd("en", "/pricing"))} />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={jsonLd(
+          breadcrumbJsonLd([
+            { name: "Home", path: "/" },
+            { name: "Pricing", path: "/pricing" }
+          ])
+        )}
+      />
       <MarketingNav lang="en" />
 
       <main className="pt-24">
@@ -16,10 +43,10 @@ export default function PricingPage() {
             Pricing
           </p>
           <h1 className="text-4xl font-semibold md:text-5xl text-zinc-900 text-balance leading-tight mb-5">
-            Simple, predictable pricing
+            Start with 10 furniture products. Prove engagement before scaling.
           </h1>
           <p className="text-lg text-zinc-500 max-w-xl mx-auto leading-relaxed">
-            A monthly subscription for hosted pages plus a per-model fee for 3D creation. No hidden costs.
+            A monthly subscription for hosted AR pages plus a per-approved-model fee for 3D creation. Simple enough to test before you roll it across the catalog.
           </p>
         </section>
 
@@ -311,7 +338,7 @@ export default function PricingPage() {
                 className="border-emerald-700 bg-transparent text-white hover:bg-emerald-900"
               >
                 <Link href="/p/northline-home/arc-oak-dining-chair">
-                  See sample product page
+                  See a furniture demo
                 </Link>
               </Button>
             </div>

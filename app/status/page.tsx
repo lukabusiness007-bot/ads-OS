@@ -95,7 +95,7 @@ function StatusPageContent() {
     () => [
       {
         title: "Photos uploaded",
-        detail: `${storedProduct?.photoCount ?? "1-4"} product photos were received and stored.`,
+        detail: `${storedProduct?.photoCount ?? "4"} product photos were received and stored.`,
         state: "done"
       },
       {

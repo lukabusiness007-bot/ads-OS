@@ -4,7 +4,7 @@ import {
   MAX_GENERATION_FORM_BODY_SIZE_BYTES,
   MAX_GENERATION_PHOTO_BYTES_TOTAL,
   MAX_GENERATION_PHOTO_SIZE_BYTES,
-  MAX_GENERATION_PHOTOS,
+  REQUIRED_GENERATION_PHOTOS,
   SUPPORTED_GENERATION_IMAGE_TYPES,
   formatMegabytes
 } from "@/lib/generation-upload";
@@ -25,11 +25,12 @@ export async function POST(request: Request) {
 
     const formData = await request.formData();
     const productName = getFormString(formData, "productName") || "product";
+    const imageEnhancement = formData.get("imageEnhancement") === "on";
     const files = formData.getAll("photos").filter((entry): entry is File => entry instanceof File);
 
-    if (files.length < 1 || files.length > MAX_GENERATION_PHOTOS) {
+    if (files.length !== REQUIRED_GENERATION_PHOTOS) {
       return NextResponse.json(
-        { errorMessage: "Upload 1-4 product photos before starting generation." },
+        { errorMessage: "Upload exactly 4 product photos before starting generation." },
         { status: 400 }
       );
     }
@@ -79,7 +80,7 @@ export async function POST(request: Request) {
       imageDataUris.push(`data:${contentType};base64,${buffer.toString("base64")}`);
     }
 
-    const taskId = await createMeshyMultiImageTask(imageDataUris);
+    const taskId = await createMeshyMultiImageTask(imageDataUris, { imageEnhancement });
     const response: StartGenerationResponse = {
       productId,
       taskId,

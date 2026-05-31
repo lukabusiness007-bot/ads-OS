@@ -50,10 +50,19 @@ export class MeshyRequestError extends Error {
   }
 }
 
-export async function createMeshyMultiImageTask(imageDataUris: string[]) {
-  if (imageDataUris.length < 1 || imageDataUris.length > 4) {
-    throw new MeshyRequestError(400, "Meshy generation requires 1-4 images.");
+type CreateMeshyMultiImageTaskOptions = {
+  imageEnhancement?: boolean;
+};
+
+export async function createMeshyMultiImageTask(
+  imageDataUris: string[],
+  options: CreateMeshyMultiImageTaskOptions = {}
+) {
+  if (imageDataUris.length !== 4) {
+    throw new MeshyRequestError(400, "Meshy generation requires exactly 4 images.");
   }
+
+  const primaryTextureReference = imageDataUris[0];
 
   const response = await fetch(`${MESHY_BASE_URL}/multi-image-to-3d`, {
     method: "POST",
@@ -66,8 +75,10 @@ export async function createMeshyMultiImageTask(imageDataUris: string[]) {
       ai_model: "latest",
       should_texture: true,
       enable_pbr: true,
+      hd_texture: true,
+      texture_image_url: primaryTextureReference,
       target_formats: ["glb", "usdz"],
-      image_enhancement: true,
+      image_enhancement: options.imageEnhancement ?? false,
       remove_lighting: true,
       auto_size: true,
       origin_at: "bottom"

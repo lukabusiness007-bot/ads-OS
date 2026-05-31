@@ -182,6 +182,23 @@ export function LandingPageContent({ lang }: { lang: Lang }) {
           </div>
         </section>
 
+        {/* ─── Furniture SEO Value Blocks ───────────────────────────── */}
+        <section className="bg-white">
+          <div className="mx-auto max-w-5xl px-6 py-20">
+            <div className="grid gap-4 sm:grid-cols-2">
+              {t.seoSections.map((section) => (
+                <article
+                  className="rounded-lg border border-zinc-200 bg-white p-6 shadow-sm"
+                  key={section.heading}
+                >
+                  <h2 className="mb-3 text-xl font-semibold leading-snug text-zinc-900">{section.heading}</h2>
+                  <p className="text-sm leading-relaxed text-zinc-500">{section.body}</p>
+                </article>
+              ))}
+            </div>
+          </div>
+        </section>
+
         {/* ─── How It Works ─────────────────────────────────────────── */}
         <section id="how-it-works" className="mx-auto max-w-5xl px-6 py-24">
           <div className="text-center mb-16">
@@ -192,7 +209,7 @@ export function LandingPageContent({ lang }: { lang: Lang }) {
               {t.howItWorks.heading}
             </h2>
           </div>
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
             {t.workflow.map(({ step, copy }, i) => (
               <article
                 key={step}

@@ -11,26 +11,26 @@ export const translations = {
       bookDemo: "Book demo",
     },
     hero: {
-      eyebrow: "Verified previews — no 3D team required",
-      heading: "Fewer returns. More confident buyers.",
-      body: "Upload product photos — we generate and verify the 3D preview. Shoppers see size and scale before buying, so fewer orders come back.",
-      cta: "Open dashboard",
-      ctaSecondary: "See sample product page",
+      eyebrow: "Furniture AR previews from 4 photos",
+      heading: "If they can see it in their room, they’re more likely to buy it.",
+      body: "Your furniture already looks good. The problem is your customers can’t picture it at home. Veridian turns product photos into 3D/AR pages so shoppers can see size, shape, and style before they leave your store.",
+      cta: "Show my products in their room",
+      ctaSecondary: "See a furniture demo",
     },
     platforms: {
       label: "Works alongside your existing ecommerce stack",
     },
     problem: {
       eyebrow: "The merchant problem",
-      heading: "Shoppers guess on size. When they guess wrong, you pay for it.",
-      p1: "Static photos do not communicate scale or fit. When the item arrives and the proportions are off, the return costs 15–25 % of item value in pick-up, handling, and restock. For most SMB furniture stores, that is the margin on the order.",
-      p2: "Veridian keeps the offer narrow: upload photos, get a verified 3D preview, live in 5–7 days. One avoided return on a €500 sofa covers a month of hosted pages.",
+      heading: "Your shoppers are buying furniture from flat photos. That is why they hesitate, ask questions, and return products.",
+      p1: "Scale is hard to judge online. A chair looks smaller. A sofa feels deeper. A lamp looks right until it is in the room.",
+      p2: "Veridian gives every key product a 3D/AR preview so buyers can inspect size, shape, and fit before checkout. It is built to increase buyer confidence, reduce hesitation, and give shoppers a stronger reason to buy.",
     },
     trustStrip: [
-      "Live in 5–7 days from photo upload",
-      "Up to 10× less than a traditional 3D studio",
+      "No 3D team needed",
+      "GLB + USDZ included",
       "Human-reviewed before publishing",
-      "AR + analytics included",
+      "Only pay for approved models",
     ],
     howItWorks: {
       eyebrow: "How it works",
@@ -38,10 +38,29 @@ export const translations = {
     },
     workflow: [
       { step: "Add product", copy: "Enter the product name, dimensions, category, and store URL." },
-      { step: "Upload photos", copy: "Use a guided checklist for front, back, side, angled, detail, and scale photos." },
-      { step: "Review model", copy: "Review the visual preview after Veridian generation and manual quality checks." },
-      { step: "Publish link", copy: "Publish a hosted product link after approval." },
+      { step: "Upload photos", copy: "Use 4 clean product photos: front, side or angle, back, and material detail." },
+      { step: "Generate model", copy: "Meshy creates the 3D asset while Veridian packages the web and AR files." },
+      { step: "Review before live", copy: "Approve the visual preview before shoppers can see it." },
+      { step: "Publish anywhere", copy: "Use the hosted link on product pages, ads, emails, or QR codes." },
       { step: "Track results", copy: "Track page views, AR clicks, and clicks back to your store." },
+    ],
+    seoSections: [
+      {
+        heading: "Built for furniture stores, not 3D teams",
+        body: "Your team should not have to manage modeling software, file formats, or AR packaging just to test product previews. Add the product details and photos; Veridian turns them into a hosted shopping page."
+      },
+      {
+        heading: "From 4 product photos to a live AR page",
+        body: "Keep the upload simple. Start with clear views that show the full product shape, then publish a verified page your shoppers can open from your store, ads, emails, or QR codes."
+      },
+      {
+        heading: "Help shoppers judge size before checkout",
+        body: "Furniture is a confidence purchase. 3D and AR help buyers understand scale, depth, and style before they commit, without promising exact CAD or manufacturing precision."
+      },
+      {
+        heading: "Verified visual previews, not CAD manufacturing files",
+        body: "Veridian is designed for ecommerce confidence. The public page shows a checked visual preview with dimensions, AR launch, and a CTA back to your store."
+      }
     ],
     whatYouGet: {
       eyebrow: "What you get",
@@ -124,10 +143,10 @@ export const translations = {
     },
     finalCta: {
       eyebrow: "Ready for a focused pilot?",
-      heading: "Book a pilot demo for your first 10–25 products",
-      body: "See how guided photo upload, human review, hosted links, and analytics fit into your current ecommerce workflow.",
-      cta: "Open dashboard",
-      ctaSecondary: "See sample product page",
+      heading: "Start with the furniture products shoppers hesitate on most",
+      body: "Show them the product in 3D and AR, then measure whether they inspect it and click back to your store.",
+      cta: "Show my products in their room",
+      ctaSecondary: "See a furniture demo",
     },
   },
 
@@ -141,26 +160,26 @@ export const translations = {
       bookDemo: "Zakažite demo",
     },
     hero: {
-      eyebrow: "Verifikovani pregledi — bez 3D tima",
-      heading: "Manje vraćanja. Sigurniji kupac.",
-      body: "Otpremite fotografije — mi generišemo i proveravamo 3D pregled. Kupac vidi razmeru i detalje pre kupovine i ređe vraća.",
-      cta: "Otvori kontrolnu tablu",
-      ctaSecondary: "Pogledajte primer stranice",
+      eyebrow: "AR pregledi nameštaja iz 4 fotografije",
+      heading: "Ako ga vide u svojoj sobi, lakše donose odluku da kupe.",
+      body: "Vaš nameštaj već izgleda dobro. Problem je što kupac ne može lako da ga zamisli kod kuće. Veridian pretvara fotografije proizvoda u 3D/AR stranice kako bi kupac video veličinu, oblik i stil pre nego što napusti prodavnicu.",
+      cta: "Prikaži moje proizvode u sobi",
+      ctaSecondary: "Pogledajte demo nameštaja",
     },
     platforms: {
       label: "Radi uz vaš postojeći e-commerce sistem",
     },
     problem: {
       eyebrow: "Problem trgovca",
-      heading: "Kupci pogađaju dimenzije. Kada pogreše, vi plaćate.",
-      p1: "Statičke fotografije ne komuniciraju razmeru ni uklapanje. Kada artikal stigne, a proporcije nisu dobre, povrat košta 15–25 % vrednosti u preuzimanju, rukovanju i ponovnom skladištenju. Za većinu SMB prodavnica nameštaja, to je marža na toj narudžbini.",
-      p2: "Veridian zadržava ponudu usku: otpremite fotografije, dobijte verifikovani 3D pregled, živo za 5–7 dana. Jedan izbegnut povrat sofe od €500 pokriva mesec hostovanih stranica.",
+      heading: "Vaši kupci kupuju nameštaj sa ravnih fotografija. Zato oklevaju, postavljaju pitanja i vraćaju proizvode.",
+      p1: "Razmera je teška za procenu online. Stolica deluje manja. Sofa izgleda plića. Lampa izgleda dobro dok ne stigne u prostor.",
+      p2: "Veridian daje ključnim proizvodima 3D/AR pregled kako bi kupci proverili veličinu, oblik i uklapanje pre kupovine. Napravljen je da poveća sigurnost kupca, smanji oklevanje i da jači razlog za kupovinu.",
     },
     trustStrip: [
-      "Živo za 5–7 dana od otpremanja fotografija",
-      "Do 10× jeftinije od tradicionalnog 3D studija",
-      "Recenzija od strane čoveka pre objavljivanja",
-      "AR + analitika uključena",
+      "Bez internog 3D tima",
+      "GLB + USDZ uključeni",
+      "Pregled od strane čoveka pre objave",
+      "Plaćanje po odobrenom modelu",
     ],
     howItWorks: {
       eyebrow: "Kako funkcioniše",
@@ -168,10 +187,29 @@ export const translations = {
     },
     workflow: [
       { step: "Dodajte proizvod", copy: "Unesite naziv, dimenzije, kategoriju i URL prodavnice." },
-      { step: "Otpremite slike", copy: "Koristite vođenu listu za prednju, zadnju, bočnu, ugaonu, detaljnu i skalnu fotografiju." },
-      { step: "Pregledajte model", copy: "Pregledajte vizuelni pregled nakon Veridian generisanja i ručnih provera kvaliteta." },
-      { step: "Objavite link", copy: "Objavite hostovani link proizvoda nakon odobrenja." },
+      { step: "Otpremite slike", copy: "Koristite 4 jasne fotografije: prednju, bočnu ili ugaonu, zadnju i detalj materijala ako postoji." },
+      { step: "Generišite model", copy: "Meshy kreira 3D asset, a Veridian pakuje web i AR fajlove." },
+      { step: "Pregled pre objave", copy: "Odobrite vizuelni pregled pre nego što ga kupci vide." },
+      { step: "Objavite bilo gde", copy: "Koristite hostovani link na product page-u, u oglasima, emailovima ili QR kodovima." },
       { step: "Pratite rezultate", copy: "Pratite preglede stranica, AR klikove i klikove nazad u vašu prodavnicu." },
+    ],
+    seoSections: [
+      {
+        heading: "Napravljeno za prodavnice nameštaja, ne za 3D timove",
+        body: "Vaš tim ne treba da vodi softver za modelovanje, formate fajlova i AR pakovanje samo da bi testirao 3D pregled. Dodajte podatke i fotografije; Veridian pravi hostovanu prodajnu stranicu."
+      },
+      {
+        heading: "Od 4 fotografije do žive AR stranice",
+        body: "Upload ostaje jednostavan. Počnite sa jasnim uglovima koji prikazuju oblik proizvoda, zatim objavite proverenu stranicu iz prodavnice, oglasa, emaila ili QR koda."
+      },
+      {
+        heading: "Pomozite kupcu da proceni veličinu pre checkouta",
+        body: "Nameštaj se kupuje kada postoji sigurnost. 3D i AR pomažu kupcu da razume razmeru, dubinu i stil pre odluke, bez obećanja CAD ili proizvodne preciznosti."
+      },
+      {
+        heading: "Verifikovani vizuelni pregledi, ne CAD fajlovi",
+        body: "Veridian je napravljen za e-commerce sigurnost. Javna stranica prikazuje proveren vizuelni pregled, dimenzije, AR pokretanje i CTA nazad ka prodavnici."
+      }
     ],
     whatYouGet: {
       eyebrow: "Šta dobijate",
@@ -254,10 +292,10 @@ export const translations = {
     },
     finalCta: {
       eyebrow: "Spremni za fokusirani pilot?",
-      heading: "Zakažite pilot demo za prvih 10–25 proizvoda",
-      body: "Pogledajte kako vođeno otpremanje fotografija, ljudska recenzija, hostovani linkovi i analitika se uklapaju u vaš postojeći e-commerce tok rada.",
-      cta: "Otvori kontrolnu tablu",
-      ctaSecondary: "Pogledajte primer stranice",
+      heading: "Počnite sa proizvodima oko kojih kupci najviše oklevaju",
+      body: "Prikažite proizvod u 3D i AR, zatim merite da li ga kupci pregledaju i vraćaju se ka prodavnici.",
+      cta: "Prikaži moje proizvode u sobi",
+      ctaSecondary: "Pogledajte demo nameštaja",
     },
   },
 } as const

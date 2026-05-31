@@ -10,12 +10,14 @@ import { translations } from "@/lib/translations"
 export function MarketingNav({ lang = "en" }: { lang?: Lang }) {
   const [menuOpen, setMenuOpen] = React.useState(false)
   const t = translations[lang].nav
+  const homePath = lang === "sr" ? "/sr" : "/"
+  const pricingPath = lang === "sr" ? "/sr/pricing" : "/pricing"
 
   const menuItems = [
-    { name: t.features, href: "#features" },
-    { name: t.howItWorks, href: "#how-it-works" },
-    { name: t.pricing, href: lang === "sr" ? "/sr/pricing" : "/pricing" },
-    { name: t.faq, href: "#faq" },
+    { name: t.features, href: `${homePath}#features` },
+    { name: t.howItWorks, href: `${homePath}#how-it-works` },
+    { name: t.pricing, href: pricingPath },
+    { name: t.faq, href: `${homePath}#faq` },
   ]
 
   return (
@@ -27,7 +29,7 @@ export function MarketingNav({ lang = "en" }: { lang?: Lang }) {
         <div className="m-auto max-w-5xl px-6">
           <div className="flex flex-wrap items-center justify-between gap-6 py-3 lg:flex-nowrap lg:gap-0 lg:py-4">
             <div className="flex w-full justify-between lg:w-auto">
-              <Link href={lang === "sr" ? "/sr" : "/"} aria-label="home" className="flex items-center gap-2.5">
+              <Link href={homePath} aria-label="home" className="flex items-center gap-2.5">
                 <span className="flex h-8 w-8 items-center justify-center rounded-md bg-emerald-900 text-xs font-extrabold text-white">
                   AR
                 </span>

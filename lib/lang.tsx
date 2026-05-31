@@ -227,11 +227,11 @@ export const t = {
 
     upload: {
       eyebrow: "Čarobnjak za vođeni upload fotografija",
-      heading: "Otpremite 8–20 fotografija proizvoda",
-      subtitle: "Faza 2 pokretanjem kontrola pre leta pre nego što proizvod može ući u Meshy generisanje.",
+      heading: "Otpremite 4 fotografije proizvoda",
+      subtitle: "Provera fotografija se pokreće pre nego što proizvod uđe u Meshy generisanje.",
       productImages: "Slike proizvoda",
       uploaded: "otpremljeno",
-      formats: "JPG, PNG, WebP",
+      formats: "JPG, PNG",
       readyToGenerate: "Spremno za generisanje",
       blocked: "Blokirano",
       startGeneration: "Pokreni generisanje",
@@ -461,11 +461,11 @@ export const t = {
 
     upload: {
       eyebrow: "Guided photo upload wizard",
-      heading: "Upload 8-20 product photos",
-      subtitle: "Phase 2 runs preflight checks before a product can enter Meshy generation.",
+      heading: "Upload 4 product photos",
+      subtitle: "Preflight checks run before a product can enter Meshy generation.",
       productImages: "Product images",
       uploaded: "uploaded",
-      formats: "JPG, PNG, WebP",
+      formats: "JPG, PNG",
       readyToGenerate: "Ready to generate",
       blocked: "Blocked",
       startGeneration: "Start generation",
