@@ -2,6 +2,7 @@
 
 import { useRef, useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { AppShell } from "@/components/AppShell";
 import { organization } from "@/lib/mock-data";
 import { useLang } from "@/lib/lang";
@@ -11,11 +12,18 @@ const categories = ["chair", "table", "sofa", "lamp", "shelf", "small_decor"];
 export default function CreateProductPage() {
   const { tr } = useLang();
   const c = tr.create;
+  const router = useRouter();
   const [uploads, setUploads] = useState<(File | null)[]>(Array(7).fill(null));
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
 
   function handleFile(index: number, file: File | undefined) {
     setUploads(prev => prev.map((f, i) => i === index ? (file ?? null) : f));
+  }
+
+  function handleSubmit() {
+    setIsSubmitting(true);
+    router.push("/status");
   }
 
   return (
@@ -88,8 +96,8 @@ export default function CreateProductPage() {
             <input id="price" defaultValue="89 EUR" />
           </div>
 
-          <button className="button accent" type="button">
-            {c.submitBtn}
+          <button className="button accent" type="button" onClick={handleSubmit} disabled={isSubmitting}>
+            {isSubmitting ? c.submittingBtn : c.submitBtn}
           </button>
         </form>
 

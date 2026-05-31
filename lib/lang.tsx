@@ -133,9 +133,9 @@ export const t = {
     create: {
       eyebrow: "Kreiraj AR stranicu",
       heading: "Vođeno podešavanje proizvoda",
-      subtitle: "Dodajte proizvod, otpremite potrebne fotografije, zatim pošaljite na generisanje i ručni pregled kvaliteta.",
+      subtitle: "Dodajte proizvod, otpremite potrebne fotografije, zatim pokrenite automatsko generisanje 3D modela.",
       backBtn: "Nazad na proizvode",
-      steps: ["Detalji proizvoda", "Dimenzije", "URL prodavnice", "Vođeni upload fotografija", "Pošalji na pregled"],
+      steps: ["Detalji proizvoda", "Dimenzije", "URL prodavnice", "Vođeni upload fotografija", "Generiši 3D model"],
       detailsHeading: "Detalji proizvoda",
       productName: "Naziv proizvoda",
       category: "Kategorija proizvoda",
@@ -147,10 +147,10 @@ export const t = {
       storeUrlHeading: "URL prodavnice",
       storeUrl: "Stranica proizvoda na vašoj prodavnici",
       price: "Prikaz cene (opciono)",
-      submitBtn: "Pošalji na generisanje i pregled",
+      submitBtn: "Generiši 3D model",
       photoEyebrow: "Vođeni upload fotografija",
       photoHeading: "Fotografije potrebne pre generisanja",
-      photoDesc: "Koristite jasne, dobro osvetljene fotografije na jednostavnoj pozadini. Vaša stranica neće biti objavljena dok model ne prođe pregled.",
+      photoDesc: "Koristite jasne, dobro osvetljene fotografije na jednostavnoj pozadini. Nakon generisanja ćete videti 3D pregled pre objavljivanja.",
       photoChecklist: [
         ["Prednja strana", "Fotografija proizvoda direktno sa prednje strane"],
         ["Zadnja strana", "Pogled sa zadnje strane sa vidljivim punim obrisom"],
@@ -164,6 +164,7 @@ export const t = {
       needed: "Potrebno",
       uploadBtn: "Otpremi",
       changeBtn: "Zameni",
+      submittingBtn: "Pokretanje generisanja...",
       assumptionNote: (name: string) =>
         `${name} ima dovoljno osnovnih uglova za početak, ali fotografije materijala/detalja i merila poboljšavaju ocenu poverenja recenzenta.`,
     },
@@ -200,26 +201,26 @@ export const t = {
 
     status: {
       eyebrow: "Status generisanja",
-      subtitle: "Meshy je primarni provajder. Tripo je rezervisan kao ručna rezervna opcija.",
+      subtitle: "Fotografije su poslate u obradu. Model će se pojaviti čim se završe generisanje i pakovanje AR fajlova.",
       photoSetFallback: "aktivnom setu fotografija",
-      fallbackHeading: "Kontrola rezervne opcije",
-      fallbackDesc: "Administratori mogu ponoviti sa Tripo-om ako Meshy ne uspe ili vrati neupotrebljivu geometriju. Ovo namerno nije izloženo prodavcima.",
-      generationRunning: "Generisanje u toku",
-      providerJob: "Posao provajdera",
-      tripoAvailable: "Tripo rezervna opcija dostupna",
+      fallbackHeading: "Šta se dešava sledeće",
+      fallbackDesc: "Aplikacija prvo generiše 3D model, zatim pakuje web i AR fajlove. Ako rezultat nije dobar, može se pokrenuti regenerisanje bez menjanja javne stranice.",
+      generationRunning: "3D generisanje u toku",
+      providerJob: "Interni posao",
+      tripoAvailable: "Rezervno generisanje dostupno",
       fallbackLocked: "Rezervna opcija zaključana",
-      viewLastModel: "Pogledaj poslednji uspešan model",
+      viewLastModel: "Otvori generisani model",
       stageDetails: [
         (photoCount: number, photoSetId: string) =>
           `${photoCount} fotografija uskladišteno u ${photoSetId}.`,
         (passed: number, total: number) =>
           `${passed}/${total} provera prošlo pre slanja provajderu.`,
-        (provider: string, status: string) =>
-          `Provajder: ${provider}. Status: ${status}.`,
+        (_provider: string, status: string) =>
+          `Status obrade: ${status}.`,
         "Sirovi izlaz provajdera se skladišti pre pakovanja GLB, USDZ, postera, sličice i metapodataka.",
         "Aplikacija proverava učitavanje modela, veličinu, dimenzije, teksture, prikaz pregleda i spremnost AR paketa.",
-        "Recenzent odobrava, odbija ili zahteva regeneraciju.",
-      ] as Array<string | ((...args: string[] | number[]) => string)>,
+        "Posle generisanja možete pregledati model, pokrenuti regenerisanje ili poslati model na proveru kvaliteta.",
+      ] as Array<string | ((...args: Array<string | number>) => string)>,
     },
 
     upload: {
@@ -364,9 +365,9 @@ export const t = {
     create: {
       eyebrow: "Create AR Page",
       heading: "Guided product setup",
-      subtitle: "Add the product, upload the required photos, then submit it for generation and human quality review.",
+      subtitle: "Add the product, upload the required photos, then start automatic 3D model generation.",
       backBtn: "Back to products",
-      steps: ["Product details", "Dimensions", "Store URL", "Guided photo upload", "Submit for review"],
+      steps: ["Product details", "Dimensions", "Store URL", "Guided photo upload", "Generate 3D model"],
       detailsHeading: "Product details",
       productName: "Product name",
       category: "Product category",
@@ -378,10 +379,10 @@ export const t = {
       storeUrlHeading: "Store URL",
       storeUrl: "Product page on your store",
       price: "Display price optional",
-      submitBtn: "Submit for generation and review",
+      submitBtn: "Generate 3D model",
       photoEyebrow: "Guided photo upload",
       photoHeading: "Photos needed before generation",
-      photoDesc: "Use clear, well-lit photos against a simple background. Your page will not publish until the model passes review.",
+      photoDesc: "Use clear, well-lit photos against a simple background. After generation, you will see the 3D preview before publishing.",
       photoChecklist: [
         ["Front", "Straight-on product photo"],
         ["Back", "Rear view with the full outline visible"],
@@ -395,6 +396,7 @@ export const t = {
       needed: "Needed",
       uploadBtn: "Upload",
       changeBtn: "Change",
+      submittingBtn: "Starting generation...",
       assumptionNote: (name: string) =>
         `${name} has enough core angles to start, but material/detail and scale photos improve the reviewer confidence score.`,
     },
@@ -431,26 +433,26 @@ export const t = {
 
     status: {
       eyebrow: "Generation status",
-      subtitle: "Meshy is the primary provider. Tripo is reserved as a manual fallback.",
+      subtitle: "Photos are processing now. The model appears here after generation and AR asset packaging finish.",
       photoSetFallback: "the active photo set",
-      fallbackHeading: "Fallback control",
-      fallbackDesc: "Admins can retry with Tripo if Meshy fails or returns unusable geometry. This is intentionally not exposed to merchants.",
-      generationRunning: "Generation running",
-      providerJob: "Provider job",
-      tripoAvailable: "Tripo fallback available",
+      fallbackHeading: "What happens next",
+      fallbackDesc: "The app generates the 3D model first, then packages web and AR files. If the result is poor, regeneration can run without changing the public page.",
+      generationRunning: "3D generation running",
+      providerJob: "Internal job",
+      tripoAvailable: "Backup generation available",
       fallbackLocked: "Fallback locked",
-      viewLastModel: "View last successful model",
+      viewLastModel: "Open generated model",
       stageDetails: [
         (photoCount: number, photoSetId: string) =>
           `${photoCount} photos stored in ${photoSetId}.`,
         (passed: number, total: number) =>
           `${passed}/${total} checks passed before provider submission.`,
-        (provider: string, status: string) =>
-          `Provider: ${provider}. Status: ${status}.`,
+        (_provider: string, status: string) =>
+          `Processing status: ${status}.`,
         "Raw provider output is stored before GLB, USDZ, poster, thumbnail, and metadata packaging.",
         "The app checks model load, size, dimensions, textures, preview render, and AR package readiness.",
-        "A reviewer approves, rejects, or requests regeneration.",
-      ] as Array<string | ((...args: string[] | number[]) => string)>,
+        "After generation, you can inspect the model, regenerate it, or send it to quality review.",
+      ] as Array<string | ((...args: Array<string | number>) => string)>,
     },
 
     upload: {

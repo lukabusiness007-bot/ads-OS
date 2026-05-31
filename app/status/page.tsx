@@ -17,9 +17,22 @@ export default function StatusPage() {
 
   function getDetail(index: number): string {
     const d = s.stageDetails;
-    if (index === 0) return (d[0] as Function)(product.photoCount, photoSet?.id ?? s.photoSetFallback);
-    if (index === 1) return (d[1] as Function)(preflightChecks.filter((c) => c.status === "pass").length, preflightChecks.length);
-    if (index === 2) return (d[2] as Function)(job?.provider ?? "meshy", job?.providerStatus ?? job?.status ?? "queued");
+    if (index === 0) {
+      const detail = d[0];
+      return typeof detail === "function" ? detail(product.photoCount, photoSet?.id ?? s.photoSetFallback) : detail;
+    }
+    if (index === 1) {
+      const detail = d[1];
+      return typeof detail === "function"
+        ? detail(preflightChecks.filter((c) => c.status === "pass").length, preflightChecks.length)
+        : detail;
+    }
+    if (index === 2) {
+      const detail = d[2];
+      return typeof detail === "function"
+        ? detail(job?.provider ?? "meshy", job?.providerStatus ?? job?.status ?? "queued")
+        : detail;
+    }
     return d[index] as string;
   }
 
@@ -48,7 +61,7 @@ export default function StatusPage() {
           <h2>{s.fallbackHeading}</h2>
           <p className="muted">{s.fallbackDesc}</p>
           <span className="badge warning">{s.generationRunning}</span>
-          <span className="badge neutral">{s.providerJob} {job?.providerJobId}</span>
+          <span className="badge neutral">{s.providerJob} {job?.id}</span>
           <span className="badge success">{job?.fallbackAvailable ? s.tripoAvailable : s.fallbackLocked}</span>
           <Link className="button secondary" href="/preview">
             {s.viewLastModel}

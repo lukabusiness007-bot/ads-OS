@@ -36,10 +36,10 @@ export const photoAngleLabels: Record<PhotoAngle, string> = {
 export const pipelineStages = [
   "Photos uploaded",
   "Preflight checks",
-  "Provider generation",
-  "Asset packaging",
-  "Automated model checks",
-  "Manual review"
+  "3D generation",
+  "AR asset packaging",
+  "Model preview",
+  "Quality review"
 ];
 
 export function runPhotoPreflight(photoSet: PhotoSet): PreflightCheck[] {
