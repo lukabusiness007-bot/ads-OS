@@ -326,7 +326,7 @@ export const billingTiers: BillingTier[] = [
   {
     id: "starter",
     name: "Starter",
-    monthlyUsd: 39,
+    monthlyEur: 39,
     publishedSkuLimit: 5,
     storageGb: 2,
     monthlyViewLimit: 5000,
@@ -336,7 +336,7 @@ export const billingTiers: BillingTier[] = [
   {
     id: "growth",
     name: "Growth",
-    monthlyUsd: 89,
+    monthlyEur: 89,
     publishedSkuLimit: 20,
     storageGb: 10,
     monthlyViewLimit: 25000,
@@ -347,7 +347,7 @@ export const billingTiers: BillingTier[] = [
   {
     id: "studio",
     name: "Studio",
-    monthlyUsd: 179,
+    monthlyEur: 179,
     publishedSkuLimit: 50,
     storageGb: 50,
     monthlyViewLimit: 100000,
@@ -357,7 +357,7 @@ export const billingTiers: BillingTier[] = [
   {
     id: "business",
     name: "Business",
-    monthlyUsd: null,
+    monthlyEur: null,
     publishedSkuLimit: null,
     storageGb: null,
     monthlyViewLimit: null,
@@ -370,21 +370,21 @@ export const overagePrices: OveragePrice[] = [
   {
     id: "extra-sku",
     name: "Extra published SKU",
-    priceUsd: 5,
+    priceEur: 5,
     unit: "per SKU/month",
     guardrail: "Keeps published catalog expansion profitable without forcing an immediate plan upgrade."
   },
   {
     id: "view-pack",
     name: "Extra view pack",
-    priceUsd: 10,
+    priceEur: 10,
     unit: "per 10k 3D/AR views",
     guardrail: "Protects bandwidth, analytics, and support during traffic spikes."
   },
   {
     id: "storage-pack",
     name: "Extra storage",
-    priceUsd: 5,
+    priceEur: 5,
     unit: "per 10GB/month",
     guardrail: "Covers raw captures, source files, GLB/USDZ packages, and poster assets."
   }
@@ -394,50 +394,60 @@ export const modelCreationAddons: ModelCreationAddon[] = [
   {
     id: "basic-cleanup",
     name: "Basic scan cleanup",
-    priceUsd: "€79/SKU",
+    priceEur: "€79/SKU",
     buyerFit: "Simple pieces",
     useCase: "Client has usable scans but needs cleanup, naming, and upload help."
   },
   {
     id: "commerce-ready",
     name: "Ecommerce-ready GLB/USDZ optimization",
-    priceUsd: "€149/SKU",
+    priceEur: "€149/SKU",
     buyerFit: "Most SMB furniture products",
     useCase: "Default add-on for SMBs that need mobile-safe files, scale checks, posters, and QA."
   },
   {
     id: "premium-pbr",
     name: "Premium manual/PBR model",
-    priceUsd: "€299–€499/SKU",
+    priceEur: "€299–€499/SKU",
     buyerFit: "Complex or luxury pieces",
     useCase: "Complex products, luxury visuals, poor source photos, or high-detail materials."
   }
 ];
 
+// Platform cost stack (EUR/month, approx). USD source prices converted at ~1 USD = 0.92 EUR.
 export const costAssumptions: CostAssumption[] = [
   {
-    id: "polycam",
-    name: "Polycam Business",
-    monthlyUsd: 400 / 12,
-    costBasis: "$400/year/user",
-    billingImpact: "Covered by model add-ons and platform overhead, not exposed as a client line item.",
-    sourceLabel: "Polycam pricing",
-    sourceUrl: "https://poly.cam/pricing"
+    id: "meshy",
+    name: "Meshy (3D generation)",
+    monthlyEur: 55,
+    costBasis: "≈$60/mo Studio plan, 4,000 credits ≈ 130+ textured models/mo; ~€0.45–0.60 per generated model. (verify — Meshy does not display plan price publicly.)",
+    billingImpact: "Per-model generation cost is folded into model add-ons; the subscription is covered by platform overhead, not exposed as a client line item.",
+    sourceLabel: "Meshy pricing",
+    sourceUrl: "https://www.meshy.ai/pricing"
+  },
+  {
+    id: "supabase",
+    name: "Supabase Pro",
+    monthlyEur: 23,
+    costBasis: "$25/mo: 8GB Postgres, 100GB file storage, 250GB egress included; then $0.09/GB egress, $0.125/GB DB.",
+    billingImpact: "Base data/auth/realtime layer; recovered across the paying customer base, not a client line item.",
+    sourceLabel: "Supabase pricing",
+    sourceUrl: "https://supabase.com/pricing"
   },
   {
     id: "cloudflare-r2",
     name: "Cloudflare R2",
-    monthlyUsd: null,
-    costBasis: "$0.015/GB-month after included usage; low request pricing; no egress fee.",
-    billingImpact: "Main reason storage can stay generous while view packs protect heavy usage.",
+    monthlyEur: null,
+    costBasis: "≈€0.014/GB-month after included usage; low request pricing; zero egress fee.",
+    billingImpact: "Main reason storage can stay generous and view packs stay cheap — the GLB served on every AR view costs no egress.",
     sourceLabel: "Cloudflare pricing",
     sourceUrl: "https://www.cloudflare.com/plans/"
   },
   {
     id: "vercel",
     name: "Vercel Pro",
-    monthlyUsd: 20,
-    costBasis: "$20/month plus usage",
+    monthlyEur: 18,
+    costBasis: "≈$20/month plus usage",
     billingImpact: "Base app hosting is recovered by the first few paying accounts.",
     sourceLabel: "Vercel pricing",
     sourceUrl: "https://vercel.com/pricing"
@@ -445,12 +455,15 @@ export const costAssumptions: CostAssumption[] = [
   {
     id: "domain-ops",
     name: "Domain, SSL, monitoring, support reserve",
-    monthlyUsd: 25,
-    costBasis: "Internal operating allowance",
+    monthlyEur: 25,
+    costBasis: "Internal operating allowance (domain, SSL, monitoring, support reserve)",
     billingImpact: "Included in margin planning so the public pricing stays simple."
   }
 ];
 
+// Fully-loaded cost-to-serve per account (EUR/month): R2 storage (≈€0.014/GB) +
+// amortized Meshy generation (~€0.50/model over 12 mo) + allocated infra/support.
+// Model bandwidth is served from R2 at zero egress, so views add no marginal cost.
 export const marginScenarios: MarginScenario[] = [
   {
     id: "starter-25mb",
@@ -458,8 +471,8 @@ export const marginScenarios: MarginScenario[] = [
     tierName: "Starter",
     skuCount: 5,
     averageAssetMb: 25,
-    monthlyRevenueUsd: 39,
-    estimatedVariableCostUsd: 7.2,
+    monthlyRevenueEur: 39,
+    estimatedVariableCostEur: 6.8,
     storageUsedGb: 0.49
   },
   {
@@ -468,8 +481,8 @@ export const marginScenarios: MarginScenario[] = [
     tierName: "Growth",
     skuCount: 20,
     averageAssetMb: 75,
-    monthlyRevenueUsd: 89,
-    estimatedVariableCostUsd: 18.5,
+    monthlyRevenueEur: 89,
+    estimatedVariableCostEur: 16.5,
     storageUsedGb: 5.86
   },
   {
@@ -478,8 +491,8 @@ export const marginScenarios: MarginScenario[] = [
     tierName: "Studio",
     skuCount: 50,
     averageAssetMb: 150,
-    monthlyRevenueUsd: 179,
-    estimatedVariableCostUsd: 43.2,
+    monthlyRevenueEur: 179,
+    estimatedVariableCostEur: 38,
     storageUsedGb: 29.3
   }
 ];
@@ -490,7 +503,7 @@ export const usageScenarios: UsageScenario[] = [
     monthlyViews: 5000,
     recommendedTier: "Starter",
     includedViews: 5000,
-    overageUsd: 0,
+    overageEur: 0,
     note: "Good for validating early product-page engagement."
   },
   {
@@ -498,7 +511,7 @@ export const usageScenarios: UsageScenario[] = [
     monthlyViews: 25000,
     recommendedTier: "Growth",
     includedViews: 25000,
-    overageUsd: 0,
+    overageEur: 0,
     note: "Default SMB pilot ceiling for 10-25 products."
   },
   {
@@ -506,7 +519,7 @@ export const usageScenarios: UsageScenario[] = [
     monthlyViews: 100000,
     recommendedTier: "Studio",
     includedViews: 100000,
-    overageUsd: 0,
+    overageEur: 0,
     note: "Enough for a larger seasonal catalog push."
   },
   {
@@ -514,27 +527,29 @@ export const usageScenarios: UsageScenario[] = [
     monthlyViews: 250000,
     recommendedTier: "Studio plus view packs",
     includedViews: 100000,
-    overageUsd: 150,
-    note: "Traffic spike is billed predictably at $10 per extra 10k views."
+    overageEur: 150,
+    note: "Traffic spike is billed predictably at €10 per extra 10k views."
   }
 ];
 
+// Model-production COGS is dominated by human cleanup/QA labor; Meshy AI generation
+// is near-free (~€0.50/model), which lowers base modeling cost vs manual photogrammetry.
 export const modelProductionScenarios: ModelProductionScenario[] = [
   {
     id: "pilot-10",
     skuCount: 10,
     addonName: "Ecommerce-ready GLB/USDZ optimization",
-    revenueUsd: 1490,
+    revenueEur: 1490,
     expectedRevisions: 2,
-    estimatedCogsUsd: 650
+    estimatedCogsEur: 560
   },
   {
     id: "pilot-25",
     skuCount: 25,
     addonName: "Ecommerce-ready GLB/USDZ optimization",
-    revenueUsd: 3725,
+    revenueEur: 3725,
     expectedRevisions: 5,
-    estimatedCogsUsd: 1625
+    estimatedCogsEur: 1400
   }
 ];
 

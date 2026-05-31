@@ -66,10 +66,10 @@ export default function PricingPage() {
                   </div>
 
                   <div className="mb-6">
-                    {tier.monthlyUsd ? (
+                    {tier.monthlyEur ? (
                       <>
                         <span className={`text-4xl font-bold ${tier.recommended ? "text-white" : "text-zinc-900"}`}>
-                          €{tier.monthlyUsd}
+                          €{tier.monthlyEur}
                         </span>
                         <span className={`text-sm ml-1 ${tier.recommended ? "text-emerald-300" : "text-zinc-400"}`}>
                           / month
@@ -134,7 +134,7 @@ export default function PricingPage() {
                     variant={tier.recommended || tier.id === "business" ? "default" : "outline"}
                   >
                     <Link href="/dashboard">
-                      {tier.monthlyUsd ? "Get started" : "Contact us"}
+                      {tier.monthlyEur ? "Get started" : "Contact us"}
                       <ArrowRight className="ml-1.5 h-3.5 w-3.5" />
                     </Link>
                   </Button>
@@ -173,7 +173,7 @@ export default function PricingPage() {
                   </span>
                 </div>
                 <h3 className="font-bold text-zinc-900 mb-2">{addon.name}</h3>
-                <p className="text-2xl font-bold text-zinc-900 mb-1">{addon.priceUsd}</p>
+                <p className="text-2xl font-bold text-zinc-900 mb-1">{addon.priceEur}</p>
                 <p className="text-sm text-zinc-500 leading-relaxed">{addon.useCase}</p>
               </article>
             ))}
@@ -202,7 +202,7 @@ export default function PricingPage() {
                   className="bg-white border border-zinc-200 rounded-xl p-5 shadow-sm"
                 >
                   <h3 className="font-semibold text-zinc-900 mb-1 text-sm">{overage.name}</h3>
-                  <p className="text-2xl font-bold text-zinc-900 mb-1">€{overage.priceUsd}</p>
+                  <p className="text-2xl font-bold text-zinc-900 mb-1">€{overage.priceEur}</p>
                   <p className="text-xs text-emerald-700 font-semibold mb-3">{overage.unit}</p>
                   <p className="text-xs text-zinc-500 leading-relaxed">{overage.guardrail}</p>
                 </div>

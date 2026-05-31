@@ -86,9 +86,9 @@ export default function BillingPage() {
                   )}
                 </div>
                 <div>
-                  {tier.monthlyUsd ? (
+                  {tier.monthlyEur ? (
                     <>
-                      <span style={{ fontSize: 20, fontWeight: 700 }}>${tier.monthlyUsd}</span>
+                      <span style={{ fontSize: 20, fontWeight: 700 }}>€{tier.monthlyEur}</span>
                       <span className="muted" style={{ fontSize: 12 }}>{b.perMonth}</span>
                     </>
                   ) : (

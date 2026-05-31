@@ -7,7 +7,7 @@ const plans = [
   {
     id: "starter",
     name: "Starter",
-    monthlyUsd: 39,
+    monthlyEur: 39,
     publishedSkuLimit: 5,
     storageGb: 2,
     monthlyViewLimit: 5000,
@@ -23,7 +23,7 @@ const plans = [
   {
     id: "growth",
     name: "Growth",
-    monthlyUsd: 89,
+    monthlyEur: 89,
     publishedSkuLimit: 20,
     storageGb: 10,
     monthlyViewLimit: 25000,
@@ -39,7 +39,7 @@ const plans = [
   {
     id: "studio",
     name: "Studio",
-    monthlyUsd: 179,
+    monthlyEur: 179,
     publishedSkuLimit: 50,
     storageGb: 50,
     monthlyViewLimit: 100000,
@@ -55,7 +55,7 @@ const plans = [
   {
     id: "business",
     name: "Business",
-    monthlyUsd: null,
+    monthlyEur: null,
     publishedSkuLimit: null,
     storageGb: null,
     monthlyViewLimit: null,
@@ -180,10 +180,10 @@ export default function PricingPageSr() {
                   </div>
 
                   <div className="mb-6">
-                    {tier.monthlyUsd ? (
+                    {tier.monthlyEur ? (
                       <>
                         <span className={`text-4xl font-bold ${tier.recommended ? "text-white" : "text-zinc-900"}`}>
-                          €{tier.monthlyUsd}
+                          €{tier.monthlyEur}
                         </span>
                         <span className={`text-sm ml-1 ${tier.recommended ? "text-emerald-300" : "text-zinc-400"}`}>
                           / mesec
@@ -243,7 +243,7 @@ export default function PricingPageSr() {
                     variant={tier.recommended || tier.id === "business" ? "default" : "outline"}
                   >
                     <Link href="/dashboard">
-                      {tier.monthlyUsd ? "Počnite" : "Kontaktirajte nas"}
+                      {tier.monthlyEur ? "Počnite" : "Kontaktirajte nas"}
                       <ArrowRight className="ml-1.5 h-3.5 w-3.5" />
                     </Link>
                   </Button>

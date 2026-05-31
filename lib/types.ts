@@ -197,7 +197,7 @@ export type MarketReference = {
 export type BillingTier = {
   id: string;
   name: string;
-  monthlyUsd: number | null;
+  monthlyEur: number | null;
   publishedSkuLimit: number | null;
   storageGb: number | null;
   monthlyViewLimit: number | null;
@@ -209,7 +209,7 @@ export type BillingTier = {
 export type OveragePrice = {
   id: string;
   name: string;
-  priceUsd: number;
+  priceEur: number;
   unit: string;
   guardrail: string;
 };
@@ -217,7 +217,7 @@ export type OveragePrice = {
 export type ModelCreationAddon = {
   id: string;
   name: string;
-  priceUsd: string;
+  priceEur: string;
   buyerFit: string;
   useCase: string;
 };
@@ -225,7 +225,7 @@ export type ModelCreationAddon = {
 export type CostAssumption = {
   id: string;
   name: string;
-  monthlyUsd: number | null;
+  monthlyEur: number | null;
   costBasis: string;
   billingImpact: string;
   sourceLabel?: string;
@@ -238,8 +238,8 @@ export type MarginScenario = {
   tierName: string;
   skuCount: number;
   averageAssetMb: number;
-  monthlyRevenueUsd: number;
-  estimatedVariableCostUsd: number;
+  monthlyRevenueEur: number;
+  estimatedVariableCostEur: number;
   storageUsedGb: number;
 };
 
@@ -248,7 +248,7 @@ export type UsageScenario = {
   monthlyViews: number;
   recommendedTier: string;
   includedViews: number;
-  overageUsd: number;
+  overageEur: number;
   note: string;
 };
 
@@ -256,9 +256,9 @@ export type ModelProductionScenario = {
   id: string;
   skuCount: number;
   addonName: string;
-  revenueUsd: number;
+  revenueEur: number;
   expectedRevisions: number;
-  estimatedCogsUsd: number;
+  estimatedCogsEur: number;
 };
 
 export type SalesObjection = {
