@@ -1,11 +1,18 @@
 "use client"
 
 import { products } from "@/lib/mock-data";
+import type { Product } from "@/lib/types";
 import { CopyButton } from "./CopyButton";
 import { StatusBadge } from "./StatusBadge";
 import { useLang } from "@/lib/lang";
 
-export function ProductTable() {
+type ProductTableProps = {
+  items?: Product[]
+  emptyTitle?: string
+  emptyDescription?: string
+}
+
+export function ProductTable({ items = products, emptyTitle, emptyDescription }: ProductTableProps) {
   const { tr } = useLang()
   const tb = tr.table
 
@@ -23,7 +30,16 @@ export function ProductTable() {
           </tr>
         </thead>
         <tbody>
-          {products.map((product) => (
+          {items.length === 0 ? (
+            <tr>
+              <td colSpan={6}>
+                <div className="emptyTableState">
+                  <strong>{emptyTitle ?? tb.emptyTitle}</strong>
+                  <p className="muted">{emptyDescription ?? tb.emptyDescription}</p>
+                </div>
+              </td>
+            </tr>
+          ) : items.map((product) => (
             <tr key={product.id}>
               <td data-label={tb.product}>
                 <strong>{product.name}</strong>
@@ -51,7 +67,7 @@ export function ProductTable() {
 }
 
 function nextAction(
-  status: (typeof products)[number]["status"],
+  status: Product["status"],
   requiredAnglesComplete: boolean,
   tb: { addPhotos: string; waitingModel: string; reviewPreview: string; publishLink: string; viewAnalytics: string; reviewDetails: string }
 ) {

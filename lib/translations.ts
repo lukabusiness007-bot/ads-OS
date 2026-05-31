@@ -14,7 +14,7 @@ export const translations = {
       eyebrow: "Verified previews — no 3D team required",
       heading: "Fewer returns. More confident buyers.",
       body: "Upload product photos — we generate and verify the 3D preview. Shoppers see size and scale before buying, so fewer orders come back.",
-      cta: "Book pilot demo",
+      cta: "Open dashboard",
       ctaSecondary: "See sample product page",
     },
     platforms: {
@@ -63,14 +63,9 @@ export const translations = {
     qualityChecks: ["Resemblance", "Scale", "Orientation", "File loading", "AR readiness"],
     dashboard: {
       eyebrow: "Dashboard preview",
-      heading: "Pilot Command Center",
-      body: "Catalog status, next actions, published pages, AR clicks, CTA clicks, and plan usage stay visible on one merchant workspace.",
-      stats: [
-        { label: "Published pages", value: "1 / 25" },
-        { label: "AR clicks", value: "188" },
-        { label: "Store clicks", value: "94" },
-        { label: "Next actions", value: "2" },
-      ],
+      heading: "Start from a clean dashboard",
+      body: "Your workspace starts empty for testing. Add a product, attach a real 3D model, then publish and measure live engagement.",
+      cta: "Go to dashboard",
     },
     pricing: {
       eyebrow: "Pilot offer",
@@ -131,7 +126,7 @@ export const translations = {
       eyebrow: "Ready for a focused pilot?",
       heading: "Book a pilot demo for your first 10–25 products",
       body: "See how guided photo upload, human review, hosted links, and analytics fit into your current ecommerce workflow.",
-      cta: "Book a pilot demo",
+      cta: "Open dashboard",
       ctaSecondary: "See sample product page",
     },
   },
@@ -149,7 +144,7 @@ export const translations = {
       eyebrow: "Verifikovani pregledi — bez 3D tima",
       heading: "Manje vraćanja. Sigurniji kupac.",
       body: "Otpremite fotografije — mi generišemo i proveravamo 3D pregled. Kupac vidi razmeru i detalje pre kupovine i ređe vraća.",
-      cta: "Zakažite pilot demo",
+      cta: "Otvori kontrolnu tablu",
       ctaSecondary: "Pogledajte primer stranice",
     },
     platforms: {
@@ -198,14 +193,9 @@ export const translations = {
     qualityChecks: ["Sličnost", "Razmera", "Orijentacija", "Učitavanje fajla", "AR spremnost"],
     dashboard: {
       eyebrow: "Pregled kontrolne table",
-      heading: "Pilotni komandni centar",
-      body: "Status kataloga, sledeće akcije, objavljene stranice, AR klikovi, CTA klikovi i korišćenje plana vidljivi su na jednom radnom prostoru.",
-      stats: [
-        { label: "Objavljene stranice", value: "1 / 25" },
-        { label: "AR klikovi", value: "188" },
-        { label: "Klikovi ka prodavnici", value: "94" },
-        { label: "Sledeće akcije", value: "2" },
-      ],
+      heading: "Počnite od prazne kontrolne table",
+      body: "Radni prostor počinje prazan za testiranje. Dodajte proizvod, povežite pravi 3D model, zatim objavite i merite stvarni angažman.",
+      cta: "Idi na kontrolnu tablu",
     },
     pricing: {
       eyebrow: "Pilot ponuda",
@@ -266,7 +256,7 @@ export const translations = {
       eyebrow: "Spremni za fokusirani pilot?",
       heading: "Zakažite pilot demo za prvih 10–25 proizvoda",
       body: "Pogledajte kako vođeno otpremanje fotografija, ljudska recenzija, hostovani linkovi i analitika se uklapaju u vaš postojeći e-commerce tok rada.",
-      cta: "Zakažite pilot demo",
+      cta: "Otvori kontrolnu tablu",
       ctaSecondary: "Pogledajte primer stranice",
     },
   },

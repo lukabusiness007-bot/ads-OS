@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="800" viewBox="0 0 1200 800" role="img" aria-labelledby="title desc">
+  <title id="title">Sample 3D product poster</title>
+  <desc id="desc">A simple oak chair preview used for local 3D and AR testing.</desc>
+  <rect width="1200" height="800" fill="#f4f6f2"/>
+  <path d="M0 650 C220 590 410 690 650 625 C850 570 1010 610 1200 545 L1200 800 L0 800 Z" fill="#e5ebe4"/>
+  <g transform="translate(430 160)">
+    <rect x="110" y="30" width="230" height="190" rx="18" fill="#c99f6f" stroke="#8b6238" stroke-width="10"/>
+    <rect x="85" y="225" width="285" height="68" rx="18" fill="#b9854d" stroke="#81552d" stroke-width="10"/>
+    <path d="M118 286 L86 572" stroke="#654223" stroke-width="24" stroke-linecap="round"/>
+    <path d="M336 286 L388 572" stroke="#654223" stroke-width="24" stroke-linecap="round"/>
+    <path d="M160 289 L146 535" stroke="#74502e" stroke-width="20" stroke-linecap="round"/>
+    <path d="M294 289 L304 535" stroke="#74502e" stroke-width="20" stroke-linecap="round"/>
+    <ellipse cx="230" cy="590" rx="225" ry="34" fill="#cad6cd"/>
+  </g>
+  <text x="600" y="720" text-anchor="middle" font-family="Arial, sans-serif" font-size="32" font-weight="700" fill="#17201a">Sample product model</text>
+</svg>

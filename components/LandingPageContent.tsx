@@ -1,8 +1,7 @@
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { MarketingNav } from "@/components/marketing-nav"
-import { ProductTable } from "@/components/ProductTable"
-import { CheckCircle2, Shield } from "lucide-react"
+import { ArrowRight, CheckCircle2, Shield } from "lucide-react"
 import type { Lang } from "@/lib/translations"
 import { translations } from "@/lib/translations"
 
@@ -310,23 +309,18 @@ export function LandingPageContent({ lang }: { lang: Lang }) {
         {/* ─── Dashboard Preview ────────────────────────────────────── */}
         <section className="bg-zinc-50 border-y border-dashed border-zinc-200">
           <div className="mx-auto max-w-5xl px-6 py-20">
-            <div className="text-center mb-12">
+            <div className="text-center">
               <p className="text-xs font-bold uppercase tracking-widest text-emerald-700 mb-3">
                 {t.dashboard.eyebrow}
               </p>
               <h2 className="text-3xl font-semibold text-zinc-900 mb-3">{t.dashboard.heading}</h2>
               <p className="text-zinc-500 max-w-xl mx-auto leading-relaxed">{t.dashboard.body}</p>
-            </div>
-            <div className="bg-white border border-zinc-200 rounded-2xl p-6 shadow-sm space-y-6">
-              <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
-                {t.dashboard.stats.map(({ label, value }) => (
-                  <div key={label} className="bg-zinc-50 border border-zinc-200 rounded-xl p-4">
-                    <p className="text-xs font-bold uppercase tracking-wider text-zinc-400 mb-1">{label}</p>
-                    <p className="text-2xl font-bold text-zinc-900">{value}</p>
-                  </div>
-                ))}
-              </div>
-              <ProductTable />
+              <Button asChild size="lg" className="mt-8">
+                <Link href="/dashboard">
+                  {t.dashboard.cta}
+                  <ArrowRight className="ml-2 h-4 w-4" />
+                </Link>
+              </Button>
             </div>
           </div>
         </section>

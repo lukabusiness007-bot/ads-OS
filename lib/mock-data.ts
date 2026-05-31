@@ -45,15 +45,15 @@ export const products: Product[] = [
     photoCount: 16,
     requiredAnglesComplete: true,
     modelAsset: {
-      glbUrl: "/models/arc-oak-chair.glb",
-      usdzUrl: "/models/arc-oak-chair.usdz",
-      posterUrl: "/posters/arc-oak-chair.jpg",
-      thumbnailUrl: "/thumbnails/arc-oak-chair.jpg",
-      fileSizeMb: 8.4,
-      triangleCount: 42600,
+      glbUrl: "/models/sample-product.glb",
+      usdzUrl: "/models/sample-product.usdz",
+      posterUrl: "/posters/sample-product.svg",
+      thumbnailUrl: "/posters/sample-product.svg",
+      fileSizeMb: 0.01,
+      triangleCount: 72,
       textureMax: 2048,
       dimensionsPresent: true,
-      metadataUrl: "/metadata/arc-oak-chair.json"
+      metadataUrl: "/metadata/sample-product.json"
     },
     hostedPage: {
       slug: "northline-home/arc-oak-dining-chair",

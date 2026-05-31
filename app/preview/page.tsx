@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { AppShell } from "@/components/AppShell";
-import { ViewerMock } from "@/components/ViewerMock";
+import { ModelViewer } from "@/components/ModelViewer";
 import { runModelPackageChecks } from "@/lib/generation-pipeline";
 import { products } from "@/lib/mock-data";
 
@@ -29,11 +29,11 @@ export default function PreviewPage() {
 
       <section className="grid two">
         <div className="panel stack">
-          <ViewerMock />
+          <ModelViewer asset={asset} alt={`${product.name} generated 3D model`} />
           <div className="row">
-            <span className="badge success">GLB ready</span>
-            <span className="badge success">USDZ ready</span>
-            <span className="badge neutral">Poster ready</span>
+            <span className={asset?.glbUrl ? "badge success" : "badge neutral"}>GLB {asset?.glbUrl ? "ready" : "missing"}</span>
+            <span className={asset?.usdzUrl ? "badge success" : "badge neutral"}>USDZ {asset?.usdzUrl ? "ready" : "missing"}</span>
+            <span className={asset?.posterUrl ? "badge success" : "badge neutral"}>Poster {asset?.posterUrl ? "ready" : "missing"}</span>
           </div>
         </div>
 

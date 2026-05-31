@@ -528,6 +528,68 @@ h3 {
   cursor: grabbing;
 }
 
+.modelViewerFrame {
+  background:
+    radial-gradient(circle at 50% 75%, rgba(23, 32, 26, 0.12), transparent 34%),
+    linear-gradient(135deg, rgba(31, 111, 91, 0.12), rgba(138, 90, 37, 0.08)),
+    #edf2ef;
+}
+
+.modelViewerFrame model-viewer {
+  height: 100%;
+  min-height: 280px;
+  width: 100%;
+}
+
+.modelViewerFallback {
+  align-content: center;
+  gap: 8px;
+  padding: 28px;
+  text-align: center;
+}
+
+.modelViewerFallback strong {
+  font-size: 22px;
+}
+
+.modelViewerFallback span {
+  color: var(--muted);
+  max-width: 320px;
+}
+
+.modelArButton {
+  background: var(--accent);
+  border: 0;
+  border-radius: 999px;
+  bottom: 16px;
+  box-shadow: var(--shadow);
+  color: #fff;
+  cursor: pointer;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 800;
+  padding: 10px 14px;
+  position: absolute;
+  right: 16px;
+}
+
+.emptyTableState {
+  display: grid;
+  gap: 6px;
+  justify-items: center;
+  padding: 34px 18px;
+  text-align: center;
+}
+
+.emptyTableState strong {
+  font-size: 18px;
+}
+
+.emptyTableState p {
+  margin-bottom: 0;
+  max-width: 460px;
+}
+
 .viewerShape {
   background: #c7a47a;
   border: 1px solid rgba(23, 32, 26, 0.16);

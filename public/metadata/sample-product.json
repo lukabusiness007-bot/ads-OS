@@ -1,0 +1,12 @@
+{
+  "name": "Sample Product Chair",
+  "unit": "meter",
+  "source": "local testing asset",
+  "dimensions": {
+    "width": 0.48,
+    "height": 0.82,
+    "depth": 0.52
+  },
+  "formats": ["glb", "usdz"],
+  "purpose": "Testing the browser 3D preview and mobile AR launch flow before provider-generated models are connected."
+}

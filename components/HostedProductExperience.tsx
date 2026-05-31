@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import { trackHostedPageEvent } from "@/lib/analytics";
 import { formatMeters } from "@/lib/ui";
 import type { Product } from "@/lib/types";
-import { ViewerMock } from "./ViewerMock";
+import { ModelViewer } from "./ModelViewer";
 
 type HostedProductExperienceProps = {
   merchantSlug: string;
@@ -48,12 +48,21 @@ export function HostedProductExperience({ merchantSlug, productSlug, product }: 
     <main className="publicPage">
       <section className="publicHero" aria-labelledby="product-title">
         <div className="publicViewerBlock">
-          <button className="viewerButton" type="button" onClick={trackViewerInteraction} aria-label="Interact with 3D viewer">
-            <ViewerMock />
-          </button>
+          <ModelViewer
+            asset={product.modelAsset}
+            alt={`${product.name} 3D model`}
+            onInteract={trackViewerInteraction}
+            onArClick={trackArClick}
+          />
           <div className="viewerMeta">
-            <span className="badge success">3D preview generated and verified</span>
-            <span className="muted">Poster loads first, then the interactive model opens in place.</span>
+            <span className={product.modelAsset ? "badge success" : "badge neutral"}>
+              {product.modelAsset ? "3D preview generated and verified" : "3D model not uploaded yet"}
+            </span>
+            <span className="muted">
+              {product.modelAsset
+                ? "Poster loads first, then the interactive model opens in place."
+                : "The hosted page can be tested after a GLB/USDZ package is available."}
+            </span>
           </div>
         </div>
 
@@ -89,18 +98,17 @@ export function HostedProductExperience({ merchantSlug, productSlug, product }: 
           </dl>
 
           <div className="publicActions">
-            <button className="button accent" type="button" onClick={trackArClick} disabled={!arSupported}>
-              View in AR
-            </button>
             <a className="button" href={product.customerUrl} onClick={trackCtaClick}>
               {product.hostedPage?.ctaLabel ?? "View on store"}
             </a>
           </div>
 
           <p className="muted">
-            {arSupported
-              ? "AR can open on this device. The 3D preview remains available if launch is interrupted."
-              : "AR is not supported in this browser, but the interactive 3D preview remains available."}
+            {!product.modelAsset
+              ? "AR is hidden until a model package is available."
+              : arSupported
+                ? "Use the View in AR control inside the 3D viewer on this device."
+                : "AR is not supported in this browser, but the interactive 3D preview remains available."}
           </p>
         </article>
       </section>
@@ -113,11 +121,15 @@ export function HostedProductExperience({ merchantSlug, productSlug, product }: 
             CAD or manufacturing precision.
           </p>
         </div>
-        <div className="assetGrid">
-          <span className="badge neutral">GLB {product.modelAsset?.fileSizeMb.toFixed(1)} MB</span>
-          <span className="badge neutral">{product.modelAsset?.triangleCount.toLocaleString()} triangles</span>
-          <span className="badge neutral">{product.modelAsset?.textureMax}px textures</span>
-        </div>
+        {product.modelAsset ? (
+          <div className="assetGrid">
+            <span className="badge neutral">GLB {product.modelAsset.fileSizeMb.toFixed(1)} MB</span>
+            <span className="badge neutral">{product.modelAsset.triangleCount.toLocaleString()} triangles</span>
+            <span className="badge neutral">{product.modelAsset.textureMax}px textures</span>
+          </div>
+        ) : (
+          <span className="badge neutral">Waiting for model asset</span>
+        )}
       </section>
     </main>
   );

@@ -3,28 +3,24 @@
 import Link from "next/link";
 import { AppShell } from "@/components/AppShell";
 import { ProductTable } from "@/components/ProductTable";
-import { organization, products } from "@/lib/mock-data";
 import { useLang } from "@/lib/lang";
 
 export default function DashboardPage() {
   const { tr } = useLang()
   const d = tr.dashboard
 
-  const published = products.filter((p) => p.status === "published").length;
-  const totalArClicks = products.reduce((s, p) => s + (p.analytics?.arButtonClicks ?? 0), 0);
-  const totalStoreClicks = products.reduce((s, p) => s + (p.analytics?.ctaClicks ?? 0), 0);
-  const needsAction = products.filter(
-    (p) => p.status !== "published" && p.status !== "generating"
-  ).length;
-
-  const usagePct = Math.round((published / 25) * 100);
+  const published = 0;
+  const totalProducts = 0;
+  const totalArClicks = 0;
+  const totalStoreClicks = 0;
+  const usagePct = 0;
 
   return (
     <AppShell>
       <header className="topbar">
         <div>
           <p className="eyebrow">{d.eyebrow}</p>
-          <h1 style={{ marginBottom: 6 }}>{organization.name}</h1>
+          <h1 style={{ marginBottom: 6 }}>{d.heading}</h1>
           <p className="muted" style={{ maxWidth: 520 }}>
             {d.subtitle}
           </p>
@@ -38,18 +34,18 @@ export default function DashboardPage() {
       <section className="grid four">
         <article className="card metric">
           <span className="muted" style={{ fontSize: 12, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.06em" }}>{d.catalogStatus}</span>
-          <strong>{products.length}</strong>
-          <span className="badge neutral">{d.pilotSkus}</span>
+          <strong>{totalProducts}</strong>
+          <span className="badge neutral">{d.noProducts}</span>
         </article>
         <article className="card metric">
           <span className="muted" style={{ fontSize: 12, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.06em" }}>{d.publishedPages}</span>
           <strong>{published}<span style={{ fontSize: 16, fontWeight: 500, color: "var(--muted)" }}>/25</span></strong>
-          <span className="badge success">{d.hostedLive}</span>
+          <span className="badge neutral">{d.hostedLive}</span>
         </article>
         <article className="card metric">
           <span className="muted" style={{ fontSize: 12, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.06em" }}>{d.arClicks}</span>
           <strong>{totalArClicks}</strong>
-          <span className="badge neutral">{d.pilotTotal}</span>
+          <span className="badge neutral">{d.noActivity}</span>
         </article>
         <article className="card metric">
           <span className="muted" style={{ fontSize: 12, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.06em" }}>{d.storeClicks}</span>
@@ -65,7 +61,7 @@ export default function DashboardPage() {
             <div>
               <h2>{d.nextActions}</h2>
               <p className="muted">
-                {needsAction} {needsAction === 1 ? d.needsAttentionOne : d.needsAttentionMany}
+                {d.emptyActionDesc}
               </p>
             </div>
             <Link className="button secondary sm" href="/create">
@@ -74,12 +70,8 @@ export default function DashboardPage() {
           </div>
           <ul className="actionList">
             <li>
-              <strong>{d.actionItem1Title}</strong>
-              <span>{d.actionItem1Desc}</span>
-            </li>
-            <li>
-              <strong>{d.actionItem2Title}</strong>
-              <span>{d.actionItem2Desc}</span>
+              <strong>{d.actionItemTitle}</strong>
+              <span>{d.actionItemDesc}</span>
             </li>
           </ul>
         </article>
@@ -118,7 +110,11 @@ export default function DashboardPage() {
             {d.publishedLinksBtn}
           </Link>
         </div>
-        <ProductTable />
+        <ProductTable
+          items={[]}
+          emptyTitle={d.emptyProductsTitle}
+          emptyDescription={d.emptyProductsDesc}
+        />
       </section>
     </AppShell>
   );
