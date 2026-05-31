@@ -468,7 +468,7 @@ export const t = {
   },
 } as const
 
-type Translations = typeof t.sr
+type Translations = (typeof t)[Lang]
 
 const LangContext = createContext<{
   lang: Lang
