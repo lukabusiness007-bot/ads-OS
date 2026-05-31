@@ -17,7 +17,7 @@ export function CopyButton({ value, label = "Copy link" }: CopyButtonProps) {
   }
 
   return (
-    <button className="button secondary" type="button" onClick={copyValue}>
+    <button className="button secondary sm" type="button" onClick={copyValue}>
       {copied ? "Copied" : label}
     </button>
   );

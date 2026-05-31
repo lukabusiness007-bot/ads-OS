@@ -26,7 +26,8 @@ export const organization = {
   name: "Northline Home",
   website: "https://northline.example",
   owner: "Mila Petrovic",
-  plan: "Pilot hosted pages"
+  plan: "Pilot hosted pages",
+  planTier: "growth"
 };
 
 export const products: Product[] = [
@@ -393,22 +394,22 @@ export const modelCreationAddons: ModelCreationAddon[] = [
   {
     id: "basic-cleanup",
     name: "Basic scan cleanup",
-    priceUsd: "$79/SKU",
-    cogsTarget: "60%+ gross margin",
+    priceUsd: "€79/SKU",
+    buyerFit: "Simple pieces",
     useCase: "Client has usable scans but needs cleanup, naming, and upload help."
   },
   {
     id: "commerce-ready",
     name: "Ecommerce-ready GLB/USDZ optimization",
-    priceUsd: "$149/SKU",
-    cogsTarget: "50-60% gross margin",
+    priceUsd: "€149/SKU",
+    buyerFit: "Most SMB furniture products",
     useCase: "Default add-on for SMBs that need mobile-safe files, scale checks, posters, and QA."
   },
   {
     id: "premium-pbr",
     name: "Premium manual/PBR model",
-    priceUsd: "$299-$499/SKU",
-    cogsTarget: "55%+ gross margin",
+    priceUsd: "€299–€499/SKU",
+    buyerFit: "Complex or luxury pieces",
     useCase: "Complex products, luxury visuals, poor source photos, or high-detail materials."
   }
 ];

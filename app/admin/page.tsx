@@ -9,9 +9,9 @@ export default function AdminReviewPage() {
   return (
     <AppShell>
       <header>
-        <p className="eyebrow">Internal admin review</p>
-        <h1>Review generated models</h1>
-        <p className="muted">Approve, reject, or request regeneration before a hosted page can publish.</p>
+        <p className="eyebrow">Interna admin provera</p>
+        <h1>Pregled generisanih modela</h1>
+        <p className="muted">Odobri, odbij ili zatraži regeneraciju pre nego što se hostovana stranica objavi.</p>
       </header>
 
       <section className="grid two">
@@ -37,42 +37,42 @@ export default function AdminReviewPage() {
                 ))}
               <li>
                 <span className="checkDot" />
-                <span>Resembles product</span>
+                <span>Liči na proizvod</span>
               </li>
               <li>
                 <span className="checkDot" />
-                <span>Orientation correct</span>
+                <span>Orijentacija ispravna</span>
               </li>
               <li>
                 <span className="checkDot" />
-                <span>Scale plausible</span>
+                <span>Razmera verodostojna</span>
               </li>
               <li>
                 <span className="checkDot" />
-                <span>AR launch test pending</span>
+                <span>AR test pokretanja na čekanju</span>
               </li>
             </ul>
             <div className="row">
               <button className="button accent" type="button">
-                Approve
+                Odobri
               </button>
               <button className="button secondary" type="button">
-                Request regeneration
+                Zatraži regeneraciju
               </button>
               <button className="button secondary" type="button">
-                Reject
+                Odbij
               </button>
             </div>
           </article>
         ))}
 
         <aside className="panel stack">
-          <h2>Review rules</h2>
+          <h2>Pravila pregleda</h2>
           <p className="muted">
-            Approval verifies visual sales quality, not CAD precision. Failed models stay private and cannot be opened
-            at a public URL.
+            Odobrenje proverava vizuelni prodajni kvalitet, a ne CAD preciznost. Neuspeli modeli ostaju privatni i ne mogu biti otvoreni
+            na javnom URL-u.
           </p>
-          <span className="badge success">Manual gate active</span>
+          <span className="badge success">Ručna kapija aktivna</span>
         </aside>
       </section>
     </AppShell>

@@ -1,9 +1,15 @@
+"use client"
+
 import Link from "next/link";
 import { AppShell } from "@/components/AppShell";
 import { ProductTable } from "@/components/ProductTable";
 import { organization, products } from "@/lib/mock-data";
+import { useLang } from "@/lib/lang";
 
 export default function DashboardPage() {
+  const { tr } = useLang()
+  const d = tr.dashboard
+
   const published = products.filter((p) => p.status === "published").length;
   const totalArClicks = products.reduce((s, p) => s + (p.analytics?.arButtonClicks ?? 0), 0);
   const totalStoreClicks = products.reduce((s, p) => s + (p.analytics?.ctaClicks ?? 0), 0);
@@ -17,38 +23,38 @@ export default function DashboardPage() {
     <AppShell>
       <header className="topbar">
         <div>
-          <p className="eyebrow">Pilot Command Center</p>
+          <p className="eyebrow">{d.eyebrow}</p>
           <h1 style={{ marginBottom: 6 }}>{organization.name}</h1>
           <p className="muted" style={{ maxWidth: 520 }}>
-            Upload photos, review verified AR pages, publish hosted links, and measure shopper engagement.
+            {d.subtitle}
           </p>
         </div>
         <Link className="button accent" href="/create">
-          + Create AR page
+          {d.createBtn}
         </Link>
       </header>
 
       {/* KPI cards */}
       <section className="grid four">
         <article className="card metric">
-          <span className="muted" style={{ fontSize: 12, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.06em" }}>Catalog status</span>
+          <span className="muted" style={{ fontSize: 12, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.06em" }}>{d.catalogStatus}</span>
           <strong>{products.length}</strong>
-          <span className="badge neutral">Pilot SKUs</span>
+          <span className="badge neutral">{d.pilotSkus}</span>
         </article>
         <article className="card metric">
-          <span className="muted" style={{ fontSize: 12, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.06em" }}>Published pages</span>
+          <span className="muted" style={{ fontSize: 12, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.06em" }}>{d.publishedPages}</span>
           <strong>{published}<span style={{ fontSize: 16, fontWeight: 500, color: "var(--muted)" }}>/25</span></strong>
-          <span className="badge success">Hosted and live</span>
+          <span className="badge success">{d.hostedLive}</span>
         </article>
         <article className="card metric">
-          <span className="muted" style={{ fontSize: 12, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.06em" }}>AR clicks</span>
+          <span className="muted" style={{ fontSize: 12, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.06em" }}>{d.arClicks}</span>
           <strong>{totalArClicks}</strong>
-          <span className="badge neutral">Pilot total</span>
+          <span className="badge neutral">{d.pilotTotal}</span>
         </article>
         <article className="card metric">
-          <span className="muted" style={{ fontSize: 12, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.06em" }}>Store clicks</span>
+          <span className="muted" style={{ fontSize: 12, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.06em" }}>{d.storeClicks}</span>
           <strong>{totalStoreClicks}</strong>
-          <span className="badge neutral">Back to store</span>
+          <span className="badge neutral">{d.backToStore}</span>
         </article>
       </section>
 
@@ -57,44 +63,46 @@ export default function DashboardPage() {
         <article className="panel stack">
           <div className="row">
             <div>
-              <h2>Next required actions</h2>
-              <p className="muted">{needsAction} product{needsAction !== 1 ? "s" : ""} need attention.</p>
+              <h2>{d.nextActions}</h2>
+              <p className="muted">
+                {needsAction} {needsAction === 1 ? d.needsAttentionOne : d.needsAttentionMany}
+              </p>
             </div>
-            <Link className="button secondary" href="/create">
-              Add product
+            <Link className="button secondary sm" href="/create">
+              {d.addProduct}
             </Link>
           </div>
           <ul className="actionList">
             <li>
-              <strong>Vale Wall Shelf</strong>
-              <span>Add one sharper material/detail photo before generation review.</span>
+              <strong>{d.actionItem1Title}</strong>
+              <span>{d.actionItem1Desc}</span>
             </li>
             <li>
-              <strong>Mira Table Lamp</strong>
-              <span>Waiting for model generation and quality review.</span>
+              <strong>{d.actionItem2Title}</strong>
+              <span>{d.actionItem2Desc}</span>
             </li>
           </ul>
         </article>
 
         <article className="panel stack">
-          <h2>Current plan usage</h2>
+          <h2>{d.planUsage}</h2>
           <div>
-            <div className="usageBar" aria-label={`Published page usage: ${published} of 25`}>
+            <div className="usageBar" aria-label={`${published} / 25`}>
               <span style={{ width: `${usagePct}%` }} />
             </div>
             <p className="muted" style={{ marginTop: 8, fontSize: 13 }}>
-              {published} of 25 pilot hosted pages published.
+              {published} / 25 {d.pagesPublished}
             </p>
           </div>
           <p className="muted" style={{ fontSize: 13, marginTop: 0 }}>
-            Model creation is billed per approved model. Hosted-page subscription covers all live pages.
+            {d.billingNote}
           </p>
           <div className="assetGrid">
             <span className="badge neutral">10–25 SKU pilot</span>
-            <span className="badge success">Human-reviewed before publishing</span>
+            <span className="badge success">{d.humanReviewed}</span>
           </div>
-          <Link className="button secondary" href="/analytics-billing" style={{ width: "fit-content" }}>
-            View billing details
+          <Link className="button ghost" href="/analytics-billing">
+            {d.viewBilling}
           </Link>
         </article>
       </section>
@@ -103,11 +111,11 @@ export default function DashboardPage() {
       <section className="panel">
         <div className="row">
           <div>
-            <h2>Products</h2>
-            <p className="muted">Action, publishing state, and product-level performance.</p>
+            <h2>{d.productsHeading}</h2>
+            <p className="muted">{d.productsDesc}</p>
           </div>
-          <Link className="button secondary" href="/published-links">
-            Published links
+          <Link className="button secondary sm" href="/published-links">
+            {d.publishedLinksBtn}
           </Link>
         </div>
         <ProductTable />

@@ -11,9 +11,9 @@ export const translations = {
       bookDemo: "Book demo",
     },
     hero: {
-      eyebrow: "Without hiring a 3D team",
-      heading: "Verified AR product pages for furniture stores",
-      body: "Upload product photos, get a quality-checked 3D/AR product page, and give shoppers a clearer way to understand size, scale, and detail before they buy.",
+      eyebrow: "Verified previews — no 3D team required",
+      heading: "Fewer returns. More confident buyers.",
+      body: "Upload product photos — we generate and verify the 3D preview. Shoppers see size and scale before buying, so fewer orders come back.",
       cta: "Book pilot demo",
       ctaSecondary: "See sample product page",
     },
@@ -22,10 +22,16 @@ export const translations = {
     },
     problem: {
       eyebrow: "The merchant problem",
-      heading: "Shoppers want to understand furniture spatially before they commit.",
-      p1: "Static photos do not always communicate scale, depth, fit, or material detail. For many SMB stores, hiring a 3D team or managing model files adds too much operational overhead for a 10 to 25 SKU pilot.",
-      p2: "Veridian keeps the offer narrow: Upload photos. We generate, check, and host the AR product page.",
+      heading: "Shoppers guess on size. When they guess wrong, you pay for it.",
+      p1: "Static photos do not communicate scale or fit. When the item arrives and the proportions are off, the return costs 15–25 % of item value in pick-up, handling, and restock. For most SMB furniture stores, that is the margin on the order.",
+      p2: "Veridian keeps the offer narrow: upload photos, get a verified 3D preview, live in 5–7 days. One avoided return on a €500 sofa covers a month of hosted pages.",
     },
+    trustStrip: [
+      "Live in 5–7 days from photo upload",
+      "Up to 10× less than a traditional 3D studio",
+      "Human-reviewed before publishing",
+      "AR + analytics included",
+    ],
     howItWorks: {
       eyebrow: "How it works",
       heading: "A simple path from product photos to a live hosted page.",
@@ -94,7 +100,7 @@ export const translations = {
       {
         question: "How predictable is pricing?",
         answer:
-          "A typical pilot uses a per-approved-model fee and a monthly hosted-page subscription. Starter models are 30 to 50 EUR, standard verified models are 70 to 120 EUR, and hosted pages are 49 to 99 EUR per month.",
+          "A typical pilot uses a per-approved-model fee and a monthly hosted-page subscription. Starter models are €30–50, standard verified models are €70–120, and hosted pages are €49–99 per month.",
       },
       {
         question: "How do I prove this is working?",
@@ -107,6 +113,20 @@ export const translations = {
           "Shopify can display 3D models if you already have the right files. Veridian helps create, check, host, publish, and measure AR product pages without asking your team to manage a 3D pipeline.",
       },
     ],
+    comparison: {
+      eyebrow: "Why not just hire a studio?",
+      heading: "Veridian vs. traditional 3D studio",
+      colVeridian: "Veridian",
+      colStudio: "Traditional 3D studio",
+      rows: [
+        { aspect: "Time to live page", veridian: "5–7 days", studio: "6–12 weeks" },
+        { aspect: "Cost per approved model", veridian: "€30–120", studio: "€300–1,200" },
+        { aspect: "Hosted page included", veridian: "✓ Included", studio: "Not included" },
+        { aspect: "Human quality review", veridian: "✓ Included", studio: "Varies by studio" },
+        { aspect: "Analytics included", veridian: "✓ Included", studio: "Not included" },
+        { aspect: "Pilot-friendly (10–25 SKUs)", veridian: "✓ Built for this", studio: "Minimum order may apply" },
+      ],
+    },
     finalCta: {
       eyebrow: "Ready for a focused pilot?",
       heading: "Book a pilot demo for your first 10–25 products",
@@ -126,9 +146,9 @@ export const translations = {
       bookDemo: "Zakažite demo",
     },
     hero: {
-      eyebrow: "Bez angažovanja 3D tima",
-      heading: "Verifikovane AR stranice proizvoda za prodavnice nameštaja",
-      body: "Otpremite fotografije proizvoda, dobijte proverenu 3D/AR stranicu i kupcu pružite jasniji uvid u veličinu, razmeru i detalje pre kupovine.",
+      eyebrow: "Verifikovani pregledi — bez 3D tima",
+      heading: "Manje vraćanja. Sigurniji kupac.",
+      body: "Otpremite fotografije — mi generišemo i proveravamo 3D pregled. Kupac vidi razmeru i detalje pre kupovine i ređe vraća.",
       cta: "Zakažite pilot demo",
       ctaSecondary: "Pogledajte primer stranice",
     },
@@ -137,10 +157,16 @@ export const translations = {
     },
     problem: {
       eyebrow: "Problem trgovca",
-      heading: "Kupci žele da prostorno razumeju nameštaj pre nego što se odluče.",
-      p1: "Statičke fotografije ne komuniciraju uvek razmeru, dubinu, uklapanje ili detalje materijala. Za mnoge SMB prodavnice, angažovanje 3D tima ili upravljanje modelima donosi previše operativnog opterećenja za pilot od 10 do 25 SKU-ova.",
-      p2: "Veridian zadržava ponudu usku: Otpremite fotografije. Mi generišemo, proveravamo i hostujemo AR stranicu proizvoda.",
+      heading: "Kupci pogađaju dimenzije. Kada pogreše, vi plaćate.",
+      p1: "Statičke fotografije ne komuniciraju razmeru ni uklapanje. Kada artikal stigne, a proporcije nisu dobre, povrat košta 15–25 % vrednosti u preuzimanju, rukovanju i ponovnom skladištenju. Za većinu SMB prodavnica nameštaja, to je marža na toj narudžbini.",
+      p2: "Veridian zadržava ponudu usku: otpremite fotografije, dobijte verifikovani 3D pregled, živo za 5–7 dana. Jedan izbegnut povrat sofe od €500 pokriva mesec hostovanih stranica.",
     },
+    trustStrip: [
+      "Živo za 5–7 dana od otpremanja fotografija",
+      "Do 10× jeftinije od tradicionalnog 3D studija",
+      "Recenzija od strane čoveka pre objavljivanja",
+      "AR + analitika uključena",
+    ],
     howItWorks: {
       eyebrow: "Kako funkcioniše",
       heading: "Jednostavan put od fotografija do objavljene stranice.",
@@ -209,7 +235,7 @@ export const translations = {
       {
         question: "Koliko su predvidive cene?",
         answer:
-          "Tipičan pilot koristi naknadu po odobrenom modelu i mesečnu pretplatu za hostovanje. Starter modeli su 30 do 50 EUR, standardni verifikovani modeli su 70 do 120 EUR, a hostovane stranice su 49 do 99 EUR mesečno.",
+          "Tipičan pilot koristi naknadu po odobrenom modelu i mesečnu pretplatu za hostovanje. Starter modeli €30–50, standardni verifikovani €70–120, hostovane stranice €49–99 mesečno.",
       },
       {
         question: "Kako da dokažem da ovo funkcioniše?",
@@ -222,6 +248,20 @@ export const translations = {
           "Shopify može da prikaže 3D modele ako već imate prave fajlove. Veridian pomaže da kreirate, proverite, hostujete, objavite i merite AR stranice proizvoda bez upravljanja 3D pipelinom.",
       },
     ],
+    comparison: {
+      eyebrow: "Zašto ne angažovati studio?",
+      heading: "Veridian vs. tradicionalni 3D studio",
+      colVeridian: "Veridian",
+      colStudio: "Tradicionalni 3D studio",
+      rows: [
+        { aspect: "Vreme do žive stranice", veridian: "5–7 dana", studio: "6–12 nedelja" },
+        { aspect: "Cena po odobrenom modelu", veridian: "€30–120", studio: "€300–1.200" },
+        { aspect: "Hostovana stranica uključena", veridian: "✓ Uključeno", studio: "Nije uključeno" },
+        { aspect: "Recenzija kvaliteta", veridian: "✓ Uključeno", studio: "Zavisi od studija" },
+        { aspect: "Analitika uključena", veridian: "✓ Uključeno", studio: "Nije uključeno" },
+        { aspect: "Pogodno za pilot (10–25 SKU)", veridian: "✓ Napravljeno za ovo", studio: "Može biti minimum narudžbine" },
+      ],
+    },
     finalCta: {
       eyebrow: "Spremni za fokusirani pilot?",
       heading: "Zakažite pilot demo za prvih 10–25 proizvoda",

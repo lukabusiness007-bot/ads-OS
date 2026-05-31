@@ -2,7 +2,6 @@ import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { MarketingNav } from "@/components/marketing-nav"
 import { ProductTable } from "@/components/ProductTable"
-import { pricingPackages } from "@/lib/mock-data"
 import { CheckCircle2, Shield } from "lucide-react"
 import type { Lang } from "@/lib/translations"
 import { translations } from "@/lib/translations"
@@ -40,12 +39,7 @@ export function LandingPageContent({ lang }: { lang: Lang }) {
 
               {/* Trust strip */}
               <div className="grid grid-cols-2 gap-x-8 gap-y-3 max-w-sm mx-auto text-left border-t border-zinc-100 pt-8">
-                {[
-                  "Built for furniture and home decor",
-                  "Human-reviewed models",
-                  "Hosted product links",
-                  "AR and store-click analytics",
-                ].map((item) => (
+                {t.trustStrip.map((item) => (
                   <div key={item} className="flex items-center gap-2">
                     <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600 shrink-0" />
                     <span className="text-xs font-semibold text-zinc-600">{item}</span>
@@ -215,6 +209,44 @@ export function LandingPageContent({ lang }: { lang: Lang }) {
           </div>
         </section>
 
+        {/* ─── Comparison ──────────────────────────────────────────── */}
+        <section className="bg-white border-b border-dashed border-zinc-200">
+          <div className="mx-auto max-w-5xl px-6 py-20">
+            <div className="text-center mb-12">
+              <p className="text-xs font-bold uppercase tracking-widest text-emerald-700 mb-3">
+                {t.comparison.eyebrow}
+              </p>
+              <h2 className="text-3xl font-semibold text-zinc-900">
+                {t.comparison.heading}
+              </h2>
+            </div>
+            <div className="overflow-x-auto rounded-xl border border-zinc-200 shadow-sm">
+              <table className="w-full text-sm">
+                <thead className="bg-zinc-50 border-b border-zinc-200">
+                  <tr>
+                    <th className="text-left py-3.5 px-5 font-semibold text-zinc-400 w-2/5" />
+                    <th className="text-left py-3.5 px-5 font-bold text-emerald-900">
+                      {t.comparison.colVeridian}
+                    </th>
+                    <th className="text-left py-3.5 px-5 font-semibold text-zinc-400">
+                      {t.comparison.colStudio}
+                    </th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-zinc-100 bg-white">
+                  {t.comparison.rows.map((row) => (
+                    <tr key={row.aspect} className="hover:bg-zinc-50 transition-colors">
+                      <td className="py-4 px-5 text-zinc-500">{row.aspect}</td>
+                      <td className="py-4 px-5 font-semibold text-zinc-900">{row.veridian}</td>
+                      <td className="py-4 px-5 text-zinc-400">{row.studio}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
         {/* ─── What You Get ─────────────────────────────────────────── */}
         <section className="bg-zinc-50 border-y border-dashed border-zinc-200">
           <div className="mx-auto max-w-5xl px-6 py-20 grid gap-12 lg:grid-cols-2 lg:items-start">
@@ -299,33 +331,6 @@ export function LandingPageContent({ lang }: { lang: Lang }) {
           </div>
         </section>
 
-        {/* ─── Pilot Offer / Pricing ────────────────────────────────── */}
-        <section id="pricing" className="mx-auto max-w-5xl px-6 py-24">
-          <div className="grid gap-12 lg:grid-cols-2 lg:items-start">
-            <div>
-              <p className="text-xs font-bold uppercase tracking-widest text-emerald-700 mb-3">
-                {t.pricing.eyebrow}
-              </p>
-              <h2 className="text-3xl font-semibold text-zinc-900 leading-snug mb-3">
-                {t.pricing.heading}
-              </h2>
-              <p className="text-zinc-500 leading-relaxed">{t.pricing.body}</p>
-            </div>
-            <div className="grid gap-4 sm:grid-cols-3">
-              {pricingPackages.slice(0, 3).map((item) => (
-                <article
-                  key={item.id}
-                  className="bg-white border border-zinc-200 rounded-xl p-5 shadow-sm hover:shadow-md hover:border-emerald-200 transition-all"
-                >
-                  <h3 className="font-semibold text-zinc-900 mb-3 text-sm">{item.name}</h3>
-                  <p className="text-xl font-bold text-zinc-900 mb-1">{item.priceRangeEur}</p>
-                  <p className="text-xs text-zinc-400 leading-relaxed">{item.billingUnit}</p>
-                </article>
-              ))}
-            </div>
-          </div>
-        </section>
-
         {/* ─── FAQ ──────────────────────────────────────────────────── */}
         <section id="faq" className="bg-zinc-50 border-y border-dashed border-zinc-200">
           <div className="mx-auto max-w-5xl px-6 py-20">
@@ -370,7 +375,7 @@ export function LandingPageContent({ lang }: { lang: Lang }) {
                 asChild
                 variant="outline"
                 size="lg"
-                className="border-emerald-700 text-white hover:bg-emerald-900"
+                className="border-emerald-700 bg-transparent text-white hover:bg-emerald-900"
               >
                 <Link href="/p/northline-home/arc-oak-dining-chair">
                   {t.finalCta.ctaSecondary}

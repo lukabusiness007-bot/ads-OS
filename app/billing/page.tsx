@@ -1,59 +1,147 @@
+"use client"
+
 import Link from "next/link";
 import { AppShell } from "@/components/AppShell";
-import { pricingPackages, products } from "@/lib/mock-data";
+import { billingTiers, organization, pricingPackages, products } from "@/lib/mock-data";
+import { useLang } from "@/lib/lang";
+
+const TIER_ORDER = ["starter", "growth", "studio", "business"];
 
 export default function BillingPage() {
+  const { tr } = useLang();
+  const b = tr.billing;
+
   const published = products.filter((p) => p.status === "published").length;
   const usagePct = Math.round((published / 25) * 100);
+  const currentTierIndex = TIER_ORDER.indexOf(organization.planTier);
+
+  function fmtViews(n: number | null) {
+    if (!n) return b.custom;
+    return n >= 1000 ? `${n / 1000}k` : String(n);
+  }
 
   return (
     <AppShell>
       <header className="topbar">
         <div>
-          <p className="eyebrow">Billing</p>
-          <h1>Pilot plan and costs</h1>
-          <p className="muted">
-            Per-approved-model fee plus a monthly hosted-page subscription. Simple and predictable.
-          </p>
+          <p className="eyebrow">{b.eyebrow}</p>
+          <h1>{b.heading}</h1>
+          <p className="muted">{b.subtitle}</p>
         </div>
         <Link className="button secondary" href="/analytics">
-          View analytics
+          {b.viewAnalytics}
         </Link>
       </header>
 
-      {/* Plan usage */}
       <section className="panel stack">
         <div className="row">
           <div>
-            <h2>Current plan usage</h2>
-            <p className="muted">10–25 SKU pilot</p>
+            <h2>{b.planUsageHeading}</h2>
+            <p className="muted">{b.planUsageSub}</p>
           </div>
-          <span className="badge success">Active</span>
+          <span className="badge success">{b.active}</span>
         </div>
         <div>
-          <div className="usageBar" aria-label={`${published} of 25 hosted pages published`}>
+          <div className="usageBar" aria-label={`${published} / 25`}>
             <span style={{ width: `${usagePct}%` }} />
           </div>
           <p className="muted" style={{ marginTop: 8, fontSize: 13 }}>
-            {published} of 25 pilot hosted pages published
+            {published} / 25 {b.pagesPublished}
           </p>
         </div>
         <div className="assetGrid">
-          <span className="badge neutral">{published} page{published !== 1 ? "s" : ""} live</span>
-          <span className="badge neutral">{25 - published} page{(25 - published) !== 1 ? "s" : ""} remaining</span>
-          <span className="badge success">Human-reviewed before publishing</span>
+          <span className="badge neutral">{published} {b.pagesLive}</span>
+          <span className="badge neutral">{25 - published} {b.pagesRemaining}</span>
+          <span className="badge success">{b.humanReviewed}</span>
         </div>
       </section>
 
-      {/* Pricing */}
       <section className="panel stack">
         <div>
-          <h2>Pricing breakdown</h2>
-          <p className="muted">
-            Billed per approved model plus a monthly subscription for hosted pages. Revision or
-            regeneration is only charged when a new version is requested after an approved model
-            already exists.
-          </p>
+          <h2>{b.subscriptionHeading}</h2>
+          <p className="muted">{b.subscriptionDesc}</p>
+        </div>
+        <div className="grid four" style={{ gap: 12, alignItems: "stretch" }}>
+          {billingTiers.map((tier) => {
+            const tierIndex = TIER_ORDER.indexOf(tier.id);
+            const isCurrent = tier.id === organization.planTier;
+            const isUpgrade = tierIndex > currentTierIndex;
+            const isLower = tierIndex < currentTierIndex;
+            return (
+              <div
+                key={tier.id}
+                className="card stack"
+                style={{
+                  border: isCurrent ? "2px solid var(--accent)" : undefined,
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: 10,
+                }}
+              >
+                <div className="row" style={{ alignItems: "flex-start", flexWrap: "wrap", gap: 6 }}>
+                  <strong>{tier.name}</strong>
+                  {isCurrent && <span className="badge success">{b.currentPlan}</span>}
+                  {tier.recommended && !isCurrent && (
+                    <span className="badge neutral">{b.popular}</span>
+                  )}
+                </div>
+                <div>
+                  {tier.monthlyUsd ? (
+                    <>
+                      <span style={{ fontSize: 20, fontWeight: 700 }}>${tier.monthlyUsd}</span>
+                      <span className="muted" style={{ fontSize: 12 }}>{b.perMonth}</span>
+                    </>
+                  ) : (
+                    <span style={{ fontSize: 20, fontWeight: 700 }}>{b.custom}</span>
+                  )}
+                </div>
+                <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 6, padding: "8px 0", borderTop: "1px solid var(--line)", borderBottom: "1px solid var(--line)" }}>
+                  {[
+                    [tier.publishedSkuLimit ?? "∞", b.skus],
+                    [tier.storageGb ? `${tier.storageGb} GB` : b.custom, b.storage],
+                    [fmtViews(tier.monthlyViewLimit) + b.perMonth, b.views],
+                  ].map(([val, label]) => (
+                    <div key={label} style={{ textAlign: "center" }}>
+                      <div style={{ fontWeight: 700, fontSize: 13 }}>{val}</div>
+                      <div className="muted" style={{ fontSize: 11 }}>{label}</div>
+                    </div>
+                  ))}
+                </div>
+                <ul style={{ margin: 0, paddingLeft: 16, fontSize: 12, color: "var(--muted)", flexGrow: 1 }}>
+                  {tier.includes.slice(0, 2).map((item) => (
+                    <li key={item} style={{ marginBottom: 3 }}>{item}</li>
+                  ))}
+                </ul>
+                {isCurrent && (
+                  <button className="button secondary" style={{ width: "100%", cursor: "default" }} disabled>
+                    {b.currentPlan}
+                  </button>
+                )}
+                {isUpgrade && tier.id !== "business" && (
+                  <button className="button accent" style={{ width: "100%" }}>
+                    {b.upgradeTo} {tier.name}
+                  </button>
+                )}
+                {isLower && (
+                  <button className="button secondary" style={{ width: "100%" }}>
+                    {b.downgradeTo} {tier.name}
+                  </button>
+                )}
+                {tier.id === "business" && (
+                  <a className="button secondary" href="mailto:hello@arads.example" style={{ width: "100%", textAlign: "center" }}>
+                    {b.talkToUs}
+                  </a>
+                )}
+              </div>
+            );
+          })}
+        </div>
+      </section>
+
+      <section className="panel stack">
+        <div>
+          <h2>{b.pricingHeading}</h2>
+          <p className="muted">{b.pricingDesc}</p>
         </div>
         {pricingPackages.slice(0, 3).map((item) => (
           <div className="lineItem" key={item.id}>
@@ -69,18 +157,10 @@ export default function BillingPage() {
         ))}
       </section>
 
-      {/* What's included */}
       <section className="panel stack">
-        <h2>What&apos;s included in the pilot</h2>
+        <h2>{b.includedHeading}</h2>
         <div className="grid two">
-          {[
-            ["Guided photo upload", "Step-by-step checklist for all required product angles."],
-            ["Model generation", "Automated generation run for each submitted product."],
-            ["Human quality review", "Manual approval gate before any page goes live."],
-            ["Hosted product page", "Public link for your store, email, ad, or QR code."],
-            ["3D viewer and AR launch", "Shoppers inspect the product in 3D and launch AR on supported devices."],
-            ["Engagement analytics", "Page views, AR clicks, and store CTA clicks — per product."],
-          ].map(([title, desc]) => (
+          {b.includedItems.map(([title, desc]) => (
             <article className="card" key={title}>
               <strong style={{ display: "block", marginBottom: 4 }}>{title}</strong>
               <p className="muted" style={{ margin: 0, fontSize: 13 }}>{desc}</p>

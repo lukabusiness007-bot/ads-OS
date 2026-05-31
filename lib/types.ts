@@ -218,7 +218,7 @@ export type ModelCreationAddon = {
   id: string;
   name: string;
   priceUsd: string;
-  cogsTarget: string;
+  buyerFit: string;
   useCase: string;
 };
 
