@@ -86,6 +86,22 @@ export type ModelAsset = {
   metadataUrl?: string;
 };
 
+export type GenerationClientStatus = "queued" | "running" | "succeeded" | "failed";
+
+export type StartGenerationResponse = {
+  productId: string;
+  taskId: string;
+  status: "queued";
+};
+
+export type GenerationStatusResponse = {
+  status: GenerationClientStatus;
+  progress: number;
+  message: string;
+  asset?: ModelAsset;
+  errorMessage?: string;
+};
+
 export type HostedPage = {
   slug: string;
   publicUrl: string;

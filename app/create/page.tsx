@@ -1,47 +1,93 @@
 "use client"
 
-import { useRef, useState } from "react";
+import type { ChangeEvent, FormEvent } from "react";
+import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { AppShell } from "@/components/AppShell";
+import { GENERATED_PRODUCT_STORAGE_KEY, type StoredGeneratedProduct } from "@/lib/generated-product-storage";
 import { organization } from "@/lib/mock-data";
-import { useLang } from "@/lib/lang";
+import type { ProductCategory, StartGenerationResponse } from "@/lib/types";
 
-const categories = ["chair", "table", "sofa", "lamp", "shelf", "small_decor"];
+const categories: ProductCategory[] = ["chair", "table", "sofa", "lamp", "shelf", "small_decor"];
+const supportedImageTypes = new Set(["image/jpeg", "image/png"]);
 
 export default function CreateProductPage() {
-  const { tr } = useLang();
-  const c = tr.create;
   const router = useRouter();
-  const [uploads, setUploads] = useState<(File | null)[]>(Array(7).fill(null));
+  const [photos, setPhotos] = useState<File[]>([]);
+  const [errorMessage, setErrorMessage] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
 
-  function handleFile(index: number, file: File | undefined) {
-    setUploads(prev => prev.map((f, i) => i === index ? (file ?? null) : f));
+  function handlePhotoChange(event: ChangeEvent<HTMLInputElement>) {
+    const selectedPhotos = Array.from(event.target.files ?? []);
+    const validationError = validatePhotos(selectedPhotos);
+
+    if (validationError) {
+      setErrorMessage(validationError);
+      setPhotos([]);
+      return;
+    }
+
+    setErrorMessage("");
+    setPhotos(selectedPhotos);
   }
 
-  function handleSubmit() {
+  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+
+    const validationError = validatePhotos(photos);
+
+    if (validationError) {
+      setErrorMessage(validationError);
+      return;
+    }
+
     setIsSubmitting(true);
-    router.push("/status");
+    setErrorMessage("");
+
+    const form = event.currentTarget;
+    const formData = new FormData(form);
+    formData.delete("photos");
+    photos.forEach((photo) => formData.append("photos", photo));
+
+    try {
+      const response = await fetch("/api/generation/start", {
+        method: "POST",
+        body: formData
+      });
+      const payload = (await response.json()) as Partial<StartGenerationResponse> & { errorMessage?: string };
+
+      if (!response.ok || !payload.productId || !payload.taskId) {
+        throw new Error(payload.errorMessage ?? "Generation could not start.");
+      }
+
+      const storedProduct = createStoredProduct(formData, payload.productId, payload.taskId, photos.length);
+      window.localStorage.setItem(GENERATED_PRODUCT_STORAGE_KEY, JSON.stringify(storedProduct));
+      router.push(`/status?productId=${encodeURIComponent(payload.productId)}&taskId=${encodeURIComponent(payload.taskId)}`);
+    } catch (error) {
+      setErrorMessage(error instanceof Error ? error.message : "Generation could not start.");
+      setIsSubmitting(false);
+    }
   }
 
   return (
     <AppShell>
       <header className="topbar">
         <div>
-          <p className="eyebrow">{c.eyebrow}</p>
-          <h1>{c.heading}</h1>
-          <p className="muted">{c.subtitle}</p>
+          <p className="eyebrow">Create AR product</p>
+          <h1>Generate a 3D model from product photos</h1>
+          <p className="muted">
+            Add product details, upload 1-4 clean JPG or PNG photos, then the app creates web and AR model files.
+          </p>
         </div>
         <Link className="button secondary" href="/dashboard">
-          {c.backBtn}
+          Back to products
         </Link>
       </header>
 
-      <section className="flowProgress" aria-label={c.eyebrow}>
-        {c.steps.map((step, index) => (
-          <div className={index < 3 ? "flowStep complete" : index === 3 ? "flowStep active" : "flowStep"} key={step}>
+      <section className="flowProgress" aria-label="Product creation progress">
+        {["Product details", "Photos", "Generate", "Review"].map((step, index) => (
+          <div className={index === 0 ? "flowStep active" : "flowStep"} key={step}>
             <span>{index + 1}</span>
             <strong>{step}</strong>
           </div>
@@ -49,15 +95,15 @@ export default function CreateProductPage() {
       </section>
 
       <section className="grid two">
-        <form className="panel form">
-          <h2>{c.detailsHeading}</h2>
+        <form className="panel form" onSubmit={handleSubmit}>
+          <h2>Product details</h2>
           <div className="field">
-            <label htmlFor="product-name">{c.productName}</label>
-            <input id="product-name" defaultValue="Arc Oak Dining Chair" />
+            <label htmlFor="product-name">Product name</label>
+            <input id="product-name" name="productName" defaultValue="Arc Oak Dining Chair" required />
           </div>
           <div className="field">
-            <label htmlFor="category">{c.category}</label>
-            <select id="category" defaultValue="chair">
+            <label htmlFor="category">Product category</label>
+            <select id="category" name="category" defaultValue="chair">
               {categories.map((category) => (
                 <option key={category} value={category}>
                   {category.replace("_", " ")}
@@ -66,80 +112,183 @@ export default function CreateProductPage() {
             </select>
           </div>
           <div className="field">
-            <label htmlFor="description">{c.description}</label>
-            <textarea id="description" defaultValue="Solid oak dining chair with curved back support." />
+            <label htmlFor="description">Short product description</label>
+            <textarea
+              id="description"
+              name="description"
+              defaultValue="Solid oak dining chair with curved back support."
+            />
           </div>
 
-          <h2>{c.dimensionsHeading}</h2>
+          <h2>Dimensions</h2>
           <div className="grid three">
             <div className="field">
-              <label htmlFor="width">{c.width}</label>
-              <input id="width" inputMode="decimal" defaultValue="48" />
+              <label htmlFor="width">Width cm</label>
+              <input id="width" name="width" inputMode="decimal" defaultValue="48" required />
             </div>
             <div className="field">
-              <label htmlFor="height">{c.height}</label>
-              <input id="height" inputMode="decimal" defaultValue="82" />
+              <label htmlFor="height">Height cm</label>
+              <input id="height" name="height" inputMode="decimal" defaultValue="82" required />
             </div>
             <div className="field">
-              <label htmlFor="depth">{c.depth}</label>
-              <input id="depth" inputMode="decimal" defaultValue="52" />
+              <label htmlFor="depth">Depth cm</label>
+              <input id="depth" name="depth" inputMode="decimal" defaultValue="52" required />
             </div>
           </div>
 
-          <h2>{c.storeUrlHeading}</h2>
+          <h2>Store URL</h2>
           <div className="field">
-            <label htmlFor="customer-url">{c.storeUrl}</label>
-            <input id="customer-url" defaultValue="https://northline.example/products/arc-oak-chair" />
+            <label htmlFor="customer-url">Product page on your store</label>
+            <input
+              id="customer-url"
+              name="customerUrl"
+              type="url"
+              defaultValue="https://northline.example/products/arc-oak-chair"
+              required
+            />
           </div>
           <div className="field">
-            <label htmlFor="price">{c.price}</label>
-            <input id="price" defaultValue="89 EUR" />
+            <label htmlFor="price">Display price optional</label>
+            <input id="price" name="price" defaultValue="89 EUR" />
           </div>
 
-          <button className="button accent" type="button" onClick={handleSubmit} disabled={isSubmitting}>
-            {isSubmitting ? c.submittingBtn : c.submitBtn}
+          <h2>Photos</h2>
+          <div className="field">
+            <label htmlFor="photos">Upload 1-4 product photos</label>
+            <input
+              id="photos"
+              type="file"
+              accept="image/jpeg,image/png"
+              multiple
+              onChange={handlePhotoChange}
+              disabled={isSubmitting}
+            />
+          </div>
+
+          {errorMessage && <div className="assumptionNote">{errorMessage}</div>}
+
+          <button className="button accent" type="submit" disabled={isSubmitting}>
+            {isSubmitting ? "Starting generation..." : "Generate 3D model"}
           </button>
         </form>
 
         <aside className="panel stack">
           <div>
-            <p className="eyebrow">{c.photoEyebrow}</p>
-            <h2>{c.photoHeading}</h2>
-            <p className="muted">{c.photoDesc}</p>
+            <p className="eyebrow">Photo guidance</p>
+            <h2>Keep the upload small and clear</h2>
+            <p className="muted">
+              Use one product per photo, simple backgrounds, sharp focus, and consistent lighting. Front, side, back,
+              and a three-quarter angle are the best four-photo set.
+            </p>
           </div>
+
           <div className="photoChecklist">
-            {c.photoChecklist.map(([title, detail], index) => (
-              <div className={index < 5 ? "uploadSlot ready" : "uploadSlot"} key={title}>
-                <span>{index < 5 ? c.ready : c.needed}</span>
-                <strong>{title}</strong>
-                <p className="muted">{detail}</p>
-                <input
-                  ref={el => { inputRefs.current[index] = el; }}
-                  type="file"
-                  accept="image/jpeg,image/png,image/webp"
-                  style={{ display: "none" }}
-                  onChange={e => handleFile(index, e.target.files?.[0])}
-                />
-                <div className="uploadSlotActions">
-                  {uploads[index] && (
-                    <span className="uploadFileName">{uploads[index]!.name}</span>
-                  )}
-                  <button
-                    type="button"
-                    className="button secondary sm"
-                    onClick={() => inputRefs.current[index]?.click()}
-                  >
-                    {uploads[index] ? c.changeBtn : c.uploadBtn}
-                  </button>
+            {["Front view", "Side or three-quarter view", "Back view", "Top or detail view"].map((label, index) => {
+              const photo = photos[index];
+
+              return (
+                <div className={photo ? "uploadSlot ready" : "uploadSlot"} key={label}>
+                  <span>{photo ? "Ready" : index === 0 ? "Needed" : "Helpful"}</span>
+                  <strong>{label}</strong>
+                  <p className="muted">{photo ? photo.name : "JPG or PNG, one clear object, no busy scene."}</p>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
+
+          <div className="row">
+            <span className={photos.length ? "badge success" : "badge neutral"}>{photos.length}/4 photos selected</span>
+            <span className="badge neutral">JPG or PNG</span>
+            <span className="badge neutral">Stored in R2</span>
+          </div>
+
           <div className="assumptionNote">
-            {c.assumptionNote(organization.name)}
+            {organization.name} can review the generated model before publishing the hosted AR page.
           </div>
         </aside>
       </section>
     </AppShell>
   );
+}
+
+function validatePhotos(files: File[]) {
+  if (files.length < 1) {
+    return "Upload at least one product photo.";
+  }
+
+  if (files.length > 4) {
+    return "Upload no more than four photos for this generation flow.";
+  }
+
+  if (files.some((file) => !isSupportedPhoto(file))) {
+    return "Use JPG or PNG photos only. WebP is blocked for this Meshy route.";
+  }
+
+  return "";
+}
+
+function isSupportedPhoto(file: File) {
+  if (supportedImageTypes.has(file.type.toLowerCase())) {
+    return true;
+  }
+
+  const fileName = file.name.toLowerCase();
+
+  return fileName.endsWith(".jpg") || fileName.endsWith(".jpeg") || fileName.endsWith(".png");
+}
+
+function createStoredProduct(
+  formData: FormData,
+  productId: string,
+  taskId: string,
+  photoCount: number
+): StoredGeneratedProduct {
+  const name = getFormString(formData, "productName") || "Generated product";
+  const category = (getFormString(formData, "category") || "small_decor") as ProductCategory;
+
+  return {
+    productId,
+    taskId,
+    name,
+    slug: slugify(name),
+    category,
+    description: getFormString(formData, "description"),
+    dimensions: {
+      width: cmToMeters(getFormString(formData, "width")),
+      height: cmToMeters(getFormString(formData, "height")),
+      depth: cmToMeters(getFormString(formData, "depth"))
+    },
+    customerUrl: getFormString(formData, "customerUrl"),
+    price: getFormString(formData, "price"),
+    brandName: organization.name,
+    photoCount,
+    status: "queued",
+    progress: 0,
+    message: "Generation is queued.",
+    updatedAt: new Date().toISOString()
+  };
+}
+
+function getFormString(formData: FormData, key: string) {
+  const value = formData.get(key);
+
+  return typeof value === "string" ? value.trim() : "";
+}
+
+function cmToMeters(value: string) {
+  const centimeters = Number.parseFloat(value.replace(",", "."));
+
+  if (!Number.isFinite(centimeters)) {
+    return 0;
+  }
+
+  return Number((centimeters / 100).toFixed(3));
+}
+
+function slugify(value: string) {
+  return value
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "")
+    .slice(0, 64) || "generated-product";
 }

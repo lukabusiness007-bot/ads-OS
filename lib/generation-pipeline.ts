@@ -1,9 +1,4 @@
 import type {
-  GenerationProvider,
-  GenerationProviderInput,
-  GenerationProviderJob,
-  GenerationProviderName,
-  GenerationProviderResult,
   ModelAsset,
   ModelPackageCheck,
   PhotoAngle,
@@ -155,45 +150,3 @@ export function runModelPackageChecks(asset: ModelAsset): ModelPackageCheck[] {
     }
   ];
 }
-
-function createMockProvider(name: GenerationProviderName): GenerationProvider {
-  return {
-    name,
-    async createJob(input: GenerationProviderInput): Promise<GenerationProviderJob> {
-      return {
-        provider: name,
-        providerJobId: `${name}-${input.productId}-${input.photoSetId}`,
-        status: "queued",
-        rawPayload: {
-          imageCount: input.imageUrls.length,
-          category: input.category,
-          dimensionsMeters: input.dimensionsMeters
-        }
-      };
-    },
-    async getJob(providerJobId: string): Promise<GenerationProviderJob> {
-      return {
-        provider: name,
-        providerJobId,
-        status: "running",
-        rawPayload: { providerStatus: "processing" }
-      };
-    },
-    async getResult(providerJobId: string): Promise<GenerationProviderResult> {
-      return {
-        provider: name,
-        providerJobId,
-        glbUrl: `/models/${providerJobId}.glb`,
-        usdzUrl: `/models/${providerJobId}.usdz`,
-        thumbnailUrl: `/thumbnails/${providerJobId}.jpg`,
-        rawAssetUrls: [`/raw/${providerJobId}/mesh.glb`, `/raw/${providerJobId}/albedo.jpg`],
-        rawPayload: { completed: true }
-      };
-    }
-  };
-}
-
-export const generationProviders: Record<GenerationProviderName, GenerationProvider> = {
-  meshy: createMockProvider("meshy"),
-  tripo: createMockProvider("tripo")
-};
