@@ -1,10 +1,14 @@
 "use client"
 
 import type { ChangeEvent, FormEvent } from "react";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { AppShell } from "@/components/AppShell";
+import {
+  prepareGenerationPhotos,
+  type PreparedGenerationPhoto
+} from "@/lib/generation-upload-client";
 import {
   MAX_GENERATION_PHOTO_BYTES_TOTAL,
   MAX_GENERATION_PHOTO_SIZE_BYTES,
@@ -17,31 +21,89 @@ import { organization } from "@/lib/mock-data";
 import type { ProductCategory, StartGenerationResponse } from "@/lib/types";
 
 const categories: ProductCategory[] = ["chair", "table", "sofa", "lamp", "shelf", "small_decor"];
+type UploadPhase = "idle" | "preparing" | "ready" | "uploading" | "starting" | "queued";
 
 export default function CreateProductPage() {
   const router = useRouter();
+  const selectionIdRef = useRef(0);
   const [photos, setPhotos] = useState<File[]>([]);
+  const [preparedPhotos, setPreparedPhotos] = useState<PreparedGenerationPhoto[]>([]);
   const [errorMessage, setErrorMessage] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [uploadPhase, setUploadPhase] = useState<UploadPhase>("idle");
+  const [uploadProgress, setUploadProgress] = useState(0);
+  const [preparationProgress, setPreparationProgress] = useState({
+    completed: 0,
+    total: 0,
+    currentFileName: ""
+  });
 
-  function handlePhotoChange(event: ChangeEvent<HTMLInputElement>) {
+  async function handlePhotoChange(event: ChangeEvent<HTMLInputElement>) {
+    const selectionId = selectionIdRef.current + 1;
+    selectionIdRef.current = selectionId;
     const selectedPhotos = Array.from(event.target.files ?? []);
-    const validationError = validatePhotos(selectedPhotos);
+    const validationError = validatePhotoSelection(selectedPhotos);
+
+    setPhotos(selectedPhotos);
+    setPreparedPhotos([]);
+    setUploadProgress(0);
+    setPreparationProgress({ completed: 0, total: selectedPhotos.length, currentFileName: "" });
 
     if (validationError) {
       setErrorMessage(validationError);
       setPhotos([]);
+      setUploadPhase("idle");
       return;
     }
 
     setErrorMessage("");
-    setPhotos(selectedPhotos);
+    setUploadPhase("preparing");
+
+    try {
+      const prepared = await prepareGenerationPhotos(selectedPhotos, {
+        onProgress: (progress) => {
+          if (selectionIdRef.current !== selectionId) {
+            return;
+          }
+
+          setPreparationProgress(progress);
+        }
+      });
+
+      if (selectionIdRef.current !== selectionId) {
+        return;
+      }
+
+      const preparedValidationError = validatePreparedPhotos(prepared);
+
+      if (preparedValidationError) {
+        setErrorMessage(preparedValidationError);
+        setPreparedPhotos([]);
+        setUploadPhase("idle");
+        return;
+      }
+
+      setPreparedPhotos(prepared);
+      setUploadPhase("ready");
+    } catch (error) {
+      if (selectionIdRef.current !== selectionId) {
+        return;
+      }
+
+      setPreparedPhotos([]);
+      setUploadPhase("idle");
+      setErrorMessage(
+        error instanceof Error
+          ? error.message
+          : "We could not prepare these photos in the browser. Try clearer source photos with fewer pixels."
+      );
+    }
   }
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
 
-    const validationError = validatePhotos(photos);
+    const validationError = validatePhotoSelection(photos) || validatePreparedPhotos(preparedPhotos);
 
     if (validationError) {
       setErrorMessage(validationError);
@@ -50,31 +112,52 @@ export default function CreateProductPage() {
 
     setIsSubmitting(true);
     setErrorMessage("");
+    setUploadProgress(0);
+    setUploadPhase("uploading");
 
     const form = event.currentTarget;
     const formData = new FormData(form);
     formData.delete("photos");
-    photos.forEach((photo) => formData.append("photos", photo));
+    preparedPhotos.forEach((photo) => formData.append("photos", photo.file));
 
     try {
-      const response = await fetch("/api/generation/start", {
-        method: "POST",
-        body: formData
-      });
-      const payload = await readStartGenerationPayload(response);
+      const response = await startGenerationRequest(formData, (progress) => {
+        setUploadProgress(progress);
 
-      if (!response.ok || !payload.productId || !payload.taskId) {
+        if (progress >= 100) {
+          setUploadPhase("starting");
+        }
+      });
+      const payload = readStartGenerationPayload(response.body, response.status);
+
+      if (response.status < 200 || response.status >= 300 || !payload.productId || !payload.taskId) {
         throw new Error(payload.errorMessage ?? "Generation could not start.");
       }
 
-      const storedProduct = createStoredProduct(formData, payload.productId, payload.taskId, photos.length);
+      setUploadPhase("queued");
+      const storedProduct = createStoredProduct(formData, payload.productId, payload.taskId, preparedPhotos.length);
       window.localStorage.setItem(GENERATED_PRODUCT_STORAGE_KEY, JSON.stringify(storedProduct));
       router.push(`/status?productId=${encodeURIComponent(payload.productId)}&taskId=${encodeURIComponent(payload.taskId)}`);
     } catch (error) {
       setErrorMessage(error instanceof Error ? error.message : "Generation could not start.");
       setIsSubmitting(false);
+      setUploadPhase(preparedPhotos.length === REQUIRED_GENERATION_PHOTOS ? "ready" : "idle");
     }
   }
+
+  const measurableProgress =
+    uploadPhase === "preparing"
+      ? preparationProgress.total > 0
+        ? Math.round((preparationProgress.completed / preparationProgress.total) * 100)
+        : 0
+      : uploadPhase === "uploading" || uploadPhase === "starting" || uploadPhase === "queued"
+      ? uploadProgress
+      : preparedPhotos.length === REQUIRED_GENERATION_PHOTOS
+      ? 100
+      : 0;
+  const progressLabel = getProgressLabel(uploadPhase, preparationProgress.currentFileName);
+  const canSubmit =
+    !isSubmitting && uploadPhase !== "preparing" && preparedPhotos.length === REQUIRED_GENERATION_PHOTOS;
 
   return (
     <AppShell>
@@ -171,6 +254,28 @@ export default function CreateProductPage() {
             />
           </div>
 
+          {(uploadPhase !== "idle" || preparedPhotos.length > 0) && (
+            <div className="uploadProgress" aria-live="polite">
+              <div className="uploadProgressHeader">
+                <strong>{progressLabel}</strong>
+                {uploadPhase === "starting" ? (
+                  <span>Processing</span>
+                ) : (
+                  <span>{measurableProgress}%</span>
+                )}
+              </div>
+              <div
+                className={uploadPhase === "starting" ? "uploadProgressBar indeterminate" : "uploadProgressBar"}
+                role={uploadPhase === "starting" ? "status" : "progressbar"}
+                aria-valuemin={uploadPhase === "starting" ? undefined : 0}
+                aria-valuemax={uploadPhase === "starting" ? undefined : 100}
+                aria-valuenow={uploadPhase === "starting" ? undefined : measurableProgress}
+              >
+                <span style={{ width: `${measurableProgress}%` }} />
+              </div>
+            </div>
+          )}
+
           <div className="toggleField">
             <div>
               <label htmlFor="image-enhancement">Image enhancement</label>
@@ -181,8 +286,8 @@ export default function CreateProductPage() {
 
           {errorMessage && <div className="assumptionNote">{errorMessage}</div>}
 
-          <button className="button accent" type="submit" disabled={isSubmitting}>
-            {isSubmitting ? "Starting generation..." : "Generate 3D model"}
+          <button className="button accent" type="submit" disabled={!canSubmit}>
+            {getSubmitLabel(uploadPhase, isSubmitting)}
           </button>
         </form>
 
@@ -193,31 +298,39 @@ export default function CreateProductPage() {
             <p className="muted">
               Use one product per photo, plain neutral backgrounds, sharp focus, and the same even lighting. Front,
               side or three-quarter, back, and top or detail views give the best color-faithful HD texture. Each photo
-              can be up to{" "}
-              {formatMegabytes(MAX_GENERATION_PHOTO_SIZE_BYTES)}.
+              is prepared in your browser before upload, so large originals are reduced automatically.
             </p>
           </div>
 
           <div className="photoChecklist">
             {["Front view", "Side or three-quarter view", "Back view", "Top or detail view"].map((label, index) => {
               const photo = photos[index];
+              const prepared = preparedPhotos[index];
 
               return (
-                <div className={photo ? "uploadSlot ready" : "uploadSlot"} key={label}>
-                  <span>{photo ? "Ready" : "Required"}</span>
+                <div className={prepared ? "uploadSlot ready" : photo ? "uploadSlot pending" : "uploadSlot"} key={label}>
+                  <span>{prepared ? "Ready" : photo ? "Preparing" : "Required"}</span>
                   <strong>{label}</strong>
-                  <p className="muted">{photo ? photo.name : "JPG or PNG, neutral light, no filters or glare."}</p>
+                  <p className="muted">
+                    {photo ? photo.name : "JPG or PNG, neutral light, no filters or glare."}
+                  </p>
+                  {prepared && (
+                    <p className="uploadMeta">
+                      {formatFileSize(prepared.originalSize)} original to {formatFileSize(prepared.preparedSize)} upload
+                      {prepared.width && prepared.height ? `, ${prepared.width}x${prepared.height}` : ""}
+                    </p>
+                  )}
                 </div>
               );
             })}
           </div>
 
           <div className="row">
-            <span className={photos.length === REQUIRED_GENERATION_PHOTOS ? "badge success" : "badge neutral"}>
+            <span className={preparedPhotos.length === REQUIRED_GENERATION_PHOTOS ? "badge success" : "badge neutral"}>
               {photos.length}/4 photos selected
             </span>
             <span className="badge neutral">JPG or PNG</span>
-            <span className="badge neutral">HD texture</span>
+            <span className="badge neutral">Auto-optimized</span>
             <span className="badge neutral">Stored in R2</span>
           </div>
 
@@ -231,7 +344,7 @@ export default function CreateProductPage() {
   );
 }
 
-function validatePhotos(files: File[]) {
+function validatePhotoSelection(files: File[]) {
   if (files.length !== REQUIRED_GENERATION_PHOTOS) {
     return "Upload exactly 4 product photos: front, side or three-quarter, back, and top or detail.";
   }
@@ -240,18 +353,26 @@ function validatePhotos(files: File[]) {
     return "Use JPG or PNG photos only. WebP is blocked for this Meshy route.";
   }
 
-  const oversizedPhoto = files.find((file) => file.size > MAX_GENERATION_PHOTO_SIZE_BYTES);
+  return "";
+}
 
-  if (oversizedPhoto) {
-    return `${oversizedPhoto.name} is too large. Each photo must be ${formatMegabytes(
-      MAX_GENERATION_PHOTO_SIZE_BYTES
-    )} or smaller.`;
+function validatePreparedPhotos(files: PreparedGenerationPhoto[]) {
+  if (files.length !== REQUIRED_GENERATION_PHOTOS) {
+    return "Wait for the app to finish preparing all 4 photos before starting generation.";
   }
 
-  const totalPhotoBytes = files.reduce((total, file) => total + file.size, 0);
+  const oversizedPhoto = files.find((photo) => photo.preparedSize > MAX_GENERATION_PHOTO_SIZE_BYTES);
+
+  if (oversizedPhoto) {
+    return `We could not prepare ${oversizedPhoto.originalName} under ${formatMegabytes(
+      MAX_GENERATION_PHOTO_SIZE_BYTES
+    )}. Try a clearer source photo with fewer pixels.`;
+  }
+
+  const totalPhotoBytes = files.reduce((total, photo) => total + photo.preparedSize, 0);
 
   if (totalPhotoBytes > MAX_GENERATION_PHOTO_BYTES_TOTAL) {
-    return `The selected photos are too large together. Keep the full upload under ${formatMegabytes(
+    return `The prepared photos are still too large together. The app needs the generated upload under ${formatMegabytes(
       MAX_GENERATION_PHOTO_BYTES_TOTAL
     )}.`;
   }
@@ -269,15 +390,37 @@ function isSupportedPhoto(file: File) {
   return fileName.endsWith(".jpg") || fileName.endsWith(".jpeg") || fileName.endsWith(".png");
 }
 
-async function readStartGenerationPayload(response: Response) {
+function startGenerationRequest(formData: FormData, onUploadProgress: (progress: number) => void) {
+  return new Promise<{ status: number; body: string }>((resolve, reject) => {
+    const request = new XMLHttpRequest();
+
+    request.open("POST", "/api/generation/start");
+    request.upload.onprogress = (event) => {
+      if (!event.lengthComputable) {
+        return;
+      }
+
+      onUploadProgress(Math.min(100, Math.round((event.loaded / event.total) * 100)));
+    };
+    request.onload = () => {
+      resolve({
+        status: request.status,
+        body: typeof request.response === "string" ? request.response : request.responseText
+      });
+    };
+    request.onerror = () => reject(new Error("The upload connection failed. Please try again."));
+    request.onabort = () => reject(new Error("The upload was cancelled."));
+    request.send(formData);
+  });
+}
+
+function readStartGenerationPayload(responseText: string, status: number) {
   const fallbackMessage =
-    response.status === 413
-      ? `The selected photos are too large. Keep the full upload under ${formatMegabytes(
+    status === 413
+      ? `The prepared upload is too large to process. The app needs the generated upload under ${formatMegabytes(
           MAX_GENERATION_PHOTO_BYTES_TOTAL
         )}.`
       : "Generation could not start.";
-
-  const responseText = await response.text();
 
   if (!responseText) {
     return { errorMessage: fallbackMessage } as Partial<StartGenerationResponse> & { errorMessage?: string };
@@ -288,6 +431,58 @@ async function readStartGenerationPayload(response: Response) {
   } catch {
     return { errorMessage: fallbackMessage } as Partial<StartGenerationResponse> & { errorMessage?: string };
   }
+}
+
+function getProgressLabel(phase: UploadPhase, currentFileName: string) {
+  if (phase === "preparing") {
+    return currentFileName ? `Preparing ${currentFileName}` : "Preparing photos";
+  }
+
+  if (phase === "uploading") {
+    return "Uploading photos";
+  }
+
+  if (phase === "starting") {
+    return "Starting generation";
+  }
+
+  if (phase === "queued") {
+    return "Generation queued";
+  }
+
+  if (phase === "ready") {
+    return "Photos ready to upload";
+  }
+
+  return "Photo upload";
+}
+
+function getSubmitLabel(phase: UploadPhase, isSubmitting: boolean) {
+  if (phase === "preparing") {
+    return "Preparing photos...";
+  }
+
+  if (isSubmitting && phase === "uploading") {
+    return "Uploading photos...";
+  }
+
+  if (isSubmitting && phase === "starting") {
+    return "Starting generation...";
+  }
+
+  if (isSubmitting && phase === "queued") {
+    return "Generation queued...";
+  }
+
+  return "Generate 3D model";
+}
+
+function formatFileSize(bytes: number) {
+  if (bytes < 1024 * 1024) {
+    return `${Math.max(1, Math.round(bytes / 1024))} KB`;
+  }
+
+  return `${(bytes / 1024 / 1024).toFixed(bytes >= 10 * 1024 * 1024 ? 0 : 1)} MB`;
 }
 
 function createStoredProduct(

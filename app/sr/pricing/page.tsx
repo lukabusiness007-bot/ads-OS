@@ -2,6 +2,7 @@ import type { Metadata } from "next"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { MarketingNav } from "@/components/marketing-nav"
+import { SerbianPricingActivityToast } from "@/components/SerbianPricingActivityToast"
 import { CheckCircle2, ArrowRight } from "lucide-react"
 import {
   breadcrumbJsonLd,
@@ -454,6 +455,7 @@ export default function PricingPageSr() {
           </div>
         </section>
       </main>
+      <SerbianPricingActivityToast />
     </div>
   )
 }

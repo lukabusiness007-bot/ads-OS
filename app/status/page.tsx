@@ -164,6 +164,21 @@ function StatusPageContent() {
             <span className="badge neutral">{Math.max(0, Math.min(100, progress))}% complete</span>
             {isPolling && <span className="badge neutral">Refreshing</span>}
           </div>
+          <div className="uploadProgress">
+            <div className="uploadProgressHeader">
+              <strong>Generation progress</strong>
+              <span>{Math.max(0, Math.min(100, progress))}%</span>
+            </div>
+            <div
+              className="uploadProgressBar"
+              role="progressbar"
+              aria-valuemin={0}
+              aria-valuemax={100}
+              aria-valuenow={Math.max(0, Math.min(100, progress))}
+            >
+              <span style={{ width: `${Math.max(0, Math.min(100, progress))}%` }} />
+            </div>
+          </div>
 
           {pollError && <div className="assumptionNote">{pollError}</div>}
 

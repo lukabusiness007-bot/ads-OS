@@ -40,7 +40,7 @@ export async function POST(request: Request) {
     if (totalPhotoBytes > MAX_GENERATION_PHOTO_BYTES_TOTAL) {
       return NextResponse.json(
         {
-          errorMessage: `The selected photos are too large together. Keep the full upload under ${formatMegabytes(
+          errorMessage: `The prepared photos are still too large together. The app needs the generated upload under ${formatMegabytes(
             MAX_GENERATION_PHOTO_BYTES_TOTAL
           )}.`
         },
@@ -63,7 +63,11 @@ export async function POST(request: Request) {
 
       if (file.size > MAX_GENERATION_PHOTO_SIZE_BYTES) {
         return NextResponse.json(
-          { errorMessage: `Each photo must be ${formatMegabytes(MAX_GENERATION_PHOTO_SIZE_BYTES)} or smaller.` },
+          {
+            errorMessage: `One prepared photo is still larger than ${formatMegabytes(
+              MAX_GENERATION_PHOTO_SIZE_BYTES
+            )}. Try a clearer source photo with fewer pixels.`
+          },
           { status: 400 }
         );
       }
@@ -136,7 +140,7 @@ function validateRequestBodySize(request: Request) {
     {
       errorMessage: `This upload is too large to process. Keep the selected photos under ${formatMegabytes(
         MAX_GENERATION_PHOTO_BYTES_TOTAL
-      )} total.`
+      )} after browser preparation.`
     },
     { status: 413 }
   );

@@ -1344,6 +1344,71 @@ h3 {
   color: var(--success);
 }
 
+.uploadSlot.pending span {
+  color: var(--warning);
+}
+
+.uploadMeta {
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.45;
+  margin: 0;
+}
+
+.uploadProgress {
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  display: grid;
+  gap: 10px;
+  padding: 12px;
+}
+
+.uploadProgressHeader {
+  align-items: center;
+  display: flex;
+  gap: 12px;
+  justify-content: space-between;
+}
+
+.uploadProgressHeader span {
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.uploadProgressBar {
+  background: #edf2ef;
+  border-radius: 999px;
+  height: 10px;
+  overflow: hidden;
+  position: relative;
+}
+
+.uploadProgressBar span {
+  background: var(--accent);
+  border-radius: inherit;
+  display: block;
+  height: 100%;
+  transition: width 180ms ease;
+}
+
+.uploadProgressBar.indeterminate span {
+  animation: uploadProgressIndeterminate 1.2s ease-in-out infinite;
+  position: absolute;
+  width: 42%;
+}
+
+@keyframes uploadProgressIndeterminate {
+  0% {
+    left: -42%;
+  }
+
+  100% {
+    left: 100%;
+  }
+}
+
 .uploadSlotActions {
   align-items: center;
   display: flex;
