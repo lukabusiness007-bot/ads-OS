@@ -12,9 +12,15 @@ export type OrganizationContext = {
   planKey: string;
 };
 
+export type EnsureOrganizationResult =
+  | { status: "ready"; organization: OrganizationContext }
+  | { status: "unauthenticated"; organization: null }
+  | { status: "setup_failed"; organization: null; errorMessage: string };
+
 export type DashboardData = {
   isConfigured: boolean;
   organization: OrganizationContext | null;
+  setupErrorMessage?: string;
   products: Product[];
   totals: {
     products: number;
@@ -62,17 +68,61 @@ export async function getCurrentOrganization(supabase: SupabaseClient): Promise<
   };
 }
 
+export async function ensureCurrentOrganization(supabase: SupabaseClient): Promise<EnsureOrganizationResult> {
+  const {
+    data: { user }
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    return {
+      status: "unauthenticated",
+      organization: null
+    };
+  }
+
+  const existingOrganization = await getCurrentOrganization(supabase);
+
+  if (existingOrganization) {
+    return {
+      status: "ready",
+      organization: existingOrganization
+    };
+  }
+
+  const { data, error } = await supabase
+    .rpc("ensure_user_organization")
+    .maybeSingle();
+
+  if (error || !data) {
+    return {
+      status: "setup_failed",
+      organization: null,
+      errorMessage: "Your account is signed in, but the merchant workspace could not be prepared. Please try again."
+    };
+  }
+
+  return {
+    status: "ready",
+    organization: mapOrganizationContext(data as DbRow)
+  };
+}
+
 export async function getDashboardData(): Promise<DashboardData> {
   if (!isSupabaseConfigured()) {
     return createEmptyDashboardData(false);
   }
 
   const supabase = await createServerSupabaseClient();
-  const organization = await getCurrentOrganization(supabase);
+  const organizationResult = await ensureCurrentOrganization(supabase);
 
-  if (!organization) {
-    return createEmptyDashboardData(true);
+  if (organizationResult.status !== "ready") {
+    return createEmptyDashboardData(
+      true,
+      organizationResult.status === "setup_failed" ? organizationResult.errorMessage : undefined
+    );
   }
+
+  const { organization } = organizationResult;
 
   const [{ data: productRows }, { data: analyticsRows }] = await Promise.all([
     supabase
@@ -115,6 +165,15 @@ export async function getDashboardData(): Promise<DashboardData> {
     organization,
     products,
     totals
+  };
+}
+
+function mapOrganizationContext(row: DbRow): OrganizationContext {
+  return {
+    id: String(row.id),
+    name: String(row.name),
+    slug: String(row.slug),
+    planKey: String(row.plan_key ?? "starter")
   };
 }
 
@@ -191,10 +250,11 @@ export async function recordHostedPageEvent(input: {
   return { ok: !error };
 }
 
-function createEmptyDashboardData(isConfigured: boolean): DashboardData {
+function createEmptyDashboardData(isConfigured: boolean, setupErrorMessage?: string): DashboardData {
   return {
     isConfigured,
     organization: null,
+    setupErrorMessage,
     products: [],
     totals: {
       products: 0,

@@ -9,7 +9,7 @@ import {
 import { createMeshyMultiImageTask, MeshyConfigurationError, MeshyRequestError } from "@/lib/providers/meshy";
 import { DEMO_ORG_ID, createPresignedR2GetUrl } from "@/lib/storage/r2";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
-import { getCurrentOrganization } from "@/lib/supabase/data";
+import { ensureCurrentOrganization } from "@/lib/supabase/data";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import type {
   GenerationPhotoContentType,
@@ -27,12 +27,17 @@ export async function POST(request: Request) {
     const productId = typeof payload.productId === "string" ? payload.productId : "";
     const photos = Array.isArray(payload.photos) ? payload.photos : [];
     const supabase = isSupabaseConfigured() ? await createServerSupabaseClient() : null;
-    const organization = supabase ? await getCurrentOrganization(supabase) : null;
+    const organizationResult = supabase ? await ensureCurrentOrganization(supabase) : null;
 
-    if (supabase && !organization) {
+    if (organizationResult?.status === "unauthenticated") {
       return NextResponse.json({ errorMessage: "Sign in before starting generation." }, { status: 401 });
     }
 
+    if (organizationResult?.status === "setup_failed") {
+      return NextResponse.json({ errorMessage: organizationResult.errorMessage }, { status: 500 });
+    }
+
+    const organization = organizationResult?.organization ?? null;
     const objectOwnerId = organization?.id ?? DEMO_ORG_ID;
     const validationError = validateStartPayload(productId, photos, objectOwnerId);
 

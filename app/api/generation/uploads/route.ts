@@ -13,7 +13,7 @@ import {
   createProductPhotoKey
 } from "@/lib/storage/r2";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
-import { getCurrentOrganization } from "@/lib/supabase/data";
+import { ensureCurrentOrganization } from "@/lib/supabase/data";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import type {
   CreateGenerationUploadsRequest,
@@ -37,12 +37,17 @@ export async function POST(request: Request) {
 
     const productId = `${slugify(payload.productName || "product")}-${randomUUID().slice(0, 8)}`;
     const supabase = isSupabaseConfigured() ? await createServerSupabaseClient() : null;
-    const organization = supabase ? await getCurrentOrganization(supabase) : null;
+    const organizationResult = supabase ? await ensureCurrentOrganization(supabase) : null;
 
-    if (supabase && !organization) {
+    if (organizationResult?.status === "unauthenticated") {
       return NextResponse.json({ errorMessage: "Sign in before uploading product photos." }, { status: 401 });
     }
 
+    if (organizationResult?.status === "setup_failed") {
+      return NextResponse.json({ errorMessage: organizationResult.errorMessage }, { status: 500 });
+    }
+
+    const organization = organizationResult?.organization ?? null;
     const databaseProductId = organization
       ? await createProductRecord(supabase!, organization.id, payload)
       : productId;

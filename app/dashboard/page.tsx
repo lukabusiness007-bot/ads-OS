@@ -28,6 +28,8 @@ export default async function DashboardPage() {
         </div>
       )}
 
+      {data.setupErrorMessage && <div className="assumptionNote">{data.setupErrorMessage}</div>}
+
       <section className="grid four">
         <article className="card metric">
           <span className="sectionLabel">Total products</span>
