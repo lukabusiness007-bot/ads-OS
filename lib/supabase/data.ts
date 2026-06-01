@@ -1,8 +1,18 @@
 import { isSupabaseConfigured } from "./config";
-import { createServerSupabaseClient } from "./server";
+import {
+  createServerSupabaseClient,
+  createServiceRoleSupabaseClient,
+  isSupabaseServiceRoleConfigured
+} from "./server";
 import type { HostedPageAnalyticsEvent, ModelAsset, Product, ProductCategory, ProductStatus } from "@/lib/types";
 
 type SupabaseClient = Awaited<ReturnType<typeof createServerSupabaseClient>>;
+type SupabaseAdminClient = ReturnType<typeof createServiceRoleSupabaseClient>;
+type AuthUser = {
+  id: string;
+  email?: string | null;
+  user_metadata?: Record<string, unknown> | null;
+};
 type DbRow = Record<string, unknown>;
 
 export type OrganizationContext = {
@@ -94,10 +104,27 @@ export async function ensureCurrentOrganization(supabase: SupabaseClient): Promi
     .maybeSingle();
 
   if (error || !data) {
+    if (error) {
+      console.error("ensure_user_organization RPC failed", error);
+    }
+
+    const fallbackOrganization = await ensureOrganizationWithServiceRole(user).catch((adminError: unknown) => {
+      console.error("Service role organization repair failed", adminError);
+      return null;
+    });
+
+    if (fallbackOrganization) {
+      return {
+        status: "ready",
+        organization: fallbackOrganization
+      };
+    }
+
     return {
       status: "setup_failed",
       organization: null,
-      errorMessage: "Your account is signed in, but the merchant workspace could not be prepared. Please try again."
+      errorMessage:
+        "Your account is signed in, but the merchant workspace could not be prepared. Apply the latest Supabase migration or configure SUPABASE_SERVICE_ROLE_KEY, then try again."
     };
   }
 
@@ -105,6 +132,141 @@ export async function ensureCurrentOrganization(supabase: SupabaseClient): Promi
     status: "ready",
     organization: mapOrganizationContext(data as DbRow)
   };
+}
+
+async function ensureOrganizationWithServiceRole(user: AuthUser): Promise<OrganizationContext | null> {
+  if (!isSupabaseServiceRoleConfigured()) {
+    return null;
+  }
+
+  const admin = createServiceRoleSupabaseClient();
+  const existingOrganization = await getExistingOrganizationForUser(admin, user.id);
+
+  if (existingOrganization) {
+    return existingOrganization;
+  }
+
+  const baseName = getUserBaseName(user);
+  const baseSlug = `${slugify(baseName) || "merchant"}-${user.id.slice(0, 8)}`;
+
+  const { error: profileError } = await admin.from("profiles").upsert(
+    {
+      id: user.id,
+      full_name: baseName,
+      email: user.email ?? null,
+      avatar_url: typeof user.user_metadata?.avatar_url === "string" ? user.user_metadata.avatar_url : null,
+      updated_at: new Date().toISOString()
+    },
+    { onConflict: "id" }
+  );
+
+  if (profileError) {
+    throw profileError;
+  }
+
+  const { data: organizationRow, error: organizationError } = await admin
+    .from("organizations")
+    .upsert(
+      {
+        name: `${baseName} Store`,
+        slug: baseSlug,
+        updated_at: new Date().toISOString()
+      },
+      { onConflict: "slug" }
+    )
+    .select("id, name, slug, plan_key")
+    .single();
+
+  if (organizationError || !organizationRow) {
+    throw organizationError ?? new Error("Organization could not be prepared.");
+  }
+
+  const organization = mapOrganizationContext(organizationRow);
+
+  const { error: membershipError } = await admin.from("organization_members").upsert(
+    {
+      organization_id: organization.id,
+      user_id: user.id,
+      role: "owner"
+    },
+    { onConflict: "organization_id,user_id" }
+  );
+
+  if (membershipError) {
+    throw membershipError;
+  }
+
+  const { error: billingError } = await admin.from("billing_customers").upsert(
+    {
+      organization_id: organization.id
+    },
+    { onConflict: "organization_id" }
+  );
+
+  if (billingError) {
+    throw billingError;
+  }
+
+  const { data: subscription } = await admin
+    .from("subscriptions")
+    .select("id")
+    .eq("organization_id", organization.id)
+    .limit(1)
+    .maybeSingle();
+
+  if (!subscription) {
+    const { error: subscriptionError } = await admin.from("subscriptions").insert({
+      organization_id: organization.id,
+      plan_key: "starter",
+      status: "trialing"
+    });
+
+    if (subscriptionError) {
+      throw subscriptionError;
+    }
+  }
+
+  return organization;
+}
+
+async function getExistingOrganizationForUser(admin: SupabaseAdminClient, userId: string) {
+  const { data, error } = await admin
+    .from("organization_members")
+    .select("organization_id, organizations(id, name, slug, plan_key)")
+    .eq("user_id", userId)
+    .order("created_at", { ascending: true })
+    .limit(1)
+    .maybeSingle();
+
+  if (error || !data) {
+    return null;
+  }
+
+  const organization = Array.isArray(data.organizations) ? data.organizations[0] : data.organizations;
+
+  return organization ? mapOrganizationContext(organization) : null;
+}
+
+function getUserBaseName(user: AuthUser) {
+  const fullName = user.user_metadata?.full_name;
+
+  if (typeof fullName === "string" && fullName.trim()) {
+    return fullName.trim();
+  }
+
+  const emailName = user.email?.split("@")[0]?.trim();
+
+  return emailName || "Merchant";
+}
+
+function slugify(value: string) {
+  return (
+    value
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/^-+|-+$/g, "")
+      .slice(0, 64) || "merchant"
+  );
 }
 
 export async function getDashboardData(): Promise<DashboardData> {

@@ -1,5 +1,6 @@
 import { cookies } from "next/headers";
 import { createServerClient } from "@supabase/ssr";
+import { createClient } from "@supabase/supabase-js";
 import { getSupabaseConfig, isSupabaseConfigured } from "./config";
 
 export async function createServerSupabaseClient() {
@@ -30,4 +31,24 @@ export async function getOptionalServerSupabaseClient() {
   }
 
   return createServerSupabaseClient();
+}
+
+export function isSupabaseServiceRoleConfigured() {
+  return Boolean(process.env.SUPABASE_SERVICE_ROLE_KEY);
+}
+
+export function createServiceRoleSupabaseClient() {
+  const { url } = getSupabaseConfig();
+  const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+
+  if (!serviceRoleKey) {
+    throw new Error("Supabase service role key is not configured.");
+  }
+
+  return createClient(url, serviceRoleKey, {
+    auth: {
+      autoRefreshToken: false,
+      persistSession: false
+    }
+  });
 }
