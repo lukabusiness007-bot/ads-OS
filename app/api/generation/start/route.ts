@@ -1,7 +1,5 @@
-import { randomUUID } from "node:crypto";
 import { NextResponse } from "next/server";
 import {
-  MAX_GENERATION_FORM_BODY_SIZE_BYTES,
   MAX_GENERATION_PHOTO_BYTES_TOTAL,
   MAX_GENERATION_PHOTO_SIZE_BYTES,
   REQUIRED_GENERATION_PHOTOS,
@@ -9,82 +7,52 @@ import {
   formatMegabytes
 } from "@/lib/generation-upload";
 import { createMeshyMultiImageTask, MeshyConfigurationError, MeshyRequestError } from "@/lib/providers/meshy";
-import { createProductPhotoKey, uploadR2Object } from "@/lib/storage/r2";
-import type { StartGenerationResponse } from "@/lib/types";
+import { DEMO_ORG_ID, createPresignedR2GetUrl } from "@/lib/storage/r2";
+import { isSupabaseConfigured } from "@/lib/supabase/config";
+import { getCurrentOrganization } from "@/lib/supabase/data";
+import { createServerSupabaseClient } from "@/lib/supabase/server";
+import type {
+  GenerationPhotoContentType,
+  GenerationUploadPhoto,
+  StartGenerationRequest,
+  StartGenerationResponse
+} from "@/lib/types";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
 export async function POST(request: Request) {
   try {
-    const bodySizeError = validateRequestBodySize(request);
+    const payload = (await request.json()) as Partial<StartGenerationRequest>;
+    const productId = typeof payload.productId === "string" ? payload.productId : "";
+    const photos = Array.isArray(payload.photos) ? payload.photos : [];
+    const supabase = isSupabaseConfigured() ? await createServerSupabaseClient() : null;
+    const organization = supabase ? await getCurrentOrganization(supabase) : null;
 
-    if (bodySizeError) {
-      return bodySizeError;
+    if (supabase && !organization) {
+      return NextResponse.json({ errorMessage: "Sign in before starting generation." }, { status: 401 });
     }
 
-    const formData = await request.formData();
-    const productName = getFormString(formData, "productName") || "product";
-    const imageEnhancement = formData.get("imageEnhancement") === "on";
-    const files = formData.getAll("photos").filter((entry): entry is File => entry instanceof File);
+    const objectOwnerId = organization?.id ?? DEMO_ORG_ID;
+    const validationError = validateStartPayload(productId, photos, objectOwnerId);
 
-    if (files.length !== REQUIRED_GENERATION_PHOTOS) {
-      return NextResponse.json(
-        { errorMessage: "Upload exactly 4 product photos before starting generation." },
-        { status: 400 }
-      );
+    if (validationError) {
+      return NextResponse.json({ errorMessage: validationError }, { status: 400 });
     }
 
-    const totalPhotoBytes = files.reduce((total, file) => total + file.size, 0);
-
-    if (totalPhotoBytes > MAX_GENERATION_PHOTO_BYTES_TOTAL) {
-      return NextResponse.json(
-        {
-          errorMessage: `The prepared photos are still too large together. The app needs the generated upload under ${formatMegabytes(
-            MAX_GENERATION_PHOTO_BYTES_TOTAL
-          )}.`
-        },
-        { status: 413 }
-      );
+    if (supabase && organization) {
+      await persistUploadedPhotos(supabase, organization.id, productId, photos);
     }
 
-    const productId = `${slugify(productName)}-${randomUUID().slice(0, 8)}`;
-    const imageDataUris: string[] = [];
+    const imageUrls = await Promise.all(photos.map((photo) => createPresignedR2GetUrl(photo.key)));
+    const taskId = await createMeshyMultiImageTask(imageUrls, {
+      imageEnhancement: payload.imageEnhancement === true
+    });
 
-    for (const [index, file] of files.entries()) {
-      const contentType = getSupportedImageType(file);
-
-      if (!contentType) {
-        return NextResponse.json(
-          { errorMessage: "Use JPG or PNG photos only for this generation flow." },
-          { status: 400 }
-        );
-      }
-
-      if (file.size > MAX_GENERATION_PHOTO_SIZE_BYTES) {
-        return NextResponse.json(
-          {
-            errorMessage: `One prepared photo is still larger than ${formatMegabytes(
-              MAX_GENERATION_PHOTO_SIZE_BYTES
-            )}. Try a clearer source photo with fewer pixels.`
-          },
-          { status: 400 }
-        );
-      }
-
-      const buffer = Buffer.from(await file.arrayBuffer());
-
-      await uploadR2Object({
-        key: createProductPhotoKey(productId, file.name || `photo-${index + 1}`, index),
-        body: buffer,
-        contentType,
-        cacheControl: "private, max-age=0, no-store"
-      });
-
-      imageDataUris.push(`data:${contentType};base64,${buffer.toString("base64")}`);
+    if (supabase && organization) {
+      await createGenerationJobRecord(supabase, organization.id, productId, taskId);
     }
 
-    const taskId = await createMeshyMultiImageTask(imageDataUris, { imageEnhancement });
     const response: StartGenerationResponse = {
       productId,
       taskId,
@@ -97,61 +65,122 @@ export async function POST(request: Request) {
   }
 }
 
-function getFormString(formData: FormData, key: string) {
-  const value = formData.get(key);
+function validateStartPayload(productId: string, photos: GenerationUploadPhoto[], objectOwnerId: string) {
+  if (!productId || !/^[a-z0-9-]+$/.test(productId)) {
+    return "Generation is missing a valid product upload id. Please prepare the photos again.";
+  }
 
-  return typeof value === "string" ? value.trim() : "";
+  if (photos.length !== REQUIRED_GENERATION_PHOTOS) {
+    return "Upload exactly 4 product photos before starting generation.";
+  }
+
+  const invalidPhoto = photos.find((photo) => !isGenerationPhoto(objectOwnerId, productId, photo));
+
+  if (invalidPhoto) {
+    return "The uploaded photo set is invalid. Please prepare the photos again.";
+  }
+
+  const oversizedPhoto = photos.find((photo) => photo.size > MAX_GENERATION_PHOTO_SIZE_BYTES);
+
+  if (oversizedPhoto) {
+    return `One prepared photo is still larger than ${formatMegabytes(
+      MAX_GENERATION_PHOTO_SIZE_BYTES
+    )}. Try a clearer source photo with fewer pixels.`;
+  }
+
+  const totalPhotoBytes = photos.reduce((total, photo) => total + photo.size, 0);
+
+  if (totalPhotoBytes > MAX_GENERATION_PHOTO_BYTES_TOTAL) {
+    return `The prepared photos are still too large together. The app needs the generated upload under ${formatMegabytes(
+      MAX_GENERATION_PHOTO_BYTES_TOTAL
+    )}.`;
+  }
+
+  return "";
 }
 
-function getSupportedImageType(file: File) {
-  const type = file.type.toLowerCase();
+async function persistUploadedPhotos(
+  supabase: Awaited<ReturnType<typeof createServerSupabaseClient>>,
+  organizationId: string,
+  productId: string,
+  photos: GenerationUploadPhoto[]
+) {
+  const photoRows = photos.map((photo, index) => ({
+    organization_id: organizationId,
+    product_id: productId,
+    r2_key: photo.key,
+    file_name: photo.fileName,
+    file_type: photo.contentType,
+    angle: ["front", "right", "back", "top_angle"][index] ?? "extra_angle",
+    size_bytes: photo.size
+  }));
 
-  if (SUPPORTED_GENERATION_IMAGE_TYPES.has(type)) {
-    return type;
-  }
-
-  const fileName = file.name.toLowerCase();
-
-  if (fileName.endsWith(".jpg") || fileName.endsWith(".jpeg")) {
-    return "image/jpeg";
-  }
-
-  if (fileName.endsWith(".png")) {
-    return "image/png";
-  }
-
-  return null;
+  await supabase.from("product_photos").insert(photoRows);
+  await supabase
+    .from("products")
+    .update({
+      status: "generating",
+      photo_count: photos.length,
+      required_angles_complete: true,
+      updated_at: new Date().toISOString()
+    })
+    .eq("id", productId)
+    .eq("organization_id", organizationId);
 }
 
-function validateRequestBodySize(request: Request) {
-  const contentLength = request.headers.get("content-length");
+async function createGenerationJobRecord(
+  supabase: Awaited<ReturnType<typeof createServerSupabaseClient>>,
+  organizationId: string,
+  productId: string,
+  taskId: string
+) {
+  const { data } = await supabase
+    .from("generation_jobs")
+    .insert({
+      organization_id: organizationId,
+      product_id: productId,
+      provider: "meshy",
+      provider_job_id: taskId,
+      status: "queued",
+      provider_status: "queued",
+      raw_provider_payload: { taskId }
+    })
+    .select("id")
+    .single();
 
-  if (!contentLength) {
-    return null;
+  if (data?.id) {
+    await supabase.from("job_events").insert({
+      organization_id: organizationId,
+      job_id: data.id,
+      event_type: "generation_started",
+      message: "Generation started from uploaded product photos.",
+      payload: { taskId }
+    });
   }
 
-  const requestBytes = Number.parseInt(contentLength, 10);
+  await supabase.from("usage_events").insert({
+    organization_id: organizationId,
+    product_id: productId,
+    event_type: "generation_started",
+    quantity: 1,
+    metadata: { taskId }
+  });
+}
 
-  if (!Number.isFinite(requestBytes) || requestBytes <= MAX_GENERATION_FORM_BODY_SIZE_BYTES) {
-    return null;
-  }
-
-  return NextResponse.json(
-    {
-      errorMessage: `This upload is too large to process. Keep the selected photos under ${formatMegabytes(
-        MAX_GENERATION_PHOTO_BYTES_TOTAL
-      )} after browser preparation.`
-    },
-    { status: 413 }
+function isGenerationPhoto(objectOwnerId: string, productId: string, photo: GenerationUploadPhoto) {
+  return (
+    typeof photo.key === "string" &&
+    photo.key.startsWith(`product-photos/${objectOwnerId}/${productId}/`) &&
+    typeof photo.fileName === "string" &&
+    photo.fileName.trim().length > 0 &&
+    isSupportedPhotoType(photo.contentType) &&
+    Number.isFinite(photo.size) &&
+    photo.size > 0
   );
 }
 
-function slugify(value: string) {
-  return value
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/^-+|-+$/g, "")
-    .slice(0, 64) || "product";
+function isSupportedPhotoType(type: unknown): type is GenerationPhotoContentType {
+  return typeof type === "string" && SUPPORTED_GENERATION_IMAGE_TYPES.has(type.toLowerCase());
 }
 
 function handleStartError(error: unknown) {

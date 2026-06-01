@@ -88,6 +88,43 @@ export type ModelAsset = {
 
 export type GenerationClientStatus = "queued" | "running" | "succeeded" | "failed";
 
+export type GenerationPhotoContentType = "image/jpeg" | "image/png";
+
+export type GenerationUploadPhotoInput = {
+  fileName: string;
+  contentType: GenerationPhotoContentType;
+  size: number;
+};
+
+export type GenerationUploadPhoto = GenerationUploadPhotoInput & {
+  key: string;
+};
+
+export type CreateGenerationUploadsRequest = {
+  productName: string;
+  category?: ProductCategory;
+  description?: string;
+  customerUrl?: string;
+  price?: string;
+  dimensions?: Product["dimensions"];
+  photos: GenerationUploadPhotoInput[];
+};
+
+export type CreateGenerationUploadsResponse = {
+  productId: string;
+  uploads: Array<GenerationUploadPhoto & {
+    uploadUrl: string;
+    headers: Record<string, string>;
+  }>;
+  errorMessage?: string;
+};
+
+export type StartGenerationRequest = {
+  productId: string;
+  photos: GenerationUploadPhoto[];
+  imageEnhancement: boolean;
+};
+
 export type StartGenerationResponse = {
   productId: string;
   taskId: string;

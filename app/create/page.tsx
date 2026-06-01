@@ -20,7 +20,13 @@ import {
 } from "@/lib/generation-upload";
 import { GENERATED_PRODUCT_STORAGE_KEY, type StoredGeneratedProduct } from "@/lib/generated-product-storage";
 import { organization } from "@/lib/mock-data";
-import type { ProductCategory, StartGenerationResponse } from "@/lib/types";
+import type {
+  CreateGenerationUploadsResponse,
+  GenerationPhotoContentType,
+  ProductCategory,
+  StartGenerationRequest,
+  StartGenerationResponse
+} from "@/lib/types";
 
 const categories: ProductCategory[] = ["chair", "table", "sofa", "lamp", "shelf", "small_decor"];
 type UploadPhase = "idle" | "preparing" | "ready" | "uploading" | "starting" | "queued";
@@ -121,16 +127,23 @@ export default function CreateProductPage() {
 
     const form = event.currentTarget;
     const formData = new FormData(form);
-    formData.delete("photos");
-    preparedPhotos.forEach((photo) => formData.append("photos", photo.file));
 
     try {
-      const response = await startGenerationRequest(formData, (progress) => {
+      const uploadTargets = await createGenerationUploads(formData, preparedPhotos);
+      await uploadPreparedPhotos(preparedPhotos, uploadTargets.uploads, (progress) => {
         setUploadProgress(progress);
+      });
 
-        if (progress >= 100) {
-          setUploadPhase("starting");
-        }
+      setUploadPhase("starting");
+      const response = await startGenerationRequest({
+        productId: uploadTargets.productId,
+        photos: uploadTargets.uploads.map(({ key, fileName, contentType, size }) => ({
+          key,
+          fileName,
+          contentType,
+          size
+        })),
+        imageEnhancement: formData.get("imageEnhancement") === "on"
       });
       const payload = readStartGenerationPayload(response.body, response.status);
 
@@ -406,36 +419,132 @@ function isSupportedPhoto(file: File) {
   return fileName.endsWith(".jpg") || fileName.endsWith(".jpeg") || fileName.endsWith(".png");
 }
 
-function startGenerationRequest(formData: FormData, onUploadProgress: (progress: number) => void) {
+function getPreparedPhotoContentType(file: File): GenerationPhotoContentType {
+  const type = file.type.toLowerCase();
+
+  if (type === "image/png") {
+    return "image/png";
+  }
+
+  return "image/jpeg";
+}
+
+async function createGenerationUploads(
+  formData: FormData,
+  preparedPhotos: PreparedGenerationPhoto[]
+): Promise<CreateGenerationUploadsResponse> {
+  const response = await fetch("/api/generation/uploads", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      productName: getFormString(formData, "productName") || "product",
+      category: getFormString(formData, "category") || "small_decor",
+      description: getFormString(formData, "description"),
+      customerUrl: getFormString(formData, "customerUrl"),
+      price: getFormString(formData, "price"),
+      dimensions: {
+        width: cmToMeters(getFormString(formData, "width")),
+        height: cmToMeters(getFormString(formData, "height")),
+        depth: cmToMeters(getFormString(formData, "depth"))
+      },
+      photos: preparedPhotos.map((photo) => ({
+        fileName: photo.file.name,
+        contentType: getPreparedPhotoContentType(photo.file),
+        size: photo.preparedSize
+      }))
+    })
+  });
+  const payload = await readJsonPayload<CreateGenerationUploadsResponse>(response);
+
+  if (!response.ok || !payload.productId || !payload.uploads) {
+    throw new Error(payload.errorMessage ?? "We could not prepare photo uploads. Please try again.");
+  }
+
+  return payload as CreateGenerationUploadsResponse;
+}
+
+async function uploadPreparedPhotos(
+  preparedPhotos: PreparedGenerationPhoto[],
+  uploads: CreateGenerationUploadsResponse["uploads"],
+  onUploadProgress: (progress: number) => void
+) {
+  if (preparedPhotos.length !== uploads.length) {
+    throw new Error("The upload targets did not match the prepared photos. Please try again.");
+  }
+
+  const uploadedBytesByIndex = new Array(preparedPhotos.length).fill(0) as number[];
+  const totalBytes = preparedPhotos.reduce((total, photo) => total + photo.preparedSize, 0);
+
+  for (const [index, photo] of preparedPhotos.entries()) {
+    await uploadPhotoToR2(photo.file, uploads[index], (loadedBytes) => {
+      uploadedBytesByIndex[index] = loadedBytes;
+      const uploadedBytes = uploadedBytesByIndex.reduce((total, value) => total + value, 0);
+      onUploadProgress(Math.min(100, Math.round((uploadedBytes / totalBytes) * 100)));
+    });
+
+    uploadedBytesByIndex[index] = photo.preparedSize;
+    const uploadedBytes = uploadedBytesByIndex.reduce((total, value) => total + value, 0);
+    onUploadProgress(Math.min(100, Math.round((uploadedBytes / totalBytes) * 100)));
+  }
+}
+
+function uploadPhotoToR2(
+  file: File,
+  upload: CreateGenerationUploadsResponse["uploads"][number],
+  onUploadProgress: (loadedBytes: number) => void
+) {
   return new Promise<{ status: number; body: string }>((resolve, reject) => {
     const request = new XMLHttpRequest();
 
-    request.open("POST", "/api/generation/start");
+    request.open("PUT", upload.uploadUrl);
+    Object.entries(upload.headers).forEach(([key, value]) => {
+      request.setRequestHeader(key, value);
+    });
     request.upload.onprogress = (event) => {
       if (!event.lengthComputable) {
         return;
       }
 
-      onUploadProgress(Math.min(100, Math.round((event.loaded / event.total) * 100)));
+      onUploadProgress(Math.min(file.size, event.loaded));
     };
     request.onload = () => {
-      resolve({
-        status: request.status,
-        body: typeof request.response === "string" ? request.response : request.responseText
-      });
+      if (request.status >= 200 && request.status < 300) {
+        resolve({
+          status: request.status,
+          body: typeof request.response === "string" ? request.response : request.responseText
+        });
+        return;
+      }
+
+      reject(new Error("A photo upload failed. Please try again."));
     };
     request.onerror = () => reject(new Error("The upload connection failed. Please try again."));
     request.onabort = () => reject(new Error("The upload was cancelled."));
-    request.send(formData);
+    request.send(file);
   });
+}
+
+async function startGenerationRequest(payload: StartGenerationRequest) {
+  const response = await fetch("/api/generation/start", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify(payload)
+  });
+
+  return {
+    status: response.status,
+    body: await response.text()
+  };
 }
 
 function readStartGenerationPayload(responseText: string, status: number) {
   const fallbackMessage =
     status === 413
-      ? `The prepared upload is too large to process. The app needs the generated upload under ${formatMegabytes(
-          MAX_GENERATION_PHOTO_BYTES_TOTAL
-        )}.`
+      ? "Generation could not start because the request was rejected before the app could process it. Please try again."
       : "Generation could not start.";
 
   if (!responseText) {
@@ -446,6 +555,20 @@ function readStartGenerationPayload(responseText: string, status: number) {
     return JSON.parse(responseText) as Partial<StartGenerationResponse> & { errorMessage?: string };
   } catch {
     return { errorMessage: fallbackMessage } as Partial<StartGenerationResponse> & { errorMessage?: string };
+  }
+}
+
+async function readJsonPayload<T extends { errorMessage?: string }>(response: Response) {
+  const text = await response.text();
+
+  if (!text) {
+    return {} as Partial<T>;
+  }
+
+  try {
+    return JSON.parse(text) as Partial<T>;
+  } catch {
+    return {} as Partial<T>;
   }
 }
 

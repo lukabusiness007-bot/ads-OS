@@ -75,7 +75,7 @@ export function MarketingNav({ lang = "en" }: { lang?: Lang }) {
                   <Link href="/p/northline-home/arc-oak-dining-chair">{t.samplePage}</Link>
                 </Button>
                 <Button asChild size="sm">
-                  <Link href="/dashboard">{t.bookDemo}</Link>
+                  <Link href="/login">{t.bookDemo}</Link>
                 </Button>
               </div>
             </div>

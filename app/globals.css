@@ -1737,7 +1737,21 @@ h3 {
     text-transform: uppercase;
   }
 
-  .publishedItem {
+.publishedItem {
     padding: 12px;
   }
+}
+
+.authPage {
+  align-items: center;
+  background: var(--bg);
+  display: flex;
+  min-height: 100vh;
+  padding: 24px;
+}
+
+.authPanel {
+  margin: 0 auto;
+  max-width: 480px;
+  width: 100%;
 }

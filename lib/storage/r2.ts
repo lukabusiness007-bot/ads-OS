@@ -1,4 +1,5 @@
-import { PutObjectCommand, S3Client } from "@aws-sdk/client-s3";
+import { GetObjectCommand, PutObjectCommand, S3Client } from "@aws-sdk/client-s3";
+import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 
 type R2Config = {
   bucket: string;
@@ -16,6 +17,13 @@ export type R2UploadInput = {
   body: Buffer | Uint8Array;
   contentType: string;
   cacheControl?: string;
+};
+
+export type R2PresignedPutInput = {
+  key: string;
+  contentType: string;
+  cacheControl?: string;
+  expiresIn?: number;
 };
 
 let cachedConfig: R2Config | null = null;
@@ -46,12 +54,66 @@ export async function uploadR2Object({
   };
 }
 
+export async function createPresignedR2PutUrl({
+  key,
+  contentType,
+  cacheControl = "private, max-age=0, no-store",
+  expiresIn = 15 * 60
+}: R2PresignedPutInput) {
+  const config = getR2Config();
+  const uploadUrl = await getSignedUrl(
+    config.client,
+    new PutObjectCommand({
+      Bucket: config.bucket,
+      Key: key,
+      ContentType: contentType,
+      CacheControl: cacheControl
+    }),
+    { expiresIn }
+  );
+
+  return {
+    key,
+    uploadUrl,
+    headers: {
+      "Content-Type": contentType,
+      "Cache-Control": cacheControl
+    }
+  };
+}
+
+export async function createPresignedR2GetUrl(key: string, expiresIn = 15 * 60) {
+  const config = getR2Config();
+
+  return getSignedUrl(
+    config.client,
+    new GetObjectCommand({
+      Bucket: config.bucket,
+      Key: key
+    }),
+    { expiresIn }
+  );
+}
+
 export function createProductPhotoKey(productId: string, fileName: string, index: number) {
   return `product-photos/${DEMO_ORG_ID}/${productId}/${String(index + 1).padStart(2, "0")}-${sanitizeObjectKeyPart(fileName)}`;
 }
 
+export function createOrganizationProductPhotoKey(organizationId: string, productId: string, fileName: string, index: number) {
+  return `product-photos/${sanitizeObjectKeyPart(organizationId)}/${sanitizeObjectKeyPart(productId)}/${String(index + 1).padStart(2, "0")}-${sanitizeObjectKeyPart(fileName)}`;
+}
+
 export function createModelAssetKey(productId: string, taskId: string, fileName: string) {
   return `model-assets/${DEMO_ORG_ID}/${productId}/${taskId}/${fileName}`;
+}
+
+export function createOrganizationModelAssetKey(
+  organizationId: string,
+  productId: string,
+  taskId: string,
+  fileName: string
+) {
+  return `model-assets/${sanitizeObjectKeyPart(organizationId)}/${sanitizeObjectKeyPart(productId)}/${sanitizeObjectKeyPart(taskId)}/${sanitizeObjectKeyPart(fileName)}`;
 }
 
 function getR2Config(): R2Config {

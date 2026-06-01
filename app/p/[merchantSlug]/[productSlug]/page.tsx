@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { HostedProductExperience } from "@/components/HostedProductExperience";
 import { getHostedProduct, products } from "@/lib/mock-data";
 import { noIndexMetadata } from "@/lib/seo";
+import { getPublishedProduct } from "@/lib/supabase/data";
 
 type PublicHostedPageProps = {
   params: Promise<{
@@ -26,7 +27,7 @@ export function generateStaticParams() {
 
 export async function generateMetadata({ params }: PublicHostedPageProps): Promise<Metadata> {
   const { merchantSlug, productSlug } = await params;
-  const product = getHostedProduct(merchantSlug, productSlug);
+  const product = (await getPublishedProduct(merchantSlug, productSlug)) ?? getHostedProduct(merchantSlug, productSlug);
 
   if (!product) {
     return {
@@ -49,7 +50,7 @@ export async function generateMetadata({ params }: PublicHostedPageProps): Promi
 
 export default async function PublicHostedPage({ params }: PublicHostedPageProps) {
   const { merchantSlug, productSlug } = await params;
-  const product = getHostedProduct(merchantSlug, productSlug);
+  const product = (await getPublishedProduct(merchantSlug, productSlug)) ?? getHostedProduct(merchantSlug, productSlug);
 
   if (!product) {
     notFound();
