@@ -14,6 +14,8 @@ import {
   MAX_GENERATION_PHOTO_SIZE_BYTES,
   REQUIRED_GENERATION_PHOTOS,
   SUPPORTED_GENERATION_IMAGE_TYPES,
+  TARGET_GENERATION_PHOTO_BYTES_TOTAL,
+  TARGET_GENERATION_PHOTO_SIZE_BYTES,
   formatMegabytes
 } from "@/lib/generation-upload";
 import { GENERATED_PRODUCT_STORAGE_KEY, type StoredGeneratedProduct } from "@/lib/generated-product-storage";
@@ -58,9 +60,11 @@ export default function CreateProductPage() {
 
     setErrorMessage("");
     setUploadPhase("preparing");
+    await waitForNextPaint();
 
     try {
       const prepared = await prepareGenerationPhotos(selectedPhotos, {
+        targetBytes: TARGET_GENERATION_PHOTO_SIZE_BYTES,
         onProgress: (progress) => {
           if (selectionIdRef.current !== selectionId) {
             return;
@@ -242,6 +246,11 @@ export default function CreateProductPage() {
           </div>
 
           <h2>Photos</h2>
+          <div className="assumptionNote">
+            Large originals are optimized in this browser first. The app targets about{" "}
+            {formatMegabytes(TARGET_GENERATION_PHOTO_SIZE_BYTES)} per photo before upload, so you should not hit the
+            old {formatMegabytes(MAX_GENERATION_PHOTO_BYTES_TOTAL)} upload ceiling.
+          </div>
           <div className="field">
             <label htmlFor="photos">Upload 4 required product photos</label>
             <input
@@ -298,7 +307,8 @@ export default function CreateProductPage() {
             <p className="muted">
               Use one product per photo, plain neutral backgrounds, sharp focus, and the same even lighting. Front,
               side or three-quarter, back, and top or detail views give the best color-faithful HD texture. Each photo
-              is prepared in your browser before upload, so large originals are reduced automatically.
+              is prepared in your browser before upload, so large originals are reduced automatically to about{" "}
+              {formatMegabytes(TARGET_GENERATION_PHOTO_SIZE_BYTES)}.
             </p>
           </div>
 
@@ -375,6 +385,12 @@ function validatePreparedPhotos(files: PreparedGenerationPhoto[]) {
     return `The prepared photos are still too large together. The app needs the generated upload under ${formatMegabytes(
       MAX_GENERATION_PHOTO_BYTES_TOTAL
     )}.`;
+  }
+
+  if (totalPhotoBytes > TARGET_GENERATION_PHOTO_BYTES_TOTAL) {
+    return `The browser prepared these photos, but they are still larger than the normal upload target of ${formatMegabytes(
+      TARGET_GENERATION_PHOTO_BYTES_TOTAL
+    )}. Try choosing clearer source photos with fewer pixels.`;
   }
 
   return "";
@@ -483,6 +499,14 @@ function formatFileSize(bytes: number) {
   }
 
   return `${(bytes / 1024 / 1024).toFixed(bytes >= 10 * 1024 * 1024 ? 0 : 1)} MB`;
+}
+
+function waitForNextPaint() {
+  return new Promise<void>((resolve) => {
+    window.requestAnimationFrame(() => {
+      window.requestAnimationFrame(() => resolve());
+    });
+  });
 }
 
 function createStoredProduct(

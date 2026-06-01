@@ -2,13 +2,15 @@
 
 import {
   MAX_GENERATION_PHOTO_SIZE_BYTES,
-  SUPPORTED_GENERATION_IMAGE_TYPES
+  SUPPORTED_GENERATION_IMAGE_TYPES,
+  TARGET_GENERATION_PHOTO_SIZE_BYTES
 } from "@/lib/generation-upload";
 
 const DEFAULT_MAX_DIMENSION = 4096;
 const DEFAULT_QUALITY = 0.86;
 const MIN_QUALITY = 0.62;
 const MIN_DIMENSION = 1200;
+const BYTES_PER_MEGABYTE = 1024 * 1024;
 
 export type PreparedGenerationPhoto = {
   file: File;
@@ -51,7 +53,7 @@ export async function prepareGenerationPhotos(
 }
 
 async function prepareGenerationPhoto(file: File, options: PrepareGenerationPhotosOptions) {
-  const targetBytes = options.targetBytes ?? MAX_GENERATION_PHOTO_SIZE_BYTES;
+  const targetBytes = Math.min(options.targetBytes ?? TARGET_GENERATION_PHOTO_SIZE_BYTES, MAX_GENERATION_PHOTO_SIZE_BYTES);
   const maxDimension = options.maxDimension ?? DEFAULT_MAX_DIMENSION;
 
   if (file.size <= targetBytes && isSupportedPhoto(file)) {
@@ -71,7 +73,8 @@ async function prepareGenerationPhoto(file: File, options: PrepareGenerationPhot
   const image = await loadImageSource(file);
 
   try {
-    let dimensionLimit = maxDimension;
+    const startingDimensionLimit = file.size > 80 * BYTES_PER_MEGABYTE ? 3000 : maxDimension;
+    let dimensionLimit = startingDimensionLimit;
     let bestBlob: Blob | null = null;
     let bestWidth = image.width;
     let bestHeight = image.height;
