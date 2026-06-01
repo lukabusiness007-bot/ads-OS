@@ -137,6 +137,8 @@ export type GenerationStatusResponse = {
   message: string;
   asset?: ModelAsset;
   errorMessage?: string;
+  failureCode?: string;
+  retryable?: boolean;
 };
 
 export type HostedPage = {

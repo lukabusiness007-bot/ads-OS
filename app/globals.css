@@ -915,6 +915,10 @@ h3 {
   border-color: var(--accent-2);
 }
 
+.step.failed {
+  border-color: var(--danger);
+}
+
 .conversationGrid,
 .costGrid,
 .scenarioGrid,

@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 import {
+  getFriendlyMeshyRequestErrorMessage,
   getFriendlyMeshyTaskMessage,
+  getMeshyTaskFailureDetails,
   getMeshyMultiImageTask,
   mapMeshyStatus,
   MeshyConfigurationError,
@@ -40,21 +42,48 @@ export async function GET(request: Request) {
     const status = mapMeshyStatus(task.status);
 
     if (status === "failed") {
+      const failure = getMeshyTaskFailureDetails(task);
+
+      console.warn("Generation task failed", {
+        productId,
+        taskId,
+        taskStatus: task.status,
+        taskError: task.task_error ?? null,
+        friendlyCode: failure.code
+      });
+
       if (supabase && organization) {
-        await updateGenerationJobStatus(supabase, organization.id, productId, taskId, "failed", task.progress ?? 100);
+        const jobId = await updateGenerationJobStatus(
+          supabase,
+          organization.id,
+          productId,
+          taskId,
+          "failed",
+          task.progress ?? 100,
+          task,
+          failure.message
+        );
+        await markProductGenerationFailed(supabase, organization.id, productId);
+        await insertGenerationJobEvent(supabase, organization.id, jobId, "generation_failed", failure.message, {
+          code: failure.code,
+          retryable: failure.retryable,
+          providerStatus: task.status
+        });
       }
 
       return NextResponse.json({
         status,
         progress: task.progress ?? 100,
-        message: getFriendlyMeshyTaskMessage(task),
-        errorMessage: getFriendlyMeshyTaskMessage(task)
+        message: failure.message,
+        errorMessage: failure.message,
+        failureCode: failure.code,
+        retryable: failure.retryable
       } satisfies GenerationStatusResponse);
     }
 
     if (status !== "succeeded") {
       if (supabase && organization) {
-        await updateGenerationJobStatus(supabase, organization.id, productId, taskId, status, task.progress ?? 0);
+        await updateGenerationJobStatus(supabase, organization.id, productId, taskId, status, task.progress ?? 0, task);
       }
 
       return NextResponse.json({
@@ -64,10 +93,42 @@ export async function GET(request: Request) {
       } satisfies GenerationStatusResponse);
     }
 
-    const asset = await storeMeshyTaskAssets(productId, taskId, task, organization?.id);
+    let asset: ModelAsset;
+
+    try {
+      asset = await storeMeshyTaskAssets(productId, taskId, task, organization?.id);
+    } catch (error) {
+      const failureMessage = getPackagingFailureMessage(error);
+
+      console.error("Generated model packaging failed", {
+        productId,
+        taskId,
+        taskStatus: task.status,
+        error: toSafeErrorLog(error)
+      });
+
+      if (supabase && organization) {
+        const jobId = await updateGenerationJobStatus(
+          supabase,
+          organization.id,
+          productId,
+          taskId,
+          "failed",
+          100,
+          task,
+          failureMessage
+        );
+        await markProductGenerationFailed(supabase, organization.id, productId);
+        await insertGenerationJobEvent(supabase, organization.id, jobId, "packaging_failed", failureMessage, {
+          providerStatus: task.status
+        });
+      }
+
+      return createPackagingFailureResponse(error);
+    }
 
     if (supabase && organization) {
-      await persistCompletedGeneration(supabase, organization.id, productId, taskId, asset);
+      await persistCompletedGeneration(supabase, organization.id, productId, taskId, asset, task);
     }
 
     return NextResponse.json({
@@ -145,19 +206,32 @@ async function updateGenerationJobStatus(
   productId: string,
   taskId: string,
   status: "queued" | "running" | "succeeded" | "failed",
-  progress: number
+  progress: number,
+  task?: MeshyTask,
+  errorMessage?: string
 ) {
-  await supabase
+  const updates: Record<string, unknown> = {
+    status,
+    progress,
+    provider_status: task?.status ?? status,
+    error_message: status === "failed" ? errorMessage ?? null : null,
+    updated_at: new Date().toISOString()
+  };
+
+  if (task) {
+    updates.raw_provider_payload = task;
+  }
+
+  const { data } = await supabase
     .from("generation_jobs")
-    .update({
-      status,
-      progress,
-      provider_status: status,
-      updated_at: new Date().toISOString()
-    })
+    .update(updates)
     .eq("organization_id", organizationId)
     .eq("product_id", productId)
-    .eq("provider_job_id", taskId);
+    .eq("provider_job_id", taskId)
+    .select("id")
+    .maybeSingle();
+
+  return typeof data?.id === "string" ? data.id : null;
 }
 
 async function persistCompletedGeneration(
@@ -165,14 +239,17 @@ async function persistCompletedGeneration(
   organizationId: string,
   productId: string,
   taskId: string,
-  asset: ModelAsset
+  asset: ModelAsset,
+  task: MeshyTask
 ) {
   const { data: job } = await supabase
     .from("generation_jobs")
     .update({
       status: "succeeded",
       progress: 100,
-      provider_status: "succeeded",
+      provider_status: task.status,
+      error_message: null,
+      raw_provider_payload: task,
       updated_at: new Date().toISOString()
     })
     .eq("organization_id", organizationId)
@@ -239,7 +316,93 @@ async function downloadRemoteAsset(url: string, fallbackContentType: string) {
   };
 }
 
+async function markProductGenerationFailed(
+  supabase: Awaited<ReturnType<typeof createServerSupabaseClient>>,
+  organizationId: string,
+  productId: string
+) {
+  await supabase
+    .from("products")
+    .update({
+      status: "generation_failed",
+      updated_at: new Date().toISOString()
+    })
+    .eq("organization_id", organizationId)
+    .eq("id", productId);
+}
+
+async function insertGenerationJobEvent(
+  supabase: Awaited<ReturnType<typeof createServerSupabaseClient>>,
+  organizationId: string,
+  jobId: string | null,
+  eventType: string,
+  message: string,
+  payload: Record<string, unknown>
+) {
+  if (!jobId) {
+    return;
+  }
+
+  await supabase.from("job_events").insert({
+    organization_id: organizationId,
+    job_id: jobId,
+    event_type: eventType,
+    message,
+    payload
+  });
+}
+
+function createPackagingFailureResponse(error: unknown, statusCode = 200) {
+  const message = getPackagingFailureMessage(error);
+
+  return NextResponse.json(
+    {
+      status: "failed",
+      progress: 100,
+      message,
+      errorMessage: message,
+      failureCode: getPackagingFailureCode(error),
+      retryable: !(error instanceof Error && error.message === "R2 storage is not configured.")
+    } satisfies GenerationStatusResponse,
+    { status: statusCode }
+  );
+}
+
+function getPackagingFailureMessage(error: unknown) {
+  if (error instanceof Error && error.message === "R2 storage is not configured.") {
+    return "The model was generated, but asset storage is not configured. Add the R2 environment variables and poll status again.";
+  }
+
+  if (error instanceof Error && error.message === "Meshy did not return a GLB model.") {
+    return "The generation finished without the required GLB file. Start a new generation so the web model can be requested again.";
+  }
+
+  if (error instanceof Error && error.message === "Could not download generated model asset.") {
+    return "The generated model file could not be downloaded for packaging. Refresh once; if it repeats, start a new generation.";
+  }
+
+  return "The model was generated, but the web and AR files could not be packaged. Please try again.";
+}
+
+function getPackagingFailureCode(error: unknown) {
+  if (error instanceof Error && error.message === "R2 storage is not configured.") {
+    return "storage_not_configured";
+  }
+
+  if (error instanceof Error && error.message === "Meshy did not return a GLB model.") {
+    return "missing_glb";
+  }
+
+  if (error instanceof Error && error.message === "Could not download generated model asset.") {
+    return "asset_download_failed";
+  }
+
+  return "packaging_failed";
+}
+
 function handleStatusError(error: unknown) {
+  console.error("Generation status check failed", toSafeErrorLog(error));
+
   if (error instanceof MeshyConfigurationError) {
     return NextResponse.json(
       {
@@ -253,27 +416,23 @@ function handleStatusError(error: unknown) {
   }
 
   if (error instanceof MeshyRequestError) {
+    const message = getFriendlyMeshyRequestErrorMessage(error);
+
     return NextResponse.json(
       {
         status: "failed",
         progress: 0,
-        message: "We could not check this generation run yet.",
-        errorMessage: "Try refreshing in a moment."
+        message,
+        errorMessage: message,
+        failureCode: `request_${error.statusCode}`,
+        retryable: error.statusCode === 429 || error.statusCode >= 500
       } satisfies GenerationStatusResponse,
       { status: error.statusCode >= 500 ? 502 : error.statusCode }
     );
   }
 
   if (error instanceof Error && error.message === "R2 storage is not configured.") {
-    return NextResponse.json(
-      {
-        status: "failed",
-        progress: 100,
-        message: "The model was generated, but asset storage is not configured.",
-        errorMessage: "Add the R2 environment variables and poll status again."
-      } satisfies GenerationStatusResponse,
-      { status: 500 }
-    );
+    return createPackagingFailureResponse(error, 500);
   }
 
   return NextResponse.json(
@@ -285,4 +444,23 @@ function handleStatusError(error: unknown) {
     } satisfies GenerationStatusResponse,
     { status: 500 }
   );
+}
+
+function toSafeErrorLog(error: unknown) {
+  if (error instanceof MeshyRequestError) {
+    return {
+      name: error.name,
+      statusCode: error.statusCode,
+      message: error.message
+    };
+  }
+
+  if (error instanceof Error) {
+    return {
+      name: error.name,
+      message: error.message
+    };
+  }
+
+  return { message: String(error) };
 }

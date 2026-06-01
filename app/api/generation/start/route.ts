@@ -6,7 +6,12 @@ import {
   SUPPORTED_GENERATION_IMAGE_TYPES,
   formatMegabytes
 } from "@/lib/generation-upload";
-import { createMeshyMultiImageTask, MeshyConfigurationError, MeshyRequestError } from "@/lib/providers/meshy";
+import {
+  createMeshyMultiImageTask,
+  getFriendlyMeshyRequestErrorMessage,
+  MeshyConfigurationError,
+  MeshyRequestError
+} from "@/lib/providers/meshy";
 import { DEMO_ORG_ID, createPresignedR2GetUrl } from "@/lib/storage/r2";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
 import { ensureCurrentOrganization } from "@/lib/supabase/data";
@@ -20,6 +25,8 @@ import type {
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
+
+const GENERATION_INPUT_URL_EXPIRES_IN_SECONDS = 6 * 60 * 60;
 
 export async function POST(request: Request) {
   try {
@@ -49,10 +56,22 @@ export async function POST(request: Request) {
       await persistUploadedPhotos(supabase, organization.id, productId, photos);
     }
 
-    const imageUrls = await Promise.all(photos.map((photo) => createPresignedR2GetUrl(photo.key)));
-    const taskId = await createMeshyMultiImageTask(imageUrls, {
-      imageEnhancement: payload.imageEnhancement === true
-    });
+    let taskId: string;
+
+    try {
+      const imageUrls = await Promise.all(
+        photos.map((photo) => createPresignedR2GetUrl(photo.key, GENERATION_INPUT_URL_EXPIRES_IN_SECONDS))
+      );
+      taskId = await createMeshyMultiImageTask(imageUrls, {
+        imageEnhancement: payload.imageEnhancement === true
+      });
+    } catch (error) {
+      if (supabase && organization) {
+        await markProductGenerationFailed(supabase, organization.id, productId);
+      }
+
+      throw error;
+    }
 
     if (supabase && organization) {
       await createGenerationJobRecord(supabase, organization.id, productId, taskId);
@@ -172,6 +191,21 @@ async function createGenerationJobRecord(
   });
 }
 
+async function markProductGenerationFailed(
+  supabase: Awaited<ReturnType<typeof createServerSupabaseClient>>,
+  organizationId: string,
+  productId: string
+) {
+  await supabase
+    .from("products")
+    .update({
+      status: "generation_failed",
+      updated_at: new Date().toISOString()
+    })
+    .eq("id", productId)
+    .eq("organization_id", organizationId);
+}
+
 function isGenerationPhoto(objectOwnerId: string, productId: string, photo: GenerationUploadPhoto) {
   return (
     typeof photo.key === "string" &&
@@ -189,6 +223,8 @@ function isSupportedPhotoType(type: unknown): type is GenerationPhotoContentType
 }
 
 function handleStartError(error: unknown) {
+  console.error("Generation start failed", toSafeErrorLog(error));
+
   if (error instanceof MeshyConfigurationError) {
     return NextResponse.json(
       { errorMessage: "The generation service is not configured yet. Add the Meshy API key and try again." },
@@ -198,7 +234,7 @@ function handleStartError(error: unknown) {
 
   if (error instanceof MeshyRequestError) {
     return NextResponse.json(
-      { errorMessage: "The generation service could not start this model. Please try again with clearer photos." },
+      { errorMessage: getFriendlyMeshyRequestErrorMessage(error) },
       { status: error.statusCode >= 500 ? 502 : error.statusCode }
     );
   }
@@ -214,4 +250,23 @@ function handleStartError(error: unknown) {
     { errorMessage: "We could not start generation. Please try again." },
     { status: 500 }
   );
+}
+
+function toSafeErrorLog(error: unknown) {
+  if (error instanceof MeshyRequestError) {
+    return {
+      name: error.name,
+      statusCode: error.statusCode,
+      message: error.message
+    };
+  }
+
+  if (error instanceof Error) {
+    return {
+      name: error.name,
+      message: error.message
+    };
+  }
+
+  return { message: String(error) };
 }

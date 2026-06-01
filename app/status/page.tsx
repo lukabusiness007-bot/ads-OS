@@ -100,14 +100,26 @@ function StatusPageContent() {
       },
       {
         title: "Creating model",
-        detail: effectiveStatus === "queued" || effectiveStatus === "running" ? message : "The 3D model was generated.",
-        state: effectiveStatus === "queued" || effectiveStatus === "running" ? "active" : "done"
+        detail:
+          effectiveStatus === "failed"
+            ? message
+            : effectiveStatus === "queued" || effectiveStatus === "running"
+            ? message
+            : "The 3D model was generated.",
+        state:
+          effectiveStatus === "failed"
+            ? "failed"
+            : effectiveStatus === "queued" || effectiveStatus === "running"
+            ? "active"
+            : "done"
       },
       {
         title: "Packaging AR files",
         detail:
           effectiveStatus === "succeeded"
             ? "GLB, USDZ, and poster files are stored for the viewer."
+            : effectiveStatus === "failed"
+            ? "Packaging stopped because this generation run failed."
             : "The model will be copied into storage as soon as generation finishes.",
         state: effectiveStatus === "succeeded" ? "done" : effectiveStatus === "failed" ? "pending" : "active"
       },
@@ -116,6 +128,8 @@ function StatusPageContent() {
         detail:
           effectiveStatus === "succeeded"
             ? "Open the preview, inspect the model, then send it to quality review."
+            : effectiveStatus === "failed"
+            ? "Start another generation after fixing the issue above."
             : "Preview unlocks after packaging finishes.",
         state: effectiveStatus === "succeeded" ? "active" : "pending"
       }
@@ -255,6 +269,10 @@ function stepClassName(state: string) {
 
   if (state === "active") {
     return "step active";
+  }
+
+  if (state === "failed") {
+    return "step failed";
   }
 
   return "step";
