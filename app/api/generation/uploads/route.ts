@@ -14,7 +14,7 @@ import {
 } from "@/lib/storage/r2";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
 import { ensureCurrentOrganization } from "@/lib/supabase/data";
-import { createServerSupabaseClient } from "@/lib/supabase/server";
+import { createServerSupabaseClient, createServiceRoleSupabaseClient, isSupabaseServiceRoleConfigured } from "@/lib/supabase/server";
 import type {
   CreateGenerationUploadsRequest,
   CreateGenerationUploadsResponse,
@@ -48,8 +48,9 @@ export async function POST(request: Request) {
     }
 
     const organization = organizationResult?.organization ?? null;
+    const adminClient = isSupabaseServiceRoleConfigured() ? createServiceRoleSupabaseClient() : null;
     const databaseProductId = organization
-      ? await createProductRecord(supabase!, organization.id, payload)
+      ? await createProductRecord(adminClient ?? supabase!, organization.id, payload)
       : productId;
     const objectOwnerId = organization?.id ?? "demo-org";
     const uploads = await Promise.all(
@@ -84,7 +85,7 @@ export async function POST(request: Request) {
 }
 
 async function createProductRecord(
-  supabase: Awaited<ReturnType<typeof createServerSupabaseClient>>,
+  supabase: Awaited<ReturnType<typeof createServerSupabaseClient>> | ReturnType<typeof createServiceRoleSupabaseClient>,
   organizationId: string,
   payload: Partial<CreateGenerationUploadsRequest>
 ) {
@@ -109,6 +110,12 @@ async function createProductRecord(
     .single();
 
   if (error || !data) {
+    console.error("products insert failed", {
+      code: (error as { code?: string } | null)?.code,
+      message: error?.message,
+      details: (error as { details?: string } | null)?.details,
+      hint: (error as { hint?: string } | null)?.hint
+    });
     throw new Error("Product could not be created.");
   }
 

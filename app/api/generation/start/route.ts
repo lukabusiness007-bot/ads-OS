@@ -15,7 +15,7 @@ import {
 import { DEMO_ORG_ID, createPresignedR2GetUrl } from "@/lib/storage/r2";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
 import { ensureCurrentOrganization } from "@/lib/supabase/data";
-import { createServerSupabaseClient } from "@/lib/supabase/server";
+import { createServerSupabaseClient, createServiceRoleSupabaseClient, isSupabaseServiceRoleConfigured } from "@/lib/supabase/server";
 import type {
   GenerationPhotoContentType,
   GenerationUploadPhoto,
@@ -45,6 +45,7 @@ export async function POST(request: Request) {
     }
 
     const organization = organizationResult?.organization ?? null;
+    const adminClient = organization && isSupabaseServiceRoleConfigured() ? createServiceRoleSupabaseClient() : null;
     const objectOwnerId = organization?.id ?? DEMO_ORG_ID;
     const validationError = validateStartPayload(productId, photos, objectOwnerId);
 
@@ -52,8 +53,8 @@ export async function POST(request: Request) {
       return NextResponse.json({ errorMessage: validationError }, { status: 400 });
     }
 
-    if (supabase && organization) {
-      await persistUploadedPhotos(supabase, organization.id, productId, photos);
+    if (organization) {
+      await persistUploadedPhotos(adminClient ?? supabase!, organization.id, productId, photos);
     }
 
     let taskId: string;
@@ -66,15 +67,15 @@ export async function POST(request: Request) {
         imageEnhancement: payload.imageEnhancement === true
       });
     } catch (error) {
-      if (supabase && organization) {
-        await markProductGenerationFailed(supabase, organization.id, productId);
+      if (organization) {
+        await markProductGenerationFailed(adminClient ?? supabase!, organization.id, productId);
       }
 
       throw error;
     }
 
-    if (supabase && organization) {
-      await createGenerationJobRecord(supabase, organization.id, productId, taskId);
+    if (organization) {
+      await createGenerationJobRecord(adminClient ?? supabase!, organization.id, productId, taskId);
     }
 
     const response: StartGenerationResponse = {
@@ -124,7 +125,7 @@ function validateStartPayload(productId: string, photos: GenerationUploadPhoto[]
 }
 
 async function persistUploadedPhotos(
-  supabase: Awaited<ReturnType<typeof createServerSupabaseClient>>,
+  supabase: Awaited<ReturnType<typeof createServerSupabaseClient>> | ReturnType<typeof createServiceRoleSupabaseClient>,
   organizationId: string,
   productId: string,
   photos: GenerationUploadPhoto[]
@@ -139,8 +140,10 @@ async function persistUploadedPhotos(
     size_bytes: photo.size
   }));
 
-  await supabase.from("product_photos").insert(photoRows);
-  await supabase
+  const { error: photosError } = await supabase.from("product_photos").insert(photoRows);
+  if (photosError) console.error("product_photos insert failed", { code: photosError.code, message: photosError.message });
+
+  const { error: productUpdateError } = await supabase
     .from("products")
     .update({
       status: "generating",
@@ -150,15 +153,16 @@ async function persistUploadedPhotos(
     })
     .eq("id", productId)
     .eq("organization_id", organizationId);
+  if (productUpdateError) console.error("products status->generating update failed", { code: productUpdateError.code, message: productUpdateError.message });
 }
 
 async function createGenerationJobRecord(
-  supabase: Awaited<ReturnType<typeof createServerSupabaseClient>>,
+  supabase: Awaited<ReturnType<typeof createServerSupabaseClient>> | ReturnType<typeof createServiceRoleSupabaseClient>,
   organizationId: string,
   productId: string,
   taskId: string
 ) {
-  const { data } = await supabase
+  const { data, error: jobError } = await supabase
     .from("generation_jobs")
     .insert({
       organization_id: organizationId,
@@ -171,6 +175,7 @@ async function createGenerationJobRecord(
     })
     .select("id")
     .single();
+  if (jobError) console.error("generation_jobs insert failed", { code: jobError.code, message: jobError.message });
 
   if (data?.id) {
     await supabase.from("job_events").insert({
@@ -192,7 +197,7 @@ async function createGenerationJobRecord(
 }
 
 async function markProductGenerationFailed(
-  supabase: Awaited<ReturnType<typeof createServerSupabaseClient>>,
+  supabase: Awaited<ReturnType<typeof createServerSupabaseClient>> | ReturnType<typeof createServiceRoleSupabaseClient>,
   organizationId: string,
   productId: string
 ) {
