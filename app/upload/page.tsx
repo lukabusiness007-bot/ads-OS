@@ -36,7 +36,7 @@ export default function UploadPage() {
           </ul>
           <div className="field">
             <label htmlFor="files">{u.productImages}</label>
-            <input id="files" type="file" multiple accept="image/png,image/jpeg,image/webp" />
+            <input id="files" type="file" multiple accept="image/png,image/jpeg" />
           </div>
           <div className="row">
             <span className="badge success">{photoSet?.photos.length ?? 0} {u.uploaded}</span>

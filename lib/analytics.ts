@@ -17,6 +17,39 @@ export function trackHostedPageEvent(input: TrackHostedPageEventInput) {
   };
 
   window.localStorage.setItem("lastHostedPageAnalyticsEvent", JSON.stringify(payload));
+  const beaconSent = navigator.sendBeacon?.(
+    "/api/analytics/hosted-page",
+    new Blob(
+      [
+        JSON.stringify({
+          merchantSlug: input.merchantSlug,
+          productSlug: input.productSlug,
+          event: input.event,
+          deviceType: payload.deviceType,
+          metadata: payload
+        })
+      ],
+      { type: "application/json" }
+    )
+  );
+
+  if (!beaconSent) {
+    void fetch("/api/analytics/hosted-page", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        merchantSlug: input.merchantSlug,
+        productSlug: input.productSlug,
+        event: input.event,
+        deviceType: payload.deviceType,
+        metadata: payload
+      }),
+      keepalive: true
+    }).catch(() => undefined);
+  }
+
   console.info("hosted-page-analytics", payload);
 }
 

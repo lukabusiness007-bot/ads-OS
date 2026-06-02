@@ -21,32 +21,32 @@ export const t = {
 
     dashboard: {
       eyebrow: "Pilot komandni centar",
-      subtitle: "Otpremi fotografije, pregledaj verifikovane AR stranice, objavi hostovane linkove i meri angažovanost kupaca.",
+      heading: "Vaša AR kontrolna tabla",
+      subtitle: "Počnite dodavanjem prvog proizvoda. Pravi proizvodi, linkovi i AR metrike će se pojaviti ovde kada budu kreirani.",
       createBtn: "+ Kreiraj AR stranicu",
       catalogStatus: "Status kataloga",
-      pilotSkus: "Pilot SKU-ovi",
+      noProducts: "Još nema proizvoda",
       publishedPages: "Objavljene stranice",
-      hostedLive: "Hostovano i aktivno",
+      hostedLive: "Još ništa nije objavljeno",
       arClicks: "AR klikovi",
-      pilotTotal: "Pilot ukupno",
+      noActivity: "Nema aktivnosti",
       storeClicks: "Klikovi na prodavnicu",
-      backToStore: "Nazad u prodavnicu",
+      backToStore: "Nema klikova",
       nextActions: "Sledeće potrebne radnje",
-      needsAttentionOne: "proizvod zahteva pažnju.",
-      needsAttentionMany: "proizvoda zahteva pažnju.",
+      emptyActionDesc: "Kreirajte prvi AR proizvod da biste testirali upload, 3D pregled i objavljivanje hostovanog linka.",
       addProduct: "Dodaj proizvod",
-      actionItem1Title: "Vale Wall Shelf",
-      actionItem1Desc: "Dodaj jednu oštriju fotografiju materijala/detalja pre pregleda generisanja.",
-      actionItem2Title: "Mira Table Lamp",
-      actionItem2Desc: "Čekanje na generisanje modela i pregled kvaliteta.",
+      actionItemTitle: "Kreirajte prvi AR proizvod",
+      actionItemDesc: "Unesite detalje proizvoda, dimenzije i fotografije, zatim pregledajte 3D model kada bude spreman.",
       planUsage: "Korišćenje trenutnog plana",
       pagesPublished: "pilot hostovanih stranica objavljeno.",
       billingNote: "Kreiranje modela se naplaćuje po odobrenom modelu. Pretplata za hostovanu stranicu pokriva sve aktivne stranice.",
       humanReviewed: "Pregledano od strane čoveka pre objavljivanja",
       viewBilling: "Pogledaj detalje naplate →",
       productsHeading: "Proizvodi",
-      productsDesc: "Akcija, status objavljivanja i performanse po proizvodu.",
+      productsDesc: "Još nema stvarnih proizvoda. Ova tabela će prikazati statuse, linkove i metrike kada dodate prvi proizvod.",
       publishedLinksBtn: "Objavljeni linkovi",
+      emptyProductsTitle: "Još nema proizvoda",
+      emptyProductsDesc: "Kreirajte prvi AR proizvod da biste počeli testiranje dashboarda.",
     },
 
     table: {
@@ -65,6 +65,8 @@ export const t = {
       publishLink: "Objavi link",
       viewAnalytics: "Pogledaj analitiku",
       reviewDetails: "Pregledaj detalje",
+      emptyTitle: "Još nema proizvoda",
+      emptyDescription: "Kreirajte prvi AR proizvod da biste ovde videli statuse, linkove i metrike.",
     },
 
     analytics: {
@@ -133,9 +135,9 @@ export const t = {
     create: {
       eyebrow: "Kreiraj AR stranicu",
       heading: "Vođeno podešavanje proizvoda",
-      subtitle: "Dodajte proizvod, otpremite potrebne fotografije, zatim pošaljite na generisanje i ručni pregled kvaliteta.",
+      subtitle: "Dodajte proizvod, otpremite potrebne fotografije, zatim pokrenite automatsko generisanje 3D modela.",
       backBtn: "Nazad na proizvode",
-      steps: ["Detalji proizvoda", "Dimenzije", "URL prodavnice", "Vođeni upload fotografija", "Pošalji na pregled"],
+      steps: ["Detalji proizvoda", "Dimenzije", "URL prodavnice", "Vođeni upload fotografija", "Generiši 3D model"],
       detailsHeading: "Detalji proizvoda",
       productName: "Naziv proizvoda",
       category: "Kategorija proizvoda",
@@ -147,10 +149,10 @@ export const t = {
       storeUrlHeading: "URL prodavnice",
       storeUrl: "Stranica proizvoda na vašoj prodavnici",
       price: "Prikaz cene (opciono)",
-      submitBtn: "Pošalji na generisanje i pregled",
+      submitBtn: "Generiši 3D model",
       photoEyebrow: "Vođeni upload fotografija",
       photoHeading: "Fotografije potrebne pre generisanja",
-      photoDesc: "Koristite jasne, dobro osvetljene fotografije na jednostavnoj pozadini. Vaša stranica neće biti objavljena dok model ne prođe pregled.",
+      photoDesc: "Koristite jasne, dobro osvetljene fotografije na jednostavnoj pozadini. Nakon generisanja ćete videti 3D pregled pre objavljivanja.",
       photoChecklist: [
         ["Prednja strana", "Fotografija proizvoda direktno sa prednje strane"],
         ["Zadnja strana", "Pogled sa zadnje strane sa vidljivim punim obrisom"],
@@ -164,6 +166,7 @@ export const t = {
       needed: "Potrebno",
       uploadBtn: "Otpremi",
       changeBtn: "Zameni",
+      submittingBtn: "Pokretanje generisanja...",
       assumptionNote: (name: string) =>
         `${name} ima dovoljno osnovnih uglova za početak, ali fotografije materijala/detalja i merila poboljšavaju ocenu poverenja recenzenta.`,
     },
@@ -200,35 +203,35 @@ export const t = {
 
     status: {
       eyebrow: "Status generisanja",
-      subtitle: "Meshy je primarni provajder. Tripo je rezervisan kao ručna rezervna opcija.",
+      subtitle: "Fotografije su poslate u obradu. Model će se pojaviti čim se završe generisanje i pakovanje AR fajlova.",
       photoSetFallback: "aktivnom setu fotografija",
-      fallbackHeading: "Kontrola rezervne opcije",
-      fallbackDesc: "Administratori mogu ponoviti sa Tripo-om ako Meshy ne uspe ili vrati neupotrebljivu geometriju. Ovo namerno nije izloženo prodavcima.",
-      generationRunning: "Generisanje u toku",
-      providerJob: "Posao provajdera",
-      tripoAvailable: "Tripo rezervna opcija dostupna",
+      fallbackHeading: "Šta se dešava sledeće",
+      fallbackDesc: "Aplikacija prvo generiše 3D model, zatim pakuje web i AR fajlove. Ako rezultat nije dobar, može se pokrenuti regenerisanje bez menjanja javne stranice.",
+      generationRunning: "3D generisanje u toku",
+      providerJob: "Interni posao",
+      tripoAvailable: "Rezervno generisanje dostupno",
       fallbackLocked: "Rezervna opcija zaključana",
-      viewLastModel: "Pogledaj poslednji uspešan model",
+      viewLastModel: "Otvori generisani model",
       stageDetails: [
         (photoCount: number, photoSetId: string) =>
           `${photoCount} fotografija uskladišteno u ${photoSetId}.`,
         (passed: number, total: number) =>
           `${passed}/${total} provera prošlo pre slanja provajderu.`,
-        (provider: string, status: string) =>
-          `Provajder: ${provider}. Status: ${status}.`,
+        (_provider: string, status: string) =>
+          `Status obrade: ${status}.`,
         "Sirovi izlaz provajdera se skladišti pre pakovanja GLB, USDZ, postera, sličice i metapodataka.",
         "Aplikacija proverava učitavanje modela, veličinu, dimenzije, teksture, prikaz pregleda i spremnost AR paketa.",
-        "Recenzent odobrava, odbija ili zahteva regeneraciju.",
-      ] as Array<string | ((...args: string[] | number[]) => string)>,
+        "Posle generisanja možete pregledati model, pokrenuti regenerisanje ili poslati model na proveru kvaliteta.",
+      ] as Array<string | ((...args: Array<string | number>) => string)>,
     },
 
     upload: {
       eyebrow: "Čarobnjak za vođeni upload fotografija",
-      heading: "Otpremite 8–20 fotografija proizvoda",
-      subtitle: "Faza 2 pokretanjem kontrola pre leta pre nego što proizvod može ući u Meshy generisanje.",
+      heading: "Otpremite 4 fotografije proizvoda",
+      subtitle: "Provera fotografija se pokreće pre nego što proizvod uđe u Meshy generisanje.",
       productImages: "Slike proizvoda",
       uploaded: "otpremljeno",
-      formats: "JPG, PNG, WebP",
+      formats: "JPG, PNG",
       readyToGenerate: "Spremno za generisanje",
       blocked: "Blokirano",
       startGeneration: "Pokreni generisanje",
@@ -252,32 +255,32 @@ export const t = {
 
     dashboard: {
       eyebrow: "Pilot Command Center",
-      subtitle: "Upload photos, review verified AR pages, publish hosted links, and measure shopper engagement.",
+      heading: "Your AR dashboard",
+      subtitle: "Start by adding your first product. Real products, hosted links, and AR metrics will appear here after you create them.",
       createBtn: "+ Create AR page",
       catalogStatus: "Catalog status",
-      pilotSkus: "Pilot SKUs",
+      noProducts: "No products yet",
       publishedPages: "Published pages",
-      hostedLive: "Hosted and live",
+      hostedLive: "Nothing published yet",
       arClicks: "AR clicks",
-      pilotTotal: "Pilot total",
+      noActivity: "No activity yet",
       storeClicks: "Store clicks",
-      backToStore: "Back to store",
+      backToStore: "No clicks yet",
       nextActions: "Next required actions",
-      needsAttentionOne: "product needs attention.",
-      needsAttentionMany: "products need attention.",
+      emptyActionDesc: "Create the first AR product to test upload, 3D preview, and hosted-link publishing.",
       addProduct: "Add product",
-      actionItem1Title: "Vale Wall Shelf",
-      actionItem1Desc: "Add one sharper material/detail photo before generation review.",
-      actionItem2Title: "Mira Table Lamp",
-      actionItem2Desc: "Waiting for model generation and quality review.",
+      actionItemTitle: "Create your first AR product",
+      actionItemDesc: "Enter product details, dimensions, and photos, then inspect the 3D model when it is ready.",
       planUsage: "Current plan usage",
       pagesPublished: "pilot hosted pages published.",
       billingNote: "Model creation is billed per approved model. Hosted-page subscription covers all live pages.",
       humanReviewed: "Human-reviewed before publishing",
       viewBilling: "View billing details →",
       productsHeading: "Products",
-      productsDesc: "Action, publishing state, and product-level performance.",
+      productsDesc: "No real products yet. This table will show statuses, links, and metrics after you add your first product.",
       publishedLinksBtn: "Published links",
+      emptyProductsTitle: "No products yet",
+      emptyProductsDesc: "Create your first AR product to start testing the dashboard.",
     },
 
     table: {
@@ -296,6 +299,8 @@ export const t = {
       publishLink: "Publish link",
       viewAnalytics: "View analytics",
       reviewDetails: "Review details",
+      emptyTitle: "No products yet",
+      emptyDescription: "Create your first AR product to see statuses, links, and metrics here.",
     },
 
     analytics: {
@@ -364,9 +369,9 @@ export const t = {
     create: {
       eyebrow: "Create AR Page",
       heading: "Guided product setup",
-      subtitle: "Add the product, upload the required photos, then submit it for generation and human quality review.",
+      subtitle: "Add the product, upload the required photos, then start automatic 3D model generation.",
       backBtn: "Back to products",
-      steps: ["Product details", "Dimensions", "Store URL", "Guided photo upload", "Submit for review"],
+      steps: ["Product details", "Dimensions", "Store URL", "Guided photo upload", "Generate 3D model"],
       detailsHeading: "Product details",
       productName: "Product name",
       category: "Product category",
@@ -378,10 +383,10 @@ export const t = {
       storeUrlHeading: "Store URL",
       storeUrl: "Product page on your store",
       price: "Display price optional",
-      submitBtn: "Submit for generation and review",
+      submitBtn: "Generate 3D model",
       photoEyebrow: "Guided photo upload",
       photoHeading: "Photos needed before generation",
-      photoDesc: "Use clear, well-lit photos against a simple background. Your page will not publish until the model passes review.",
+      photoDesc: "Use clear, well-lit photos against a simple background. After generation, you will see the 3D preview before publishing.",
       photoChecklist: [
         ["Front", "Straight-on product photo"],
         ["Back", "Rear view with the full outline visible"],
@@ -395,6 +400,7 @@ export const t = {
       needed: "Needed",
       uploadBtn: "Upload",
       changeBtn: "Change",
+      submittingBtn: "Starting generation...",
       assumptionNote: (name: string) =>
         `${name} has enough core angles to start, but material/detail and scale photos improve the reviewer confidence score.`,
     },
@@ -431,35 +437,35 @@ export const t = {
 
     status: {
       eyebrow: "Generation status",
-      subtitle: "Meshy is the primary provider. Tripo is reserved as a manual fallback.",
+      subtitle: "Photos are processing now. The model appears here after generation and AR asset packaging finish.",
       photoSetFallback: "the active photo set",
-      fallbackHeading: "Fallback control",
-      fallbackDesc: "Admins can retry with Tripo if Meshy fails or returns unusable geometry. This is intentionally not exposed to merchants.",
-      generationRunning: "Generation running",
-      providerJob: "Provider job",
-      tripoAvailable: "Tripo fallback available",
+      fallbackHeading: "What happens next",
+      fallbackDesc: "The app generates the 3D model first, then packages web and AR files. If the result is poor, regeneration can run without changing the public page.",
+      generationRunning: "3D generation running",
+      providerJob: "Internal job",
+      tripoAvailable: "Backup generation available",
       fallbackLocked: "Fallback locked",
-      viewLastModel: "View last successful model",
+      viewLastModel: "Open generated model",
       stageDetails: [
         (photoCount: number, photoSetId: string) =>
           `${photoCount} photos stored in ${photoSetId}.`,
         (passed: number, total: number) =>
           `${passed}/${total} checks passed before provider submission.`,
-        (provider: string, status: string) =>
-          `Provider: ${provider}. Status: ${status}.`,
+        (_provider: string, status: string) =>
+          `Processing status: ${status}.`,
         "Raw provider output is stored before GLB, USDZ, poster, thumbnail, and metadata packaging.",
         "The app checks model load, size, dimensions, textures, preview render, and AR package readiness.",
-        "A reviewer approves, rejects, or requests regeneration.",
-      ] as Array<string | ((...args: string[] | number[]) => string)>,
+        "After generation, you can inspect the model, regenerate it, or send it to quality review.",
+      ] as Array<string | ((...args: Array<string | number>) => string)>,
     },
 
     upload: {
       eyebrow: "Guided photo upload wizard",
-      heading: "Upload 8-20 product photos",
-      subtitle: "Phase 2 runs preflight checks before a product can enter Meshy generation.",
+      heading: "Upload 4 product photos",
+      subtitle: "Preflight checks run before a product can enter Meshy generation.",
       productImages: "Product images",
       uploaded: "uploaded",
-      formats: "JPG, PNG, WebP",
+      formats: "JPG, PNG",
       readyToGenerate: "Ready to generate",
       blocked: "Blocked",
       startGeneration: "Start generation",
@@ -468,7 +474,7 @@ export const t = {
   },
 } as const
 
-type Translations = typeof t.sr
+type Translations = (typeof t)[Lang]
 
 const LangContext = createContext<{
   lang: Lang

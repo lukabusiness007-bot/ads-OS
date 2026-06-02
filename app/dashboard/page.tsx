@@ -1,124 +1,111 @@
-"use client"
-
 import Link from "next/link";
 import { AppShell } from "@/components/AppShell";
 import { ProductTable } from "@/components/ProductTable";
-import { organization, products } from "@/lib/mock-data";
-import { useLang } from "@/lib/lang";
+import { getDashboardData } from "@/lib/supabase/data";
 
-export default function DashboardPage() {
-  const { tr } = useLang()
-  const d = tr.dashboard
-
-  const published = products.filter((p) => p.status === "published").length;
-  const totalArClicks = products.reduce((s, p) => s + (p.analytics?.arButtonClicks ?? 0), 0);
-  const totalStoreClicks = products.reduce((s, p) => s + (p.analytics?.ctaClicks ?? 0), 0);
-  const needsAction = products.filter(
-    (p) => p.status !== "published" && p.status !== "generating"
-  ).length;
-
-  const usagePct = Math.round((published / 25) * 100);
+export default async function DashboardPage() {
+  const data = await getDashboardData();
+  const usagePct = Math.min(100, Math.round((data.totals.published / 25) * 100));
 
   return (
     <AppShell>
       <header className="topbar">
         <div>
-          <p className="eyebrow">{d.eyebrow}</p>
-          <h1 style={{ marginBottom: 6 }}>{organization.name}</h1>
-          <p className="muted" style={{ maxWidth: 520 }}>
-            {d.subtitle}
+          <p className="eyebrow">{data.organization?.name ?? "Merchant dashboard"}</p>
+          <h1 style={{ marginBottom: 6 }}>Overview</h1>
+          <p className="muted" style={{ maxWidth: 560 }}>
+            Real products, generation jobs, published pages, billing usage, and analytics now come from Supabase.
           </p>
         </div>
         <Link className="button accent" href="/create">
-          {d.createBtn}
+          Create AR product
         </Link>
       </header>
 
-      {/* KPI cards */}
+      {!data.isConfigured && (
+        <div className="assumptionNote">
+          Supabase is not configured yet. Add the Supabase env vars, run the migration, then sign in to see real data.
+        </div>
+      )}
+
+      {data.setupErrorMessage && <div className="assumptionNote">{data.setupErrorMessage}</div>}
+
       <section className="grid four">
         <article className="card metric">
-          <span className="muted" style={{ fontSize: 12, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.06em" }}>{d.catalogStatus}</span>
-          <strong>{products.length}</strong>
-          <span className="badge neutral">{d.pilotSkus}</span>
+          <span className="sectionLabel">Total products</span>
+          <strong>{data.totals.products}</strong>
+          <span className="badge neutral">Catalog</span>
         </article>
         <article className="card metric">
-          <span className="muted" style={{ fontSize: 12, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.06em" }}>{d.publishedPages}</span>
-          <strong>{published}<span style={{ fontSize: 16, fontWeight: 500, color: "var(--muted)" }}>/25</span></strong>
-          <span className="badge success">{d.hostedLive}</span>
+          <span className="sectionLabel">Published pages</span>
+          <strong>
+            {data.totals.published}
+            <span style={{ fontSize: 16, fontWeight: 500, color: "var(--muted)" }}>/25</span>
+          </strong>
+          <span className="badge neutral">Hosted live</span>
         </article>
         <article className="card metric">
-          <span className="muted" style={{ fontSize: 12, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.06em" }}>{d.arClicks}</span>
-          <strong>{totalArClicks}</strong>
-          <span className="badge neutral">{d.pilotTotal}</span>
+          <span className="sectionLabel">AR clicks</span>
+          <strong>{data.totals.arClicks}</strong>
+          <span className="badge neutral">View in room</span>
         </article>
         <article className="card metric">
-          <span className="muted" style={{ fontSize: 12, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.06em" }}>{d.storeClicks}</span>
-          <strong>{totalStoreClicks}</strong>
-          <span className="badge neutral">{d.backToStore}</span>
+          <span className="sectionLabel">Store clicks</span>
+          <strong>{data.totals.storeClicks}</strong>
+          <span className="badge neutral">Back to store</span>
         </article>
       </section>
 
-      {/* Action panel + Usage panel */}
       <section className="grid two">
         <article className="panel stack">
           <div className="row">
             <div>
-              <h2>{d.nextActions}</h2>
-              <p className="muted">
-                {needsAction} {needsAction === 1 ? d.needsAttentionOne : d.needsAttentionMany}
-              </p>
+              <h2>Next actions</h2>
+              <p className="muted">Focus on products that need photos, review, or publishing.</p>
             </div>
             <Link className="button secondary sm" href="/create">
-              {d.addProduct}
+              Add product
             </Link>
           </div>
           <ul className="actionList">
             <li>
-              <strong>{d.actionItem1Title}</strong>
-              <span>{d.actionItem1Desc}</span>
-            </li>
-            <li>
-              <strong>{d.actionItem2Title}</strong>
-              <span>{d.actionItem2Desc}</span>
+              <strong>{data.totals.processing} scans in processing</strong>
+              <span>{data.totals.published} published pages are live.</span>
             </li>
           </ul>
         </article>
 
         <article className="panel stack">
-          <h2>{d.planUsage}</h2>
+          <h2>Plan usage</h2>
           <div>
-            <div className="usageBar" aria-label={`${published} / 25`}>
+            <div className="usageBar" aria-label={`${data.totals.published} / 25`}>
               <span style={{ width: `${usagePct}%` }} />
             </div>
             <p className="muted" style={{ marginTop: 8, fontSize: 13 }}>
-              {published} / 25 {d.pagesPublished}
+              {data.totals.published} / 25 published pages used
             </p>
           </div>
-          <p className="muted" style={{ fontSize: 13, marginTop: 0 }}>
-            {d.billingNote}
-          </p>
-          <div className="assetGrid">
-            <span className="badge neutral">10–25 SKU pilot</span>
-            <span className="badge success">{d.humanReviewed}</span>
-          </div>
-          <Link className="button ghost" href="/analytics-billing">
-            {d.viewBilling}
+          <Link className="button ghost" href="/billing">
+            View billing details
           </Link>
         </article>
       </section>
 
-      {/* Products table */}
       <section className="panel">
         <div className="row">
           <div>
-            <h2>{d.productsHeading}</h2>
-            <p className="muted">{d.productsDesc}</p>
+            <h2>Products</h2>
+            <p className="muted">Products are loaded from Supabase for the signed-in organization.</p>
           </div>
           <Link className="button secondary sm" href="/published-links">
-            {d.publishedLinksBtn}
+            Published links
           </Link>
         </div>
-        <ProductTable />
+        <ProductTable
+          items={data.products}
+          emptyTitle="No real products yet"
+          emptyDescription="Create your first AR product to start filling the Supabase database."
+        />
       </section>
     </AppShell>
   );

@@ -4,6 +4,8 @@ import Link from "next/link"
 import { usePathname, useRouter } from "next/navigation"
 import { LayoutGrid, PlusSquare, Link2, BarChart2, CreditCard, LogOut } from "lucide-react"
 import { useLang } from "@/lib/lang"
+import { isSupabaseConfigured } from "@/lib/supabase/config"
+import { createBrowserSupabaseClient } from "@/lib/supabase/client"
 
 export function AppShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname()
@@ -19,7 +21,12 @@ export function AppShell({ children }: { children: React.ReactNode }) {
     { href: "/billing", label: n.billing, icon: CreditCard },
   ]
 
-  function handleLogout() {
+  async function handleLogout() {
+    if (isSupabaseConfigured()) {
+      const supabase = createBrowserSupabaseClient()
+      await supabase.auth.signOut()
+    }
+
     router.push("/")
   }
 

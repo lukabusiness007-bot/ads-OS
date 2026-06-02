@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { AppShell } from "@/components/AppShell";
-import { ViewerMock } from "@/components/ViewerMock";
+import { ModelViewer } from "@/components/ModelViewer";
 import { products } from "@/lib/mock-data";
 import { formatMeters } from "@/lib/ui";
 
@@ -45,7 +45,7 @@ export default function HostedPageSettingsPage() {
 
         <aside className="panel stack">
           <h2>Public preview</h2>
-          <ViewerMock />
+          <ModelViewer asset={product.modelAsset} alt={`${product.name} hosted 3D model`} />
           <h3>{product.name}</h3>
           <p className="muted">{product.description}</p>
           <p className="muted">

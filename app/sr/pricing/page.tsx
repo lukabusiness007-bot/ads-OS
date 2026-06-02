@@ -1,7 +1,25 @@
+import type { Metadata } from "next"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { MarketingNav } from "@/components/marketing-nav"
+import { SerbianPricingActivityToast } from "@/components/SerbianPricingActivityToast"
 import { CheckCircle2, ArrowRight } from "lucide-react"
+import {
+  breadcrumbJsonLd,
+  buildSeoMetadata,
+  jsonLd,
+  marketingAlternates,
+  webApplicationJsonLd
+} from "@/lib/seo"
+
+export const metadata: Metadata = buildSeoMetadata({
+  title: "Cene za AR stranice proizvoda za namestaj",
+  description:
+    "Pocnite sa 10 proizvoda namestaja i dokazite angazovanje kupaca pre sirenja kataloga. Hosting plus naknada po odobrenom modelu.",
+  path: "/sr/pricing",
+  lang: "sr",
+  alternates: marketingAlternates("/pricing", "/sr/pricing")
+})
 
 const plans = [
   {
@@ -121,6 +139,16 @@ const overages = [
 export default function PricingPageSr() {
   return (
     <div className="min-h-screen bg-white">
+      <script type="application/ld+json" dangerouslySetInnerHTML={jsonLd(webApplicationJsonLd("sr", "/sr/pricing"))} />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={jsonLd(
+          breadcrumbJsonLd([
+            { name: "Pocetna", path: "/sr" },
+            { name: "Cene", path: "/sr/pricing" }
+          ])
+        )}
+      />
       <MarketingNav lang="sr" />
 
       <main className="pt-24">
@@ -130,10 +158,10 @@ export default function PricingPageSr() {
             Cene
           </p>
           <h1 className="text-4xl font-semibold md:text-5xl text-zinc-900 text-balance leading-tight mb-5">
-            Jednostavne, predvidive cene
+            Počnite sa 10 proizvoda nameštaja. Dokažite angažovanje pre skaliranja.
           </h1>
           <p className="text-lg text-zinc-500 max-w-xl mx-auto leading-relaxed">
-            Mesečna pretplata za hostovane stranice plus naknada po modelu za 3D kreaciju. Bez skrivenih troškova.
+            Mesečna pretplata za hostovane AR stranice plus naknada po odobrenom modelu za 3D kreaciju. Dovoljno jednostavno za pilot pre širenja na ceo katalog.
           </p>
         </section>
 
@@ -427,6 +455,7 @@ export default function PricingPageSr() {
           </div>
         </section>
       </main>
+      <SerbianPricingActivityToast />
     </div>
   )
 }

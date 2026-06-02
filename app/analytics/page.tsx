@@ -1,99 +1,88 @@
-"use client"
-
 import Link from "next/link";
 import { AppShell } from "@/components/AppShell";
-import { products } from "@/lib/mock-data";
-import { useLang } from "@/lib/lang";
+import { getDashboardData } from "@/lib/supabase/data";
 
-function sumMetric(metric: "pageViews" | "viewerInteractions" | "arButtonClicks" | "ctaClicks") {
-  return products.reduce((sum, p) => sum + (p.analytics?.[metric] ?? 0), 0);
-}
-
-export default function AnalyticsPage() {
-  const { tr } = useLang();
-  const a = tr.analytics;
+export default async function AnalyticsPage() {
+  const data = await getDashboardData();
 
   return (
     <AppShell>
       <header className="topbar">
         <div>
-          <p className="eyebrow">{a.eyebrow}</p>
-          <h1>{a.heading}</h1>
-          <p className="muted">{a.subtitle}</p>
+          <p className="eyebrow">Analytics</p>
+          <h1>Hosted page performance</h1>
+          <p className="muted">Page views, viewer interactions, AR clicks, and store clicks are stored in Supabase.</p>
         </div>
         <Link className="button secondary" href="/billing">
-          {a.viewBilling}
+          View billing
         </Link>
       </header>
 
       <section className="grid four">
         <article className="card metric">
-          <span className="muted" style={{ fontSize: 12, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.06em" }}>
-            {a.pageViews}
-          </span>
-          <strong>{sumMetric("pageViews")}</strong>
-          <span className="badge neutral">{a.allProducts}</span>
+          <span className="sectionLabel">Page views</span>
+          <strong>{data.totals.pageViews}</strong>
+          <span className="badge neutral">All products</span>
         </article>
         <article className="card metric">
-          <span className="muted" style={{ fontSize: 12, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.06em" }}>
-            {a.viewerInteractions}
-          </span>
-          <strong>{sumMetric("viewerInteractions")}</strong>
-          <span className="badge neutral">{a.engagements3d}</span>
+          <span className="sectionLabel">Interactions</span>
+          <strong>{data.totals.viewerInteractions}</strong>
+          <span className="badge neutral">3D viewer</span>
         </article>
         <article className="card metric">
-          <span className="muted" style={{ fontSize: 12, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.06em" }}>
-            {a.arClicks}
-          </span>
-          <strong>{sumMetric("arButtonClicks")}</strong>
-          <span className="badge neutral">{a.viewInRoom}</span>
+          <span className="sectionLabel">AR clicks</span>
+          <strong>{data.totals.arClicks}</strong>
+          <span className="badge neutral">View in room</span>
         </article>
         <article className="card metric">
-          <span className="muted" style={{ fontSize: 12, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.06em" }}>
-            {a.storeCta}
-          </span>
-          <strong>{sumMetric("ctaClicks")}</strong>
-          <span className="badge success">{a.backToStore}</span>
+          <span className="sectionLabel">Store CTA</span>
+          <strong>{data.totals.storeClicks}</strong>
+          <span className="badge success">Back to store</span>
         </article>
       </section>
 
       <section className="panel">
         <div style={{ marginBottom: 16 }}>
-          <h2>{a.breakdown}</h2>
-          <p className="muted">{a.breakdownDesc}</p>
+          <h2>Product breakdown</h2>
+          <p className="muted">Engagement metrics for each published product page.</p>
         </div>
         <div className="responsiveTable">
           <table className="table">
             <thead>
               <tr>
-                <th>{a.colProduct}</th>
-                <th>{a.colPageViews}</th>
-                <th>{a.colInteractions}</th>
-                <th>{a.colArClicks}</th>
-                <th>{a.colStoreClicks}</th>
-                <th>{a.colTopDevices}</th>
+                <th>Product</th>
+                <th>Page views</th>
+                <th>Interactions</th>
+                <th>AR clicks</th>
+                <th>Store clicks</th>
               </tr>
             </thead>
             <tbody>
-              {products.map((product) => (
-                <tr key={product.id}>
-                  <td data-label={a.colProduct}>
-                    <strong>{product.name}</strong>
-                    <p className="muted" style={{ marginBottom: 0, fontSize: 13 }}>
-                      {product.category.replace("_", " ")}
-                    </p>
-                  </td>
-                  <td data-label={a.colPageViews}>{product.analytics?.pageViews ?? 0}</td>
-                  <td data-label={a.colInteractions}>{product.analytics?.viewerInteractions ?? 0}</td>
-                  <td data-label={a.colArClicks}>{product.analytics?.arButtonClicks ?? 0}</td>
-                  <td data-label={a.colStoreClicks}>{product.analytics?.ctaClicks ?? 0}</td>
-                  <td data-label={a.colTopDevices}>
-                    {product.analytics?.topDevices.length
-                      ? product.analytics.topDevices.map((d) => `${d.type} ${d.share}%`).join(", ")
-                      : <span className="muted">{a.noData}</span>}
+              {data.products.length === 0 ? (
+                <tr>
+                  <td colSpan={5}>
+                    <div className="emptyTableState">
+                      <strong>No analytics yet</strong>
+                      <p className="muted">Publish a product page and customer events will appear here.</p>
+                    </div>
                   </td>
                 </tr>
-              ))}
+              ) : (
+                data.products.map((product) => (
+                  <tr key={product.id}>
+                    <td data-label="Product">
+                      <strong>{product.name}</strong>
+                      <p className="muted" style={{ marginBottom: 0, fontSize: 13 }}>
+                        {product.category.replace("_", " ")}
+                      </p>
+                    </td>
+                    <td data-label="Page views">{product.analytics?.pageViews ?? 0}</td>
+                    <td data-label="Interactions">{product.analytics?.viewerInteractions ?? 0}</td>
+                    <td data-label="AR clicks">{product.analytics?.arButtonClicks ?? 0}</td>
+                    <td data-label="Store clicks">{product.analytics?.ctaClicks ?? 0}</td>
+                  </tr>
+                ))
+              )}
             </tbody>
           </table>
         </div>

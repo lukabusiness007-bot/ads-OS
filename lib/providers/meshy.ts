@@ -1,0 +1,276 @@
+import type { GenerationClientStatus } from "@/lib/types";
+
+const MESHY_BASE_URL = "https://api.meshy.ai/openapi/v1";
+
+export type MeshyTaskStatus = "PENDING" | "IN_PROGRESS" | "SUCCEEDED" | "FAILED" | "CANCELED";
+
+export type MeshyTask = {
+  id: string;
+  type?: "multi-image-to-3d";
+  model_urls?: {
+    glb?: string;
+    usdz?: string;
+    fbx?: string;
+    obj?: string;
+    stl?: string;
+    pre_remeshed_glb?: string;
+  };
+  thumbnail_url?: string;
+  thumbnail_urls?: {
+    front?: string;
+    right?: string;
+    back?: string;
+    left?: string;
+  };
+  progress?: number;
+  status: MeshyTaskStatus;
+  task_error?: {
+    type?: string;
+    code?: string;
+    message?: string;
+    doc_url?: string;
+  } | null;
+  consumed_credits?: number;
+};
+
+export class MeshyConfigurationError extends Error {
+  constructor() {
+    super("Meshy API is not configured.");
+    this.name = "MeshyConfigurationError";
+  }
+}
+
+export class MeshyRequestError extends Error {
+  statusCode: number;
+
+  constructor(statusCode: number, message: string) {
+    super(message);
+    this.name = "MeshyRequestError";
+    this.statusCode = statusCode;
+  }
+}
+
+export type MeshyFailureDetails = {
+  code: string;
+  message: string;
+  retryable: boolean;
+};
+
+type CreateMeshyMultiImageTaskOptions = {
+  imageEnhancement?: boolean;
+};
+
+export async function createMeshyMultiImageTask(
+  imageUrls: string[],
+  options: CreateMeshyMultiImageTaskOptions = {}
+) {
+  if (imageUrls.length !== 4) {
+    throw new MeshyRequestError(400, "Meshy generation requires exactly 4 images.");
+  }
+
+  const primaryTextureReference = imageUrls[0];
+
+  const response = await fetch(`${MESHY_BASE_URL}/multi-image-to-3d`, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${getMeshyApiKey()}`,
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      image_urls: imageUrls,
+      ai_model: "latest",
+      should_texture: true,
+      enable_pbr: true,
+      hd_texture: true,
+      texture_image_url: primaryTextureReference,
+      target_formats: ["glb", "usdz"],
+      image_enhancement: options.imageEnhancement ?? false,
+      remove_lighting: true,
+      auto_size: true,
+      origin_at: "bottom"
+    })
+  });
+
+  if (!response.ok) {
+    throw await createMeshyRequestError(response);
+  }
+
+  const payload = (await response.json()) as { result?: string };
+
+  if (!payload.result) {
+    throw new MeshyRequestError(502, "Meshy did not return a task id.");
+  }
+
+  return payload.result;
+}
+
+export async function getMeshyMultiImageTask(taskId: string): Promise<MeshyTask> {
+  const response = await fetch(`${MESHY_BASE_URL}/multi-image-to-3d/${encodeURIComponent(taskId)}`, {
+    headers: {
+      Authorization: `Bearer ${getMeshyApiKey()}`
+    },
+    cache: "no-store"
+  });
+
+  if (!response.ok) {
+    throw await createMeshyRequestError(response);
+  }
+
+  return response.json() as Promise<MeshyTask>;
+}
+
+export function mapMeshyStatus(status: MeshyTaskStatus): GenerationClientStatus {
+  if (status === "PENDING") {
+    return "queued";
+  }
+
+  if (status === "IN_PROGRESS") {
+    return "running";
+  }
+
+  if (status === "SUCCEEDED") {
+    return "succeeded";
+  }
+
+  return "failed";
+}
+
+export function getFriendlyMeshyTaskMessage(task: MeshyTask) {
+  if (task.status === "PENDING") {
+    return "Your model is queued. We will start as soon as capacity is available.";
+  }
+
+  if (task.status === "IN_PROGRESS") {
+    return "Your model is being created from the uploaded product photos.";
+  }
+
+  if (task.status === "SUCCEEDED") {
+    return "Your model is ready and the AR files are being packaged.";
+  }
+
+  return getMeshyTaskFailureDetails(task).message;
+}
+
+export function getMeshyTaskFailureDetails(task: MeshyTask): MeshyFailureDetails {
+  const code = task.task_error?.code ?? task.task_error?.type ?? task.status.toLowerCase();
+  const type = task.task_error?.type;
+  const rawMessage = task.task_error?.message?.toLowerCase() ?? "";
+
+  if (task.status === "CANCELED") {
+    return {
+      code: "canceled",
+      message: "This generation run was canceled before the model finished.",
+      retryable: true
+    };
+  }
+
+  if (code === "image_too_complex") {
+    return {
+      code,
+      message: "The photos look too complex for this generation run. Use one clear product on a simple background, without extra objects or dense repeating details.",
+      retryable: false
+    };
+  }
+
+  if (code === "moderation_blocked") {
+    return {
+      code,
+      message: "The photos were blocked by the generation safety filter. Use neutral product-only photos and try again.",
+      retryable: false
+    };
+  }
+
+  if (code === "timeout" || type === "timeout") {
+    return {
+      code: "timeout",
+      message: "The generation run timed out. Try again; if it repeats, simplify the photo set and keep one product centered in each image.",
+      retryable: true
+    };
+  }
+
+  if (code === "service_unavailable" || type === "service_unavailable" || code === "server_error" || type === "server_error") {
+    return {
+      code,
+      message: "The generation service hit a temporary processing error. Try the same photo set again in a few minutes.",
+      retryable: true
+    };
+  }
+
+  if (code === "format_conversion_failed") {
+    return {
+      code,
+      message: "The model was created, but the AR file conversion failed. Try generating again so the web and AR files can be packaged.",
+      retryable: true
+    };
+  }
+
+  if (type === "invalid_input" || code === "invalid_input") {
+    const message = rawMessage.includes("download") || rawMessage.includes("url") || rawMessage.includes("fetch")
+      ? "The generation service could not read one or more uploaded photos. Start a new generation; new jobs keep private photo links available longer while they wait in the queue."
+      : "The uploaded photos need a cleaner input set before generation can continue. Use four sharp JPG or PNG views of the same single product.";
+
+    return {
+      code,
+      message,
+      retryable: false
+    };
+  }
+
+  return {
+    code,
+    message: "The generation run could not finish. Try again with four clearer product-only photos.",
+    retryable: true
+  };
+}
+
+export function getFriendlyMeshyRequestErrorMessage(error: MeshyRequestError) {
+  if (error.statusCode === 401 || error.statusCode === 403) {
+    return "The generation service rejected the API key. Check the server MESHY_API_KEY before trying again.";
+  }
+
+  if (error.statusCode === 402) {
+    return "The generation service account does not have enough credits to start this model.";
+  }
+
+  if (error.statusCode === 429) {
+    return "The generation service is rate limiting new jobs. Wait a minute and try again.";
+  }
+
+  if (error.statusCode === 400) {
+    const rawMessage = error.message.toLowerCase();
+
+    if (rawMessage.includes("download") || rawMessage.includes("url") || rawMessage.includes("accessible")) {
+      return "The generation service could not read the uploaded photo links. Start a new generation so fresh private photo links can be sent.";
+    }
+
+    return "The generation service rejected the photo request. Use four valid JPG or PNG product photos and try again.";
+  }
+
+  if (error.statusCode >= 500) {
+    return "The generation service is having a temporary issue. Try again in a few minutes.";
+  }
+
+  return "The generation service could not start this model. Try again with four clearer product photos.";
+}
+
+function getMeshyApiKey() {
+  if (!process.env.MESHY_API_KEY) {
+    throw new MeshyConfigurationError();
+  }
+
+  return process.env.MESHY_API_KEY;
+}
+
+async function createMeshyRequestError(response: Response) {
+  let message = `Meshy request failed with status ${response.status}.`;
+
+  try {
+    const payload = (await response.json()) as { message?: string; error?: string };
+    message = payload.message ?? payload.error ?? message;
+  } catch {
+    const text = await response.text().catch(() => "");
+    message = text || message;
+  }
+
+  return new MeshyRequestError(response.status, message);
+}

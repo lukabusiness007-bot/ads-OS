@@ -1,9 +1,4 @@
 import type {
-  GenerationProvider,
-  GenerationProviderInput,
-  GenerationProviderJob,
-  GenerationProviderName,
-  GenerationProviderResult,
   ModelAsset,
   ModelPackageCheck,
   PhotoAngle,
@@ -36,19 +31,17 @@ export const photoAngleLabels: Record<PhotoAngle, string> = {
 export const pipelineStages = [
   "Photos uploaded",
   "Preflight checks",
-  "Provider generation",
-  "Asset packaging",
-  "Automated model checks",
-  "Manual review"
+  "3D generation",
+  "AR asset packaging",
+  "Model preview",
+  "Quality review"
 ];
 
 export function runPhotoPreflight(photoSet: PhotoSet): PreflightCheck[] {
   const requiredAngleSet = new Set(photoSet.requiredAngles);
   const uploadedAngleSet = new Set(photoSet.photos.map((photo) => photo.angle));
   const missingAngles = [...requiredAngleSet].filter((angle) => !uploadedAngleSet.has(angle));
-  const unsupportedFiles = photoSet.photos.filter(
-    (photo) => !["image/jpeg", "image/png", "image/webp"].includes(photo.fileType)
-  );
+  const unsupportedFiles = photoSet.photos.filter((photo) => !["image/jpeg", "image/png"].includes(photo.fileType));
   const tinyImages = photoSet.photos.filter((photo) => photo.width < 1200 || photo.height < 1200);
   const blurryImages = photoSet.photos.filter((photo) => photo.blurScore < 0.64);
   const duplicateImages = photoSet.photos.filter((photo) => photo.duplicateGroup);
@@ -57,8 +50,8 @@ export function runPhotoPreflight(photoSet: PhotoSet): PreflightCheck[] {
     {
       id: "photo-count",
       label: "Photo count",
-      status: photoSet.photos.length >= 8 && photoSet.photos.length <= 20 ? "pass" : "fail",
-      detail: `${photoSet.photos.length} photos uploaded; Phase 2 accepts 8-20.`
+      status: photoSet.photos.length === 4 ? "pass" : "fail",
+      detail: `${photoSet.photos.length} photos uploaded; the current HD Meshy flow requires exactly 4.`
     },
     {
       id: "file-types",
@@ -66,7 +59,7 @@ export function runPhotoPreflight(photoSet: PhotoSet): PreflightCheck[] {
       status: unsupportedFiles.length === 0 ? "pass" : "fail",
       detail:
         unsupportedFiles.length === 0
-          ? "All files are JPG, PNG, or WebP."
+          ? "All files are JPG or PNG."
           : `${unsupportedFiles.length} unsupported file needs replacement.`
     },
     {
@@ -138,8 +131,8 @@ export function runModelPackageChecks(asset: ModelAsset): ModelPackageCheck[] {
     {
       id: "textures",
       label: "Texture files",
-      status: asset.textureMax <= 2048 ? "pass" : "warning",
-      detail: `${asset.textureMax}px max texture; Phase 2 limit is 2048px.`
+      status: asset.textureMax >= 4096 ? "pass" : "warning",
+      detail: `${asset.textureMax}px max texture; HD target is 4096px.`
     },
     {
       id: "public-preview",
@@ -155,45 +148,3 @@ export function runModelPackageChecks(asset: ModelAsset): ModelPackageCheck[] {
     }
   ];
 }
-
-function createMockProvider(name: GenerationProviderName): GenerationProvider {
-  return {
-    name,
-    async createJob(input: GenerationProviderInput): Promise<GenerationProviderJob> {
-      return {
-        provider: name,
-        providerJobId: `${name}-${input.productId}-${input.photoSetId}`,
-        status: "queued",
-        rawPayload: {
-          imageCount: input.imageUrls.length,
-          category: input.category,
-          dimensionsMeters: input.dimensionsMeters
-        }
-      };
-    },
-    async getJob(providerJobId: string): Promise<GenerationProviderJob> {
-      return {
-        provider: name,
-        providerJobId,
-        status: "running",
-        rawPayload: { providerStatus: "processing" }
-      };
-    },
-    async getResult(providerJobId: string): Promise<GenerationProviderResult> {
-      return {
-        provider: name,
-        providerJobId,
-        glbUrl: `/models/${providerJobId}.glb`,
-        usdzUrl: `/models/${providerJobId}.usdz`,
-        thumbnailUrl: `/thumbnails/${providerJobId}.jpg`,
-        rawAssetUrls: [`/raw/${providerJobId}/mesh.glb`, `/raw/${providerJobId}/albedo.jpg`],
-        rawPayload: { completed: true }
-      };
-    }
-  };
-}
-
-export const generationProviders: Record<GenerationProviderName, GenerationProvider> = {
-  meshy: createMockProvider("meshy"),
-  tripo: createMockProvider("tripo")
-};
