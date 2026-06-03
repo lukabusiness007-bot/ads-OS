@@ -1,8 +1,11 @@
 import type { ReactNode } from "react";
 import { noIndexMetadata } from "@/lib/seo";
+import { requireAuthenticatedUser } from "@/lib/supabase/auth-guard";
 
 export const metadata = noIndexMetadata;
 
-export default function UploadLayout({ children }: { children: ReactNode }) {
+export default async function UploadLayout({ children }: { children: ReactNode }) {
+  await requireAuthenticatedUser("/upload");
+
   return children;
 }
