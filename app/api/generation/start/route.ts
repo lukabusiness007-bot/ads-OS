@@ -15,7 +15,7 @@ import {
 import { DEMO_ORG_ID, R2ConfigurationError, R2RequestError, createPresignedR2GetUrl } from "@/lib/storage/r2";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
 import { ensureCurrentOrganization } from "@/lib/supabase/data";
-import { createServerSupabaseClient } from "@/lib/supabase/server";
+import { createServerSupabaseClient, createServiceRoleSupabaseClient, isSupabaseServiceRoleConfigured } from "@/lib/supabase/server";
 import type {
   GenerationPhotoContentType,
   GenerationUploadPhoto,
@@ -45,6 +45,7 @@ export async function POST(request: Request) {
     }
 
     const organization = organizationResult?.organization ?? null;
+    const adminClient = organization && isSupabaseServiceRoleConfigured() ? createServiceRoleSupabaseClient() : null;
     const objectOwnerId = organization?.id ?? DEMO_ORG_ID;
     const validationError = validateStartPayload(productId, photos, objectOwnerId);
 
@@ -52,8 +53,8 @@ export async function POST(request: Request) {
       return NextResponse.json({ errorMessage: validationError }, { status: 400 });
     }
 
-    if (supabase && organization) {
-      await persistUploadedPhotos(supabase, organization.id, productId, photos);
+    if (organization) {
+      await persistUploadedPhotos(adminClient ?? supabase!, organization.id, productId, photos);
     }
 
     let taskId: string;
@@ -66,15 +67,15 @@ export async function POST(request: Request) {
         imageEnhancement: payload.imageEnhancement === true
       });
     } catch (error) {
-      if (supabase && organization) {
-        await markProductGenerationFailed(supabase, organization.id, productId);
+      if (organization) {
+        await markProductGenerationFailed(adminClient ?? supabase!, organization.id, productId);
       }
 
       throw error;
     }
 
-    if (supabase && organization) {
-      await createGenerationJobRecord(supabase, organization.id, productId, taskId);
+    if (organization) {
+      await createGenerationJobRecord(adminClient ?? supabase!, organization.id, productId, taskId);
     }
 
     const response: StartGenerationResponse = {
@@ -124,7 +125,7 @@ function validateStartPayload(productId: string, photos: GenerationUploadPhoto[]
 }
 
 async function persistUploadedPhotos(
-  supabase: Awaited<ReturnType<typeof createServerSupabaseClient>>,
+  supabase: Awaited<ReturnType<typeof createServerSupabaseClient>> | ReturnType<typeof createServiceRoleSupabaseClient>,
   organizationId: string,
   productId: string,
   photos: GenerationUploadPhoto[]
@@ -153,7 +154,7 @@ async function persistUploadedPhotos(
 }
 
 async function createGenerationJobRecord(
-  supabase: Awaited<ReturnType<typeof createServerSupabaseClient>>,
+  supabase: Awaited<ReturnType<typeof createServerSupabaseClient>> | ReturnType<typeof createServiceRoleSupabaseClient>,
   organizationId: string,
   productId: string,
   taskId: string
@@ -192,7 +193,7 @@ async function createGenerationJobRecord(
 }
 
 async function markProductGenerationFailed(
-  supabase: Awaited<ReturnType<typeof createServerSupabaseClient>>,
+  supabase: Awaited<ReturnType<typeof createServerSupabaseClient>> | ReturnType<typeof createServiceRoleSupabaseClient>,
   organizationId: string,
   productId: string
 ) {
