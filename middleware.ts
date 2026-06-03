@@ -1,5 +1,4 @@
 import { NextResponse, type NextRequest } from "next/server";
-import { createServerClient } from "@supabase/ssr";
 
 const protectedPrefixes = [
   "/admin",
@@ -15,10 +14,6 @@ const protectedPrefixes = [
   "/upload"
 ];
 
-type SupabaseAuthVerifier = {
-  getUser: () => Promise<{ data: { user: unknown | null } }>;
-};
-
 export async function middleware(request: NextRequest) {
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
@@ -27,28 +22,7 @@ export async function middleware(request: NextRequest) {
     return NextResponse.next();
   }
 
-  let response = NextResponse.next({
-    request
-  });
-  const supabase = createServerClient(supabaseUrl, supabaseAnonKey, {
-    cookies: {
-      getAll() {
-        return request.cookies.getAll();
-      },
-      setAll(cookiesToSet) {
-        cookiesToSet.forEach(({ name, value }) => request.cookies.set(name, value));
-        response = NextResponse.next({ request });
-        cookiesToSet.forEach(({ name, value, options }) => {
-          response.cookies.set(name, value, options);
-        });
-      }
-    }
-  });
-
-  const {
-    data: { user }
-  } = await (supabase.auth as unknown as SupabaseAuthVerifier).getUser();
-  const isAuthenticated = Boolean(user);
+  const isAuthenticated = hasSupabaseAuthCookie(request);
   const isProtected = protectedPrefixes.some((prefix) => request.nextUrl.pathname.startsWith(prefix));
 
   if (isProtected && !isAuthenticated) {
@@ -65,7 +39,13 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(url);
   }
 
-  return response;
+  return NextResponse.next();
+}
+
+function hasSupabaseAuthCookie(request: NextRequest) {
+  return request.cookies
+    .getAll()
+    .some(({ name, value }) => name.startsWith("sb-") && name.includes("auth-token") && Boolean(value));
 }
 
 export const config = {
