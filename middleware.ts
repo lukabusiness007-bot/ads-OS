@@ -15,6 +15,10 @@ const protectedPrefixes = [
   "/upload"
 ];
 
+type SupabaseAuthVerifier = {
+  getUser: () => Promise<{ data: { user: unknown | null } }>;
+};
+
 export async function middleware(request: NextRequest) {
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
@@ -41,8 +45,10 @@ export async function middleware(request: NextRequest) {
     }
   });
 
-  const { data: claimsData } = await supabase.auth.getClaims();
-  const isAuthenticated = Boolean(claimsData?.claims.sub);
+  const {
+    data: { user }
+  } = await (supabase.auth as unknown as SupabaseAuthVerifier).getUser();
+  const isAuthenticated = Boolean(user);
   const isProtected = protectedPrefixes.some((prefix) => request.nextUrl.pathname.startsWith(prefix));
 
   if (isProtected && !isAuthenticated) {
