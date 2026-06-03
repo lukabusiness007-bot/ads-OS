@@ -166,7 +166,7 @@ async function storeMeshyTaskAssets(
   const glbUpload = await uploadR2Object({
     key: createAssetKey(productId, taskId, "model.glb", organizationId),
     body: glb.body,
-    contentType: glb.contentType
+    contentType: "model/gltf-binary"
   });
 
   const usdz = task.model_urls?.usdz

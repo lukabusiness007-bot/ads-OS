@@ -10,10 +10,34 @@ type ModelViewerProps = {
   onArClick?: () => void
 }
 
+type LoadError = { message: string; detail?: string }
+
 export function ModelViewer({ asset, alt, onInteract, onArClick }: ModelViewerProps) {
+  const [loadError, setLoadError] = React.useState<LoadError | null>(null)
+  const viewerRef = React.useRef<HTMLElement | null>(null)
+
   React.useEffect(() => {
-    void import("@google/model-viewer")
+    import("@google/model-viewer").catch((err: unknown) => {
+      const message = err instanceof Error ? err.message : String(err)
+      setLoadError({ message: "3D viewer script failed to load.", detail: message })
+    })
   }, [])
+
+  React.useEffect(() => {
+    const el = viewerRef.current
+    if (!el) return
+
+    function onError(e: Event) {
+      const detail = (e as CustomEvent<{ type: string; sourceError?: Error }>).detail
+      setLoadError({
+        message: "Could not load 3D model.",
+        detail: detail?.sourceError?.message ?? detail?.type ?? "unknown error"
+      })
+    }
+
+    el.addEventListener("error", onError)
+    return () => el.removeEventListener("error", onError)
+  }, [asset?.glbUrl])
 
   if (!asset?.glbUrl) {
     return (
@@ -24,10 +48,23 @@ export function ModelViewer({ asset, alt, onInteract, onArClick }: ModelViewerPr
     )
   }
 
+  if (loadError) {
+    return (
+      <div className="viewer modelViewerFallback" aria-label="3D model load error">
+        <strong>Could not display model</strong>
+        <span>{loadError.message}</span>
+        {loadError.detail && (
+          <span className="muted" style={{ fontSize: 12 }}>{loadError.detail}</span>
+        )}
+      </div>
+    )
+  }
+
   const modelViewerProps = {
+    ref: viewerRef,
     src: asset.glbUrl,
     "ios-src": asset.usdzUrl,
-    poster: asset.posterUrl,
+    poster: asset.posterUrl || undefined,
     alt,
     ar: true,
     "ar-modes": "webxr scene-viewer quick-look",
