@@ -12,7 +12,19 @@ export async function GET(request: Request) {
   }
 
   const supabase = await createServerSupabaseClient();
-  await supabase.auth.exchangeCodeForSession(code);
+  const { data } = await supabase.auth.exchangeCodeForSession(code);
+
+  if (data.user) {
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("is_platform_admin")
+      .eq("id", data.user.id)
+      .single();
+
+    if (profile?.is_platform_admin) {
+      return NextResponse.redirect(new URL("/admin", url.origin));
+    }
+  }
 
   return NextResponse.redirect(new URL(next, url.origin));
 }

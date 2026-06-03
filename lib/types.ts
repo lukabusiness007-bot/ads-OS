@@ -373,3 +373,171 @@ export type ExpansionReadinessSignal = {
   target: string;
   status: "ready" | "watch" | "blocked";
 };
+
+// ---- Admin types ----
+
+export type AdminProfile = {
+  id: string;
+  full_name: string | null;
+  email: string | null;
+  username: string | null;
+  avatar_url: string | null;
+  is_platform_admin: boolean;
+  suspended_at: string | null;
+  default_language: string;
+  created_at: string;
+  updated_at: string;
+};
+
+export type AdminOrg = {
+  id: string;
+  name: string;
+  slug: string;
+  website: string | null;
+  plan_key: string;
+  suspended_at: string | null;
+  created_at: string;
+  updated_at: string;
+};
+
+export type AdminOrgMember = {
+  organization_id: string;
+  user_id: string;
+  role: "owner" | "admin" | "member";
+  created_at: string;
+  profile: Pick<AdminProfile, "id" | "full_name" | "email" | "username" | "suspended_at">;
+};
+
+export type AdminSubscription = {
+  id: string;
+  organization_id: string;
+  plan_key: string;
+  status: string;
+  current_period_start: string | null;
+  current_period_end: string | null;
+  created_at: string;
+};
+
+export type AdminProduct = {
+  id: string;
+  organization_id: string;
+  name: string;
+  slug: string;
+  category: string;
+  status: ProductStatus;
+  description: string | null;
+  customer_url: string | null;
+  price: string | null;
+  width_m: number | null;
+  height_m: number | null;
+  depth_m: number | null;
+  photo_count: number;
+  required_angles_complete: boolean;
+  created_at: string;
+  updated_at: string;
+};
+
+export type AdminModelAsset = {
+  id: string;
+  product_id: string;
+  generation_job_id: string | null;
+  glb_r2_key: string | null;
+  public_glb_url: string | null;
+  public_usdz_url: string | null;
+  public_poster_url: string | null;
+  file_size_mb: number | null;
+  triangle_count: number;
+  texture_max: number;
+  dimensions_present: boolean;
+  created_at: string;
+};
+
+export type AdminReview = {
+  id: string;
+  product_id: string;
+  organization_id: string;
+  status: "pending" | "approved" | "rejected" | "changes_requested";
+  reviewer_id: string | null;
+  reviewer_kind: "human" | "auto";
+  notes: string | null;
+  created_at: string;
+  updated_at: string;
+};
+
+export type AdminGenerationJob = {
+  id: string;
+  product_id: string;
+  provider: string;
+  status: "queued" | "running" | "succeeded" | "failed";
+  progress: number;
+  error_message: string | null;
+  started_at: string;
+  updated_at: string;
+};
+
+export type AdminAuditEntry = {
+  id: string;
+  actor_id: string | null;
+  action: string;
+  target_type: string;
+  target_id: string | null;
+  metadata: Record<string, unknown>;
+  created_at: string;
+  actor?: Pick<AdminProfile, "id" | "full_name" | "email" | "username"> | null;
+};
+
+export type AdminNotification = {
+  id: string;
+  product_id: string | null;
+  action: string;
+  read: boolean;
+  created_at: string;
+  product?: Pick<AdminProduct, "id" | "name" | "status"> | null;
+};
+
+export type AdminOverviewStats = {
+  awaiting_review: number;
+  generating: number;
+  generation_failed: number;
+  published: number;
+  total_merchants: number;
+  new_signups_7d: number;
+  new_signups_30d: number;
+  needs_attention: Array<{
+    id: string;
+    name: string;
+    status: ProductStatus;
+    org_name: string;
+    updated_at: string;
+  }>;
+};
+
+export type AdminUserRow = {
+  id: string;
+  full_name: string | null;
+  email: string | null;
+  username: string | null;
+  suspended_at: string | null;
+  created_at: string;
+  org_name: string | null;
+  org_id: string | null;
+  plan_key: string | null;
+  subscription_status: string | null;
+};
+
+export type AdminReviewQueueItem = {
+  product: AdminProduct;
+  org: Pick<AdminOrg, "id" | "name">;
+  review: AdminReview | null;
+  model_asset: AdminModelAsset | null;
+  latest_job: AdminGenerationJob | null;
+  photos: Array<{ id: string; r2_key: string; angle: string | null; file_name: string }>;
+};
+
+export type ReviewDecision = {
+  decision: "approved" | "rejected" | "regenerate";
+  notes?: string;
+  reviewerId: string;
+};
+
+export type AutoReviewVerdict = "approve" | "reject" | "needs_human";

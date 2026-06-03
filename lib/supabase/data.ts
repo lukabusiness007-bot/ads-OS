@@ -493,7 +493,7 @@ function mapModelAsset(row: DbRow): ModelAsset {
   return {
     glbUrl: String(row.public_glb_url ?? ""),
     usdzUrl: typeof row.public_usdz_url === "string" ? row.public_usdz_url : undefined,
-    posterUrl: typeof row.public_poster_url === "string" ? row.public_poster_url : undefined,
+    posterUrl: typeof row.public_poster_url === "string" ? row.public_poster_url : "",
     thumbnailUrl: typeof row.public_poster_url === "string" ? row.public_poster_url : undefined,
     fileSizeMb: toNumber(row.file_size_mb),
     triangleCount: toNumber(row.triangle_count),

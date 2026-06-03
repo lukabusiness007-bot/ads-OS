@@ -1,11 +1,15 @@
-import type { ReactNode } from "react";
+import { requirePlatformAdmin } from "@/lib/supabase/auth-guard";
+import { AdminShell } from "@/components/AdminShell";
 import { noIndexMetadata } from "@/lib/seo";
-import { requireAuthenticatedUser } from "@/lib/supabase/auth-guard";
+import type { Metadata } from "next";
 
-export const metadata = noIndexMetadata;
+export const metadata: Metadata = {
+  title: "Admin — Veridian",
+  ...noIndexMetadata
+};
 
-export default async function AdminLayout({ children }: { children: ReactNode }) {
-  await requireAuthenticatedUser("/admin");
+export default async function AdminLayout({ children }: { children: React.ReactNode }) {
+  await requirePlatformAdmin("/admin");
 
-  return children;
+  return <AdminShell>{children}</AdminShell>;
 }

@@ -1953,3 +1953,119 @@ h3 {
   max-width: 480px;
   width: 100%;
 }
+
+/* ─── Admin-specific ──────────────────────────────────────────── */
+
+.impersonationBanner {
+  align-items: center;
+  background: var(--warning);
+  color: #fff;
+  display: flex;
+  font-size: 13px;
+  font-weight: 600;
+  gap: 12px;
+  justify-content: center;
+  padding: 8px 16px;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.statCard {
+  align-items: flex-start;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 16px 20px;
+}
+
+.statCard .statNumber {
+  font-size: 32px;
+  font-weight: 700;
+  line-height: 1;
+  color: var(--ink);
+}
+
+.statCard .statLabel {
+  color: var(--muted);
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: .04em;
+}
+
+.adminTable {
+  border-collapse: collapse;
+  font-size: 13px;
+  width: 100%;
+}
+
+.adminTable th {
+  border-bottom: 2px solid var(--line);
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: .04em;
+  padding: 8px 12px;
+  text-align: left;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.adminTable td {
+  border-bottom: 1px solid var(--line);
+  padding: 10px 12px;
+  vertical-align: top;
+}
+
+.adminTable tr:last-child td {
+  border-bottom: none;
+}
+
+.adminTable tr:hover td {
+  background: var(--surface-2);
+}
+
+.inspectorGrid {
+  display: grid;
+  gap: 20px;
+  grid-template-columns: 1fr 1fr;
+}
+
+.inspectorActions {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.checkRow {
+  align-items: center;
+  display: flex;
+  font-size: 13px;
+  gap: 8px;
+  padding: 4px 0;
+}
+
+.checkDotPass  { background: var(--success); border-radius: 50%; flex-shrink: 0; height: 8px; width: 8px; }
+.checkDotWarn  { background: var(--warning); border-radius: 50%; flex-shrink: 0; height: 8px; width: 8px; }
+.checkDotFail  { background: var(--danger);  border-radius: 50%; flex-shrink: 0; height: 8px; width: 8px; }
+
+.photoStrip {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.photoThumb {
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  height: 80px;
+  object-fit: cover;
+  width: 80px;
+}
+
+@media (max-width: 900px) {
+  .inspectorGrid { grid-template-columns: 1fr; }
+}

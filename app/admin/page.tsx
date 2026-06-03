@@ -1,80 +1,93 @@
-import { AppShell } from "@/components/AppShell";
-import { ViewerMock } from "@/components/ViewerMock";
-import { runModelPackageChecks } from "@/lib/generation-pipeline";
-import { getReviewQueue } from "@/lib/mock-data";
+import Link from "next/link";
+import { requirePlatformAdmin } from "@/lib/supabase/auth-guard";
+import { getAdminOverviewStats } from "@/lib/admin/data";
+import { StatusBadge } from "@/components/StatusBadge";
+import type { ProductStatus } from "@/lib/types";
 
-export default function AdminReviewPage() {
-  const queue = getReviewQueue();
+export default async function AdminOverviewPage() {
+  const admin = await requirePlatformAdmin("/admin");
+  if (!admin) return null;
+
+  const stats = await getAdminOverviewStats(admin);
+
+  const statCards = [
+    { label: "Awaiting review", value: stats.awaiting_review, href: "/admin/review", tone: "warning" },
+    { label: "Generating", value: stats.generating, href: "/admin/review?status=generating", tone: "neutral" },
+    { label: "Generation failed", value: stats.generation_failed, href: "/admin/review?status=generation_failed", tone: "danger" },
+    { label: "Published", value: stats.published, href: "/admin/review?status=published", tone: "success" },
+    { label: "Total merchants", value: stats.total_merchants, href: "/admin/users", tone: "neutral" },
+    { label: "New signups (7d)", value: stats.new_signups_7d, href: "/admin/users", tone: "neutral" },
+    { label: "New signups (30d)", value: stats.new_signups_30d, href: "/admin/users", tone: "neutral" },
+  ] as const;
 
   return (
-    <AppShell>
+    <>
       <header>
-        <p className="eyebrow">Interna admin provera</p>
-        <h1>Pregled generisanih modela</h1>
-        <p className="muted">Odobri, odbij ili zatraži regeneraciju pre nego što se hostovana stranica objavi.</p>
+        <p className="eyebrow">Platform admin</p>
+        <h1>Overview</h1>
+        <p className="muted">At-a-glance health across all merchants and models.</p>
       </header>
 
-      <section className="grid two">
-        {queue.map((item) => (
-          <article className="panel stack" key={item.id}>
-            <div className="row">
-              <div>
-                <h2>{item.product?.name}</h2>
-                <p className="muted">{item.product?.customerUrl}</p>
+      <section>
+        <div className="grid four" style={{ gap: 12, marginBottom: 32 }}>
+          {statCards.map((card) => (
+            <Link
+              key={card.label}
+              href={card.href}
+              style={{ textDecoration: "none" }}
+            >
+              <div className="statCard">
+                <span className="statNumber">{card.value}</span>
+                <span className="statLabel">{card.label}</span>
               </div>
-              <span className="badge warning">{item.status}</span>
-            </div>
-            <ViewerMock />
-            <ul className="checklist">
-              {item.product?.modelAsset &&
-                runModelPackageChecks(item.product.modelAsset).map((check) => (
-                  <li key={check.id}>
-                    <span className="checkDot" />
-                    <span>
-                      {check.label}: {check.status}
-                    </span>
-                  </li>
-                ))}
-              <li>
-                <span className="checkDot" />
-                <span>Liči na proizvod</span>
-              </li>
-              <li>
-                <span className="checkDot" />
-                <span>Orijentacija ispravna</span>
-              </li>
-              <li>
-                <span className="checkDot" />
-                <span>Razmera verodostojna</span>
-              </li>
-              <li>
-                <span className="checkDot" />
-                <span>AR test pokretanja na čekanju</span>
-              </li>
-            </ul>
-            <div className="row">
-              <button className="button accent" type="button">
-                Odobri
-              </button>
-              <button className="button secondary" type="button">
-                Zatraži regeneraciju
-              </button>
-              <button className="button secondary" type="button">
-                Odbij
-              </button>
-            </div>
-          </article>
-        ))}
-
-        <aside className="panel stack">
-          <h2>Pravila pregleda</h2>
-          <p className="muted">
-            Odobrenje proverava vizuelni prodajni kvalitet, a ne CAD preciznost. Neuspeli modeli ostaju privatni i ne mogu biti otvoreni
-            na javnom URL-u.
-          </p>
-          <span className="badge success">Ručna kapija aktivna</span>
-        </aside>
+            </Link>
+          ))}
+        </div>
       </section>
-    </AppShell>
+
+      <section className="panel stack">
+        <div className="row">
+          <h2 style={{ margin: 0 }}>Needs your attention</h2>
+          <Link href="/admin/review" className="button secondary sm">
+            View all →
+          </Link>
+        </div>
+
+        {stats.needs_attention.length === 0 ? (
+          <p className="muted">All clear — nothing pending review or failed generation.</p>
+        ) : (
+          <table className="adminTable">
+            <thead>
+              <tr>
+                <th>Product</th>
+                <th>Merchant</th>
+                <th>Status</th>
+                <th>Updated</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody>
+              {stats.needs_attention.map((item) => (
+                <tr key={item.id}>
+                  <td style={{ fontWeight: 600 }}>{item.name}</td>
+                  <td className="muted">{item.org_name}</td>
+                  <td>
+                    <StatusBadge status={item.status as ProductStatus} />
+                  </td>
+                  <td className="muted" style={{ fontSize: 12 }}>
+                    {new Date(item.updated_at).toLocaleString()}
+                  </td>
+                  <td>
+                    <Link href={`/admin/review/${item.id}`} className="button secondary sm">
+                      Review →
+                    </Link>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        )}
+      </section>
+    </>
   );
 }

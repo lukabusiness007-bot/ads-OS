@@ -14,32 +14,76 @@ export default function LoginPage() {
   );
 }
 
+function isEmailAddress(value: string) {
+  return value.includes("@");
+}
+
+async function resolveIdentifier(identifier: string): Promise<{ email: string | null; error?: string }> {
+  if (isEmailAddress(identifier)) {
+    return { email: identifier };
+  }
+
+  // Username → email lookup via server route (uses service role, never reaches browser)
+  try {
+    const res = await fetch("/api/auth/resolve-username", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ username: identifier })
+    });
+    if (!res.ok) {
+      return { email: null, error: "Invalid username or password." };
+    }
+    const data = await res.json();
+    return { email: data.email };
+  } catch {
+    return { email: null, error: "Could not resolve username." };
+  }
+}
+
 function LoginPageContent() {
   const searchParams = useSearchParams();
   const next = searchParams.get("next") || "/dashboard";
-  const [email, setEmail] = useState("");
+  const [identifier, setIdentifier] = useState("");
   const [password, setPassword] = useState("");
   const [message, setMessage] = useState("");
   const configured = isSupabaseConfigured();
 
   async function signInWithPassword() {
     setMessage("");
+
+    const { email, error: resolveError } = await resolveIdentifier(identifier.trim());
+    if (!email) {
+      setMessage(resolveError ?? "Invalid username or password.");
+      return;
+    }
+
     const supabase = createBrowserSupabaseClient();
-    const { error } = await supabase.auth.signInWithPassword({ email, password });
+    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
 
     if (error) {
       setMessage(error.message);
       return;
     }
 
-    window.location.href = next;
+    // Check is_platform_admin via profile (client reads its own row; RLS permits this)
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("is_platform_admin")
+      .eq("id", data.user.id)
+      .single();
+
+    if (profile?.is_platform_admin) {
+      window.location.href = "/admin";
+    } else {
+      window.location.href = next;
+    }
   }
 
   async function signUpWithPassword() {
     setMessage("");
     const supabase = createBrowserSupabaseClient();
     const { error } = await supabase.auth.signUp({
-      email,
+      email: identifier.trim(),
       password,
       options: {
         emailRedirectTo: `${window.location.origin}/auth/callback?next=${encodeURIComponent(next)}`
@@ -64,6 +108,8 @@ function LoginPageContent() {
     }
   }
 
+  const isUsername = identifier.trim() && !isEmailAddress(identifier.trim());
+
   return (
     <LoginShell>
       <>
@@ -79,8 +125,15 @@ function LoginPageContent() {
         ) : (
           <>
             <div className="field">
-              <label htmlFor="email">Email</label>
-              <input id="email" type="email" value={email} onChange={(event) => setEmail(event.target.value)} />
+              <label htmlFor="identifier">Email or username</label>
+              <input
+                id="identifier"
+                type={isUsername ? "text" : "email"}
+                value={identifier}
+                autoComplete="username email"
+                onChange={(event) => setIdentifier(event.target.value)}
+                onKeyDown={(e) => e.key === "Enter" && signInWithPassword()}
+              />
             </div>
             <div className="field">
               <label htmlFor="password">Password</label>
@@ -88,7 +141,9 @@ function LoginPageContent() {
                 id="password"
                 type="password"
                 value={password}
+                autoComplete="current-password"
                 onChange={(event) => setPassword(event.target.value)}
+                onKeyDown={(e) => e.key === "Enter" && signInWithPassword()}
               />
             </div>
             {message && <div className="assumptionNote">{message}</div>}
@@ -96,9 +151,11 @@ function LoginPageContent() {
               <button className="button accent" type="button" onClick={signInWithPassword}>
                 Sign in
               </button>
-              <button className="button secondary" type="button" onClick={signUpWithPassword}>
-                Create account
-              </button>
+              {!isUsername && (
+                <button className="button secondary" type="button" onClick={signUpWithPassword}>
+                  Create account
+                </button>
+              )}
               <button className="button ghost" type="button" onClick={signInWithGoogle}>
                 Continue with Google
               </button>

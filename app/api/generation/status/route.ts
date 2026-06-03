@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { sendAdminNotificationEmail } from "@/lib/admin/email";
 import {
   getFriendlyMeshyRequestErrorMessage,
   getFriendlyMeshyTaskMessage,
@@ -307,6 +308,16 @@ async function persistCompletedGeneration(
     status: "pending",
     notes: "Generated model is ready for quality review."
   });
+
+  // Best-effort admin email — never blocks the response
+  const { data: productRow } = await supabase.from("products").select("name").eq("id", productId).maybeSingle();
+  const { data: orgRow } = await supabase.from("organizations").select("name").eq("id", organizationId).maybeSingle();
+  sendAdminNotificationEmail({
+    productId,
+    productName: (productRow as { name?: string } | null)?.name ?? "Unknown product",
+    merchantName: (orgRow as { name?: string } | null)?.name ?? "Unknown merchant",
+    action: "awaiting_review"
+  }).catch(() => undefined);
 }
 
 async function downloadRemoteAsset(url: string, fallbackContentType: string) {
@@ -337,6 +348,16 @@ async function markProductGenerationFailed(
     })
     .eq("organization_id", organizationId)
     .eq("id", productId);
+
+  // Best-effort admin email
+  const { data: productRow } = await supabase.from("products").select("name").eq("id", productId).maybeSingle();
+  const { data: orgRow } = await supabase.from("organizations").select("name").eq("id", organizationId).maybeSingle();
+  sendAdminNotificationEmail({
+    productId,
+    productName: (productRow as { name?: string } | null)?.name ?? "Unknown product",
+    merchantName: (orgRow as { name?: string } | null)?.name ?? "Unknown merchant",
+    action: "generation_failed"
+  }).catch(() => undefined);
 }
 
 async function insertGenerationJobEvent(
