@@ -7,6 +7,24 @@ type R2Config = {
   client: S3Client;
 };
 
+export class R2ConfigurationError extends Error {
+  constructor() {
+    super("R2 storage is not configured.");
+    this.name = "R2ConfigurationError";
+  }
+}
+
+export class R2RequestError extends Error {
+  operation: string;
+
+  constructor(operation: string, cause: unknown) {
+    super(`R2 request failed while ${operation}.`);
+    this.name = "R2RequestError";
+    this.operation = operation;
+    this.cause = cause;
+  }
+}
+
 export type R2UploadResult = {
   key: string;
   url: string;
@@ -38,15 +56,19 @@ export async function uploadR2Object({
 }: R2UploadInput): Promise<R2UploadResult> {
   const config = getR2Config();
 
-  await config.client.send(
-    new PutObjectCommand({
-      Bucket: config.bucket,
-      Key: key,
-      Body: body,
-      ContentType: contentType,
-      CacheControl: cacheControl
-    })
-  );
+  try {
+    await config.client.send(
+      new PutObjectCommand({
+        Bucket: config.bucket,
+        Key: key,
+        Body: body,
+        ContentType: contentType,
+        CacheControl: cacheControl
+      })
+    );
+  } catch (error) {
+    throw new R2RequestError("uploading an object", error);
+  }
 
   return {
     key,
@@ -61,16 +83,22 @@ export async function createPresignedR2PutUrl({
   expiresIn = 15 * 60
 }: R2PresignedPutInput) {
   const config = getR2Config();
-  const uploadUrl = await getSignedUrl(
-    config.client,
-    new PutObjectCommand({
-      Bucket: config.bucket,
-      Key: key,
-      ContentType: contentType,
-      CacheControl: cacheControl
-    }),
-    { expiresIn }
-  );
+  let uploadUrl: string;
+
+  try {
+    uploadUrl = await getSignedUrl(
+      config.client,
+      new PutObjectCommand({
+        Bucket: config.bucket,
+        Key: key,
+        ContentType: contentType,
+        CacheControl: cacheControl
+      }),
+      { expiresIn }
+    );
+  } catch (error) {
+    throw new R2RequestError("creating a signed upload URL", error);
+  }
 
   return {
     key,
@@ -85,14 +113,18 @@ export async function createPresignedR2PutUrl({
 export async function createPresignedR2GetUrl(key: string, expiresIn = 15 * 60) {
   const config = getR2Config();
 
-  return getSignedUrl(
-    config.client,
-    new GetObjectCommand({
-      Bucket: config.bucket,
-      Key: key
-    }),
-    { expiresIn }
-  );
+  try {
+    return await getSignedUrl(
+      config.client,
+      new GetObjectCommand({
+        Bucket: config.bucket,
+        Key: key
+      }),
+      { expiresIn }
+    );
+  } catch (error) {
+    throw new R2RequestError("creating a signed download URL", error);
+  }
 }
 
 export function createProductPhotoKey(productId: string, fileName: string, index: number) {
@@ -128,7 +160,7 @@ function getR2Config(): R2Config {
   const publicBaseUrl = process.env.R2_PUBLIC_BASE_URL;
 
   if (!endpoint || !accessKeyId || !secretAccessKey || !bucket || !publicBaseUrl) {
-    throw new Error("R2 storage is not configured.");
+    throw new R2ConfigurationError();
   }
 
   cachedConfig = {

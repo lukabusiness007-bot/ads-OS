@@ -12,7 +12,7 @@ import {
   MeshyConfigurationError,
   MeshyRequestError
 } from "@/lib/providers/meshy";
-import { DEMO_ORG_ID, createPresignedR2GetUrl } from "@/lib/storage/r2";
+import { DEMO_ORG_ID, R2ConfigurationError, R2RequestError, createPresignedR2GetUrl } from "@/lib/storage/r2";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
 import { ensureCurrentOrganization } from "@/lib/supabase/data";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
@@ -239,15 +239,29 @@ function handleStartError(error: unknown) {
     );
   }
 
-  if (error instanceof Error && error.message === "R2 storage is not configured.") {
+  if (error instanceof R2ConfigurationError) {
     return NextResponse.json(
-      { errorMessage: "Storage is not configured yet. Add the R2 environment variables and try again." },
+      {
+        errorMessage: "Storage is not configured yet. Add the R2 environment variables and try again.",
+        failureCode: "storage_not_configured"
+      },
       { status: 500 }
     );
   }
 
+  if (error instanceof R2RequestError) {
+    return NextResponse.json(
+      {
+        errorMessage:
+          "Storage could not create private photo links for generation. Check the R2 bucket name, endpoint, and access key permissions.",
+        failureCode: "storage_request_failed"
+      },
+      { status: 502 }
+    );
+  }
+
   return NextResponse.json(
-    { errorMessage: "We could not start generation. Please try again." },
+    { errorMessage: "We could not start generation. Please try again.", failureCode: "generation_start_failed" },
     { status: 500 }
   );
 }
@@ -261,6 +275,14 @@ function toSafeErrorLog(error: unknown) {
     };
   }
 
+  if (error instanceof R2RequestError) {
+    return {
+      name: error.name,
+      operation: error.operation,
+      cause: getSafeCause(error.cause)
+    };
+  }
+
   if (error instanceof Error) {
     return {
       name: error.name,
@@ -269,4 +291,15 @@ function toSafeErrorLog(error: unknown) {
   }
 
   return { message: String(error) };
+}
+
+function getSafeCause(cause: unknown) {
+  if (cause instanceof Error) {
+    return {
+      name: cause.name,
+      message: cause.message
+    };
+  }
+
+  return String(cause);
 }

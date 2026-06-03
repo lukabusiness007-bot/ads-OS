@@ -9,7 +9,13 @@ import {
   MeshyRequestError,
   type MeshyTask
 } from "@/lib/providers/meshy";
-import { createModelAssetKey, createOrganizationModelAssetKey, uploadR2Object } from "@/lib/storage/r2";
+import {
+  R2ConfigurationError,
+  R2RequestError,
+  createModelAssetKey,
+  createOrganizationModelAssetKey,
+  uploadR2Object
+} from "@/lib/storage/r2";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
 import { getCurrentOrganization } from "@/lib/supabase/data";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
@@ -362,15 +368,19 @@ function createPackagingFailureResponse(error: unknown, statusCode = 200) {
       message,
       errorMessage: message,
       failureCode: getPackagingFailureCode(error),
-      retryable: !(error instanceof Error && error.message === "R2 storage is not configured.")
+      retryable: !(error instanceof R2ConfigurationError)
     } satisfies GenerationStatusResponse,
     { status: statusCode }
   );
 }
 
 function getPackagingFailureMessage(error: unknown) {
-  if (error instanceof Error && error.message === "R2 storage is not configured.") {
+  if (error instanceof R2ConfigurationError) {
     return "The model was generated, but asset storage is not configured. Add the R2 environment variables and poll status again.";
+  }
+
+  if (error instanceof R2RequestError) {
+    return "The model was generated, but storage could not save the GLB/USDZ files. Check the R2 bucket, endpoint, access key permissions, and public base URL.";
   }
 
   if (error instanceof Error && error.message === "Meshy did not return a GLB model.") {
@@ -385,8 +395,12 @@ function getPackagingFailureMessage(error: unknown) {
 }
 
 function getPackagingFailureCode(error: unknown) {
-  if (error instanceof Error && error.message === "R2 storage is not configured.") {
+  if (error instanceof R2ConfigurationError) {
     return "storage_not_configured";
+  }
+
+  if (error instanceof R2RequestError) {
+    return "storage_request_failed";
   }
 
   if (error instanceof Error && error.message === "Meshy did not return a GLB model.") {
@@ -431,8 +445,12 @@ function handleStatusError(error: unknown) {
     );
   }
 
-  if (error instanceof Error && error.message === "R2 storage is not configured.") {
+  if (error instanceof R2ConfigurationError) {
     return createPackagingFailureResponse(error, 500);
+  }
+
+  if (error instanceof R2RequestError) {
+    return createPackagingFailureResponse(error, 502);
   }
 
   return NextResponse.json(
@@ -455,6 +473,14 @@ function toSafeErrorLog(error: unknown) {
     };
   }
 
+  if (error instanceof R2RequestError) {
+    return {
+      name: error.name,
+      operation: error.operation,
+      cause: getSafeCause(error.cause)
+    };
+  }
+
   if (error instanceof Error) {
     return {
       name: error.name,
@@ -463,4 +489,15 @@ function toSafeErrorLog(error: unknown) {
   }
 
   return { message: String(error) };
+}
+
+function getSafeCause(cause: unknown) {
+  if (cause instanceof Error) {
+    return {
+      name: cause.name,
+      message: cause.message
+    };
+  }
+
+  return String(cause);
 }

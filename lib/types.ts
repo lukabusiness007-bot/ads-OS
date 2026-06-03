@@ -117,6 +117,7 @@ export type CreateGenerationUploadsResponse = {
     headers: Record<string, string>;
   }>;
   errorMessage?: string;
+  failureCode?: string;
 };
 
 export type StartGenerationRequest = {
@@ -126,9 +127,11 @@ export type StartGenerationRequest = {
 };
 
 export type StartGenerationResponse = {
-  productId: string;
-  taskId: string;
-  status: "queued";
+  productId?: string;
+  taskId?: string;
+  status?: "queued";
+  errorMessage?: string;
+  failureCode?: string;
 };
 
 export type GenerationStatusResponse = {

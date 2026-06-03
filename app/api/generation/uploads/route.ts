@@ -10,7 +10,9 @@ import {
 import {
   createOrganizationProductPhotoKey,
   createPresignedR2PutUrl,
-  createProductPhotoKey
+  createProductPhotoKey,
+  R2ConfigurationError,
+  R2RequestError
 } from "@/lib/storage/r2";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
 import { ensureCurrentOrganization } from "@/lib/supabase/data";
@@ -177,15 +179,63 @@ function handleUploadsError(error: unknown) {
     );
   }
 
-  if (error instanceof Error && error.message === "R2 storage is not configured.") {
+  if (error instanceof R2ConfigurationError) {
     return NextResponse.json(
-      { errorMessage: "Storage is not configured yet. Add the R2 environment variables and try again." },
+      {
+        errorMessage: "Storage is not configured yet. Add the R2 environment variables and try again.",
+        failureCode: "storage_not_configured"
+      },
       { status: 500 }
     );
   }
 
+  if (error instanceof R2RequestError) {
+    console.error("Upload preparation storage request failed", toSafeErrorLog(error));
+
+    return NextResponse.json(
+      {
+        errorMessage:
+          "Storage could not create upload links. Check the R2 bucket name, endpoint, access key permissions, and CORS policy.",
+        failureCode: "storage_request_failed"
+      },
+      { status: 502 }
+    );
+  }
+
+  console.error("Upload preparation failed", toSafeErrorLog(error));
+
   return NextResponse.json(
-    { errorMessage: "We could not prepare photo uploads. Please try again." },
+    { errorMessage: "We could not prepare photo uploads. Please try again.", failureCode: "upload_preparation_failed" },
     { status: 500 }
   );
+}
+
+function toSafeErrorLog(error: unknown) {
+  if (error instanceof R2RequestError) {
+    return {
+      name: error.name,
+      operation: error.operation,
+      cause: getSafeCause(error.cause)
+    };
+  }
+
+  if (error instanceof Error) {
+    return {
+      name: error.name,
+      message: error.message
+    };
+  }
+
+  return { message: String(error) };
+}
+
+function getSafeCause(cause: unknown) {
+  if (cause instanceof Error) {
+    return {
+      name: cause.name,
+      message: cause.message
+    };
+  }
+
+  return String(cause);
 }
