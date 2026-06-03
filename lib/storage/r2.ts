@@ -172,7 +172,13 @@ function getR2Config(): R2Config {
       credentials: {
         accessKeyId,
         secretAccessKey
-      }
+      },
+      // Recent AWS SDK v3 adds a CRC32 checksum (computed at signing time over an
+      // empty body) into presigned PUT URLs, which breaks browser uploads to R2:
+      // the actual file body fails the baked-in checksum. Only add checksums when
+      // the operation strictly requires them so presigned URLs stay clean.
+      requestChecksumCalculation: "WHEN_REQUIRED",
+      responseChecksumValidation: "WHEN_REQUIRED"
     })
   };
 
