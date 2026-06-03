@@ -18,7 +18,7 @@ import {
 } from "@/lib/storage/r2";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
 import { getCurrentOrganization } from "@/lib/supabase/data";
-import { createServerSupabaseClient } from "@/lib/supabase/server";
+import { createServerSupabaseClient, createServiceRoleSupabaseClient, isSupabaseServiceRoleConfigured } from "@/lib/supabase/server";
 import type { GenerationStatusResponse, ModelAsset } from "@/lib/types";
 
 export const runtime = "nodejs";
@@ -44,6 +44,8 @@ export async function GET(request: Request) {
   try {
     const supabase = isSupabaseConfigured() ? await createServerSupabaseClient() : null;
     const organization = supabase ? await getCurrentOrganization(supabase) : null;
+    const adminClient = organization && isSupabaseServiceRoleConfigured() ? createServiceRoleSupabaseClient() : null;
+    const writeClient = adminClient ?? supabase;
     const task = await getMeshyMultiImageTask(taskId);
     const status = mapMeshyStatus(task.status);
 
@@ -58,9 +60,9 @@ export async function GET(request: Request) {
         friendlyCode: failure.code
       });
 
-      if (supabase && organization) {
+      if (writeClient && organization) {
         const jobId = await updateGenerationJobStatus(
-          supabase,
+          writeClient,
           organization.id,
           productId,
           taskId,
@@ -69,8 +71,8 @@ export async function GET(request: Request) {
           task,
           failure.message
         );
-        await markProductGenerationFailed(supabase, organization.id, productId);
-        await insertGenerationJobEvent(supabase, organization.id, jobId, "generation_failed", failure.message, {
+        await markProductGenerationFailed(writeClient, organization.id, productId);
+        await insertGenerationJobEvent(writeClient, organization.id, jobId, "generation_failed", failure.message, {
           code: failure.code,
           retryable: failure.retryable,
           providerStatus: task.status
@@ -88,8 +90,8 @@ export async function GET(request: Request) {
     }
 
     if (status !== "succeeded") {
-      if (supabase && organization) {
-        await updateGenerationJobStatus(supabase, organization.id, productId, taskId, status, task.progress ?? 0, task);
+      if (writeClient && organization) {
+        await updateGenerationJobStatus(writeClient, organization.id, productId, taskId, status, task.progress ?? 0, task);
       }
 
       return NextResponse.json({
@@ -113,9 +115,9 @@ export async function GET(request: Request) {
         error: toSafeErrorLog(error)
       });
 
-      if (supabase && organization) {
+      if (writeClient && organization) {
         const jobId = await updateGenerationJobStatus(
-          supabase,
+          writeClient,
           organization.id,
           productId,
           taskId,
@@ -124,8 +126,8 @@ export async function GET(request: Request) {
           task,
           failureMessage
         );
-        await markProductGenerationFailed(supabase, organization.id, productId);
-        await insertGenerationJobEvent(supabase, organization.id, jobId, "packaging_failed", failureMessage, {
+        await markProductGenerationFailed(writeClient, organization.id, productId);
+        await insertGenerationJobEvent(writeClient, organization.id, jobId, "packaging_failed", failureMessage, {
           providerStatus: task.status
         });
       }
@@ -133,8 +135,8 @@ export async function GET(request: Request) {
       return createPackagingFailureResponse(error);
     }
 
-    if (supabase && organization) {
-      await persistCompletedGeneration(supabase, organization.id, productId, taskId, asset, task);
+    if (writeClient && organization) {
+      await persistCompletedGeneration(writeClient, organization.id, productId, taskId, asset, task);
     }
 
     return NextResponse.json({
@@ -207,7 +209,7 @@ function createAssetKey(productId: string, taskId: string, fileName: string, org
 }
 
 async function updateGenerationJobStatus(
-  supabase: Awaited<ReturnType<typeof createServerSupabaseClient>>,
+  supabase: Awaited<ReturnType<typeof createServerSupabaseClient>> | ReturnType<typeof createServiceRoleSupabaseClient>,
   organizationId: string,
   productId: string,
   taskId: string,
@@ -241,7 +243,7 @@ async function updateGenerationJobStatus(
 }
 
 async function persistCompletedGeneration(
-  supabase: Awaited<ReturnType<typeof createServerSupabaseClient>>,
+  supabase: Awaited<ReturnType<typeof createServerSupabaseClient>> | ReturnType<typeof createServiceRoleSupabaseClient>,
   organizationId: string,
   productId: string,
   taskId: string,
@@ -323,7 +325,7 @@ async function downloadRemoteAsset(url: string, fallbackContentType: string) {
 }
 
 async function markProductGenerationFailed(
-  supabase: Awaited<ReturnType<typeof createServerSupabaseClient>>,
+  supabase: Awaited<ReturnType<typeof createServerSupabaseClient>> | ReturnType<typeof createServiceRoleSupabaseClient>,
   organizationId: string,
   productId: string
 ) {
@@ -338,7 +340,7 @@ async function markProductGenerationFailed(
 }
 
 async function insertGenerationJobEvent(
-  supabase: Awaited<ReturnType<typeof createServerSupabaseClient>>,
+  supabase: Awaited<ReturnType<typeof createServerSupabaseClient>> | ReturnType<typeof createServiceRoleSupabaseClient>,
   organizationId: string,
   jobId: string | null,
   eventType: string,
