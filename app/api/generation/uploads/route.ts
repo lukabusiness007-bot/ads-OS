@@ -48,7 +48,11 @@ export async function POST(request: Request) {
     }
 
     const organization = organizationResult?.organization ?? null;
-    const adminClient = isSupabaseServiceRoleConfigured() ? createServiceRoleSupabaseClient() : null;
+    const serviceRoleAvailable = isSupabaseServiceRoleConfigured();
+    const adminClient = serviceRoleAvailable ? createServiceRoleSupabaseClient() : null;
+
+    console.log("[uploads] org_id:", organization?.id ?? "none", "| service_role:", serviceRoleAvailable, "| supabase_configured:", isSupabaseConfigured());
+
     const databaseProductId = organization
       ? await createProductRecord(adminClient ?? supabase!, organization.id, payload)
       : productId;
@@ -110,12 +114,12 @@ async function createProductRecord(
     .single();
 
   if (error || !data) {
-    console.error("products insert failed", {
-      code: (error as { code?: string } | null)?.code,
+    console.error("[uploads] PRODUCT INSERT FAILED >>>", JSON.stringify({
+      code: error?.code,
       message: error?.message,
-      details: (error as { details?: string } | null)?.details,
-      hint: (error as { hint?: string } | null)?.hint
-    });
+      details: error?.details,
+      hint: error?.hint
+    }));
     throw new Error("Product could not be created.");
   }
 
