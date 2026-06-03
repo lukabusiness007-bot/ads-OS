@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import { RuntimeDiagnosticsPopup } from "@/components/RuntimeDiagnosticsPopup";
 import { LanguageProvider } from "@/lib/lang";
 import { jsonLd, organizationJsonLd, siteConfig } from "@/lib/seo";
 
@@ -27,6 +28,7 @@ export default function RootLayout({
       <body>
         <script type="application/ld+json" dangerouslySetInnerHTML={jsonLd(organizationJsonLd())} />
         <LanguageProvider>{children}</LanguageProvider>
+        <RuntimeDiagnosticsPopup />
       </body>
     </html>
   );
