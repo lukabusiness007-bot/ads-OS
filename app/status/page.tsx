@@ -17,10 +17,17 @@ export default function StatusPage() {
 
 function StatusPageContent() {
   const searchParams = useSearchParams();
-  const [storedProduct, setStoredProduct] = useState<StoredGeneratedProduct | null>(() => readStoredProduct());
+  const [storedProduct, setStoredProduct] = useState<StoredGeneratedProduct | null>(null);
   const [statusPayload, setStatusPayload] = useState<GenerationStatusResponse | null>(null);
   const [isPolling, setIsPolling] = useState(false);
   const [pollError, setPollError] = useState("");
+
+  // Read from localStorage only after mount so the server-rendered HTML and the
+  // first client render match. Reading it in the useState initializer caused a
+  // hydration mismatch (React error #418).
+  useEffect(() => {
+    setStoredProduct(readStoredProduct());
+  }, []);
 
   const productId = searchParams.get("productId") ?? storedProduct?.productId ?? "";
   const taskId = searchParams.get("taskId") ?? storedProduct?.taskId ?? "";
