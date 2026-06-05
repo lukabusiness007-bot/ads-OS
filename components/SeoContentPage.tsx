@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { MarketingNav } from "@/components/marketing-nav";
+import { BackToTop } from "@/components/BackToTop";
 import type { SeoContentPage as SeoContentPageType } from "@/lib/seo-content";
 import {
   getSeoContentPath
@@ -109,6 +110,7 @@ export function SeoContentPage({ page }: SeoContentPageProps) {
           </div>
         </section>
       </main>
+      <BackToTop />
     </div>
   );
 }

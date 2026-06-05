@@ -124,7 +124,7 @@ export function organizationJsonLd() {
 export function webApplicationJsonLd(lang: SeoLang, path: string) {
   return {
     "@context": "https://schema.org",
-    "@type": "WebApplication",
+    "@type": "SoftwareApplication",
     name: siteConfig.fullName,
     url: absoluteUrl(path),
     applicationCategory: "BusinessApplication",
@@ -134,11 +134,24 @@ export function webApplicationJsonLd(lang: SeoLang, path: string) {
       lang === "sr"
         ? "SaaS platforma za 3D i AR stranice proizvoda namenjena prodavnicama nameštaja."
         : "SaaS platform for verified 3D and AR product pages built for furniture stores.",
+    featureList:
+      lang === "sr"
+        ? ["3D pregled proizvoda", "App-free AR", "Analitika angažovanja", "Upravljanje katalogom"]
+        : ["3D product viewer", "App-free AR", "Engagement analytics", "Catalog management"],
     offers: {
       "@type": "Offer",
       price: "39",
       priceCurrency: "EUR",
-      category: "Subscription"
+      priceSpecification: {
+        "@type": "UnitPriceSpecification",
+        price: "39",
+        priceCurrency: "EUR",
+        referenceQuantity: {
+          "@type": "QuantitativeValue",
+          value: "1",
+          unitCode: "MON"
+        }
+      }
     }
   };
 }

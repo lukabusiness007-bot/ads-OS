@@ -7,7 +7,7 @@ import { jsonLd, organizationJsonLd, siteConfig } from "@/lib/seo";
 export const metadata: Metadata = {
   metadataBase: new URL(siteConfig.url),
   title: {
-    default: "AR stranice proizvoda koje pomažu kupcima da kupuju sa sigurnošću | Veridian",
+    default: "AR stranice proizvoda — kupujte sa sigurnošću | Veridian",
     template: "%s | Veridian"
   },
   description:

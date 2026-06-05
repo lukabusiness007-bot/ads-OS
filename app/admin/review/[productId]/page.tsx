@@ -132,6 +132,8 @@ export default async function ReviewInspectorPage({
                     src={url}
                     alt={`Product photo ${i + 1}`}
                     className="photoThumb"
+                    loading="lazy"
+                    decoding="async"
                   />
                 ))}
               </div>

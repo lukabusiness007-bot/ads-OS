@@ -2,6 +2,21 @@
 @tailwind components;
 @tailwind utilities;
 
+html {
+  scroll-behavior: smooth;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+}
+
+/* offset for fixed nav (~64px) */
+:where([id]) {
+  scroll-margin-top: 5rem;
+}
+
 @layer base {
   :root {
     --background: 0 0% 100%;

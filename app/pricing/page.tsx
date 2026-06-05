@@ -2,6 +2,7 @@ import type { Metadata } from "next"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { MarketingNav } from "@/components/marketing-nav"
+import { BackToTop } from "@/components/BackToTop"
 import { billingTiers, modelCreationAddons, overagePrices } from "@/lib/mock-data"
 import { CheckCircle2, ArrowRight } from "lucide-react"
 import {
@@ -345,6 +346,7 @@ export default function PricingPage() {
           </div>
         </section>
       </main>
+      <BackToTop />
     </div>
   )
 }

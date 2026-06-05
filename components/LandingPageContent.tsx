@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button"
 import { MarketingNav } from "@/components/marketing-nav"
 import { HeroGem } from "@/components/HeroGem"
 import { ArrowRight, CheckCircle2, Shield } from "lucide-react"
+import { BackToTop } from "@/components/BackToTop"
 import type { Lang } from "@/lib/translations"
 import { translations } from "@/lib/translations"
 
@@ -302,6 +303,7 @@ export function LandingPageContent({ lang }: { lang: Lang }) {
           </div>
         </section>
       </main>
+      <BackToTop />
     </div>
   )
 }
