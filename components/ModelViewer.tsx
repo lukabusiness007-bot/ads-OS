@@ -167,10 +167,10 @@ export function ModelViewer({ asset, alt, onInteract, onArClick }: ModelViewerPr
     "interaction-prompt": "none",
     reveal: "auto",
     loading: "lazy",
-    "environment-image": "neutral",
-    "shadow-intensity": "0.35",
-    "shadow-softness": "0.85",
-    exposure: "1",
+    "tone-mapping": "commerce",
+    "shadow-intensity": "1",
+    "shadow-softness": "1",
+    exposure: "1.1",
   } satisfies React.HTMLAttributes<HTMLElement> & Record<string, unknown>
 
   return (
