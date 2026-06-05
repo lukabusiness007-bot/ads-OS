@@ -532,6 +532,7 @@ export type AdminReviewQueueItem = {
   org: Pick<AdminOrg, "id" | "name">;
   review: AdminReview | null;
   model_asset: AdminModelAsset | null;
+  modelAssetForViewer?: { glbUrl: string; usdzUrl?: string; posterUrl: string };
   latest_job: AdminGenerationJob | null;
   photos: Array<{ id: string; r2_key: string; angle: string | null; file_name: string }>;
 };

@@ -14,7 +14,9 @@ type LoadError = { message: string; detail?: string }
 
 export function ModelViewer({ asset, alt, onInteract, onArClick }: ModelViewerProps) {
   const [loadError, setLoadError] = React.useState<LoadError | null>(null)
+  const [isFullscreen, setIsFullscreen] = React.useState(false)
   const viewerRef = React.useRef<HTMLElement | null>(null)
+  const wrapperRef = React.useRef<HTMLDivElement | null>(null)
 
   React.useEffect(() => {
     import("@google/model-viewer").catch((err: unknown) => {
@@ -30,11 +32,6 @@ export function ModelViewer({ asset, alt, onInteract, onArClick }: ModelViewerPr
     function onError(e: Event) {
       const detail = (e as CustomEvent<{ type: string; sourceError?: Error }>).detail
       const sourceMessage = detail?.sourceError?.message
-      // model-viewer masks the real load/parse failure with a secondary
-      // "Cannot read properties of undefined (reading 'scene')" thrown off the
-      // empty GLTFInstance it substitutes on error. Don't surface that — it's
-      // never actionable. The genuine cause is logged to the console by the
-      // library, and our pre-fetch check below catches the common cases.
       const isMaskedSceneError = !!sourceMessage && /reading 'scene'|\.scene/.test(sourceMessage)
       setLoadError({
         message: "Could not load 3D model.",
@@ -49,8 +46,6 @@ export function ModelViewer({ asset, alt, onInteract, onArClick }: ModelViewerPr
   }, [asset?.glbUrl])
 
   // Pre-validate the GLB URL before model-viewer swallows the real failure.
-  // This turns opaque internal errors into actionable messages (HTTP status,
-  // wrong content type, or a body that isn't actually a GLB).
   React.useEffect(() => {
     const glbUrl = asset?.glbUrl
     if (!glbUrl) return
@@ -70,7 +65,6 @@ export function ModelViewer({ asset, alt, onInteract, onArClick }: ModelViewerPr
           })
           return
         }
-        // A valid binary glTF begins with the ASCII magic "glTF".
         const head = new Uint8Array(await res.clone().arrayBuffer().catch(() => new ArrayBuffer(0))).slice(0, 4)
         const magic = String.fromCharCode(...head)
         if (head.length >= 4 && magic !== "glTF") {
@@ -95,6 +89,45 @@ export function ModelViewer({ asset, alt, onInteract, onArClick }: ModelViewerPr
       controller.abort()
     }
   }, [asset?.glbUrl])
+
+  // Sync fullscreen state with native fullscreen API events
+  React.useEffect(() => {
+    function onFsChange() {
+      setIsFullscreen(!!document.fullscreenElement)
+    }
+    document.addEventListener("fullscreenchange", onFsChange)
+    return () => document.removeEventListener("fullscreenchange", onFsChange)
+  }, [])
+
+  // Close CSS-overlay fullscreen on Escape
+  React.useEffect(() => {
+    if (!isFullscreen) return
+    function onKeyDown(e: KeyboardEvent) {
+      if (e.key === "Escape") setIsFullscreen(false)
+    }
+    document.addEventListener("keydown", onKeyDown)
+    return () => document.removeEventListener("keydown", onKeyDown)
+  }, [isFullscreen])
+
+  function toggleFullscreen() {
+    const wrapper = wrapperRef.current
+    if (!wrapper) return
+
+    // Native Fullscreen API — desktop + Android Chrome
+    if (wrapper.requestFullscreen) {
+      if (document.fullscreenElement) {
+        document.exitFullscreen()
+      } else {
+        wrapper.requestFullscreen().catch(() => {
+          // Blocked (e.g. iOS) — fall back to CSS overlay
+          setIsFullscreen(f => !f)
+        })
+      }
+    } else {
+      // iOS Safari — toggle CSS full-viewport overlay
+      setIsFullscreen(f => !f)
+    }
+  }
 
   if (!asset?.glbUrl) {
     return (
@@ -129,7 +162,10 @@ export function ModelViewer({ asset, alt, onInteract, onArClick }: ModelViewerPr
     "camera-controls": true,
     "touch-action": "pan-y",
     "auto-rotate": true,
-    reveal: "interaction",
+    "auto-rotate-delay": "0",
+    "rotation-per-second": "24deg",
+    "interaction-prompt": "none",
+    reveal: "auto",
     loading: "lazy",
     "environment-image": "neutral",
     "shadow-intensity": "0.35",
@@ -138,12 +174,26 @@ export function ModelViewer({ asset, alt, onInteract, onArClick }: ModelViewerPr
   } satisfies React.HTMLAttributes<HTMLElement> & Record<string, unknown>
 
   return (
-    <div className="viewer modelViewerFrame" onPointerDown={onInteract}>
+    <div
+      ref={wrapperRef}
+      className={`viewer modelViewerFrame${isFullscreen ? " modelViewerFullscreen" : ""}`}
+      onPointerDown={onInteract}
+    >
       {React.createElement("model-viewer", modelViewerProps,
         <button className="modelArButton" slot="ar-button" type="button" onClick={onArClick}>
           View in AR
         </button>
       )}
+
+      <button
+        className="modelFullscreenButton"
+        type="button"
+        onClick={toggleFullscreen}
+        aria-label={isFullscreen ? "Exit fullscreen" : "Fullscreen"}
+        title={isFullscreen ? "Exit fullscreen" : "Fullscreen"}
+      >
+        {isFullscreen ? "✕" : "⛶"}
+      </button>
     </div>
   )
 }

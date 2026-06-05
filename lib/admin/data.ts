@@ -433,12 +433,19 @@ export async function getProductForReview(
     }
   }
 
-  // Run model package checks
-  const modelChecks: ModelPackageCheck[] = modelAsset
-    ? runModelPackageChecks({
+  // Derive viewer-ready URLs from R2 keys (falling back to stored public URLs)
+  const modelAssetForViewer = modelAsset
+    ? {
         glbUrl: (modelAsset.glb_r2_key ? publicUrlForKey(modelAsset.glb_r2_key) : null) ?? modelAsset.public_glb_url ?? "",
         usdzUrl: (modelAsset.usdz_r2_key ? publicUrlForKey(modelAsset.usdz_r2_key) : null) ?? modelAsset.public_usdz_url ?? undefined,
         posterUrl: (modelAsset.poster_r2_key ? publicUrlForKey(modelAsset.poster_r2_key) : null) ?? modelAsset.public_poster_url ?? "",
+      }
+    : undefined;
+
+  // Run model package checks
+  const modelChecks: ModelPackageCheck[] = modelAsset && modelAssetForViewer
+    ? runModelPackageChecks({
+        ...modelAssetForViewer,
         fileSizeMb: modelAsset.file_size_mb ?? 0,
         triangleCount: modelAsset.triangle_count,
         textureMax: modelAsset.texture_max,
@@ -451,6 +458,7 @@ export async function getProductForReview(
     org: (product as Record<string, unknown>).organizations as Pick<AdminOrg, "id" | "name">,
     review: review as AdminReview | null,
     model_asset: modelAsset,
+    modelAssetForViewer,
     latest_job: job as AdminGenerationJob | null,
     photos: (photos ?? []) as Array<{ id: string; r2_key: string; angle: string | null; file_name: string }>,
     modelChecks,

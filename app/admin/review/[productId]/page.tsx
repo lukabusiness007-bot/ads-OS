@@ -33,19 +33,11 @@ export default async function ReviewInspectorPage({
     );
   }
 
-  const { product, org, review, model_asset, latest_job, modelChecks, photoPresignedUrls } = item;
+  const { product, org, review, model_asset, modelAssetForViewer, latest_job, modelChecks, photoPresignedUrls } = item;
 
   const dimensions = (product.width_m || product.height_m || product.depth_m)
     ? `${Math.round((product.width_m ?? 0) * 100)} × ${Math.round((product.height_m ?? 0) * 100)} × ${Math.round((product.depth_m ?? 0) * 100)} cm`
     : "Not specified";
-
-  const modelAssetForViewer = model_asset
-    ? {
-        glbUrl: model_asset.public_glb_url ?? "",
-        usdzUrl: model_asset.public_usdz_url ?? undefined,
-        posterUrl: model_asset.public_poster_url ?? ""
-      }
-    : undefined;
 
   return (
     <>

@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { trackHostedPageEvent } from "@/lib/analytics";
 import { formatMeters } from "@/lib/ui";
+import { isArCapable } from "@/lib/device";
 import type { Product } from "@/lib/types";
 import { ModelViewer } from "./ModelViewer";
 
@@ -26,7 +27,7 @@ export function HostedProductExperience({ merchantSlug, productSlug, product }: 
   useEffect(() => {
     trackHostedPageEvent({ ...analyticsInput, event: "page_view" });
     const detection = window.setTimeout(() => {
-      setArSupported(isLikelyArSupported());
+      setArSupported(isArCapable());
     }, 0);
 
     return () => window.clearTimeout(detection);
@@ -60,7 +61,7 @@ export function HostedProductExperience({ merchantSlug, productSlug, product }: 
             </span>
             <span className="muted">
               {product.modelAsset
-                ? "Tap the preview to open the interactive 3D model."
+                ? "Drag to rotate · pinch to zoom · tap View in AR on mobile."
                 : "The hosted page unlocks after a model package is available."}
             </span>
           </div>
@@ -135,8 +136,4 @@ export function HostedProductExperience({ merchantSlug, productSlug, product }: 
   );
 }
 
-function isLikelyArSupported() {
-  const userAgent = navigator.userAgent;
 
-  return /iPhone|iPad|Android/i.test(userAgent);
-}
