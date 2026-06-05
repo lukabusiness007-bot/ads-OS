@@ -9,7 +9,15 @@ import { translations } from "@/lib/translations"
 
 export function MarketingNav({ lang = "en" }: { lang?: Lang }) {
   const [menuOpen, setMenuOpen] = React.useState(false)
+  const [scrolled, setScrolled] = React.useState(false)
   const t = translations[lang].nav
+
+  React.useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 50)
+    onScroll()
+    window.addEventListener("scroll", onScroll, { passive: true })
+    return () => window.removeEventListener("scroll", onScroll)
+  }, [])
   const homePath = lang === "sr" ? "/sr" : "/"
   const pricingPath = lang === "sr" ? "/sr/pricing" : "/pricing"
 
@@ -24,10 +32,14 @@ export function MarketingNav({ lang = "en" }: { lang?: Lang }) {
     <header>
       <nav
         data-state={menuOpen ? "active" : undefined}
-        className="group fixed z-20 w-full border-b border-dashed bg-white/90 backdrop-blur"
+        className={`group fixed z-20 w-full border-b border-dashed transition-all duration-300 ${
+          scrolled
+            ? "bg-white/70 backdrop-blur-[20px] shadow-md border-transparent"
+            : "bg-white/90 backdrop-blur"
+        }`}
       >
         <div className="m-auto max-w-5xl px-6">
-          <div className="flex flex-wrap items-center justify-between gap-6 py-3 lg:flex-nowrap lg:gap-0 lg:py-4">
+          <div className={`flex flex-wrap items-center justify-between gap-6 py-3 transition-all duration-300 lg:flex-nowrap lg:gap-0 ${scrolled ? "lg:py-3" : "lg:py-4"}`}>
             <div className="flex w-full justify-between lg:w-auto">
               <Link href={homePath} aria-label="home" className="flex items-center gap-2.5">
                 <span className="flex h-8 w-8 items-center justify-center rounded-md bg-emerald-900 text-xs font-extrabold text-white">

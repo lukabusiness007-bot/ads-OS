@@ -2,6 +2,8 @@ import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { MarketingNav } from "@/components/marketing-nav"
 import { HeroGem } from "@/components/HeroGem"
+import { Reveal } from "@/components/Reveal"
+import { TypingHeading } from "@/components/TypingHeading"
 import { ArrowRight, CheckCircle2, Shield } from "lucide-react"
 import { BackToTop } from "@/components/BackToTop"
 import type { Lang } from "@/lib/translations"
@@ -16,7 +18,7 @@ export function LandingPageContent({ lang }: { lang: Lang }) {
 
       <main>
         {/* ─── Hero ──────────────────────────────────────────────────── */}
-        <section className="pt-16 sm:pt-24 bg-white overflow-hidden">
+        <Reveal className="pt-16 sm:pt-24 bg-white overflow-hidden">
           <div className="mx-auto max-w-5xl px-6">
             {/* Copy block */}
             <div className="mx-auto max-w-2xl text-center pt-8 pb-6 sm:pt-16 sm:pb-10">
@@ -24,7 +26,7 @@ export function LandingPageContent({ lang }: { lang: Lang }) {
                 {t.hero.eyebrow}
               </p>
               <h1 className="text-4xl font-semibold md:text-5xl lg:text-6xl text-zinc-900 text-balance leading-tight mb-6">
-                {t.hero.heading}
+                <TypingHeading text={t.hero.heading} />
               </h1>
               <p className="text-base sm:text-lg text-zinc-500 max-w-xl mx-auto leading-relaxed mb-6 sm:mb-8">
                 {t.hero.body}
@@ -60,19 +62,19 @@ export function LandingPageContent({ lang }: { lang: Lang }) {
               <p className="text-center text-xs text-zinc-400 -mt-2 pb-8">↻ Drag to rotate</p>
             </div>
           </div>
-        </section>
+        </Reveal>
 
         {/* ─── Hosted link anywhere ──────────────────────────────────── */}
-        <section className="bg-white relative z-10 py-12 border-t border-dashed border-zinc-200">
+        <Reveal className="bg-white relative z-10 py-12 border-t border-dashed border-zinc-200">
           <div className="mx-auto max-w-5xl px-6 text-center">
             <p className="text-sm font-semibold text-zinc-400">
               Add your hosted product link to any store page, email, ad, or QR code — no plugin required
             </p>
           </div>
-        </section>
+        </Reveal>
 
         {/* ─── Problem ──────────────────────────────────────────────── */}
-        <section id="features" className="bg-zinc-50 border-y border-dashed border-zinc-200">
+        <Reveal id="features" className="bg-zinc-50 border-y border-dashed border-zinc-200">
           <div className="mx-auto max-w-5xl px-6 py-20 grid gap-12 lg:grid-cols-2 lg:items-center">
             <div>
               <p className="text-xs font-bold uppercase tracking-widest text-emerald-700 mb-3">
@@ -87,15 +89,15 @@ export function LandingPageContent({ lang }: { lang: Lang }) {
               <p>{t.problem.p2}</p>
             </div>
           </div>
-        </section>
+        </Reveal>
 
         {/* ─── Furniture SEO Value Blocks ───────────────────────────── */}
-        <section className="bg-white">
+        <Reveal className="bg-white">
           <div className="mx-auto max-w-5xl px-6 py-20">
             <div className="grid gap-4 sm:grid-cols-2">
               {t.seoSections.map((section) => (
                 <article
-                  className="rounded-lg border border-zinc-200 bg-white p-6 shadow-sm"
+                  className="rounded-lg border border-zinc-200 bg-white p-6 shadow-sm transition-all duration-300 hover:-translate-y-2 hover:shadow-xl hover:border-emerald-600"
                   key={section.heading}
                 >
                   <h2 className="mb-3 text-xl font-semibold leading-snug text-zinc-900">{section.heading}</h2>
@@ -104,10 +106,10 @@ export function LandingPageContent({ lang }: { lang: Lang }) {
               ))}
             </div>
           </div>
-        </section>
+        </Reveal>
 
         {/* ─── How It Works ─────────────────────────────────────────── */}
-        <section id="how-it-works" className="mx-auto max-w-5xl px-6 py-24">
+        <Reveal id="how-it-works" className="mx-auto max-w-5xl px-6 py-24">
           <div className="text-center mb-16">
             <p className="text-xs font-bold uppercase tracking-widest text-emerald-700 mb-3">
               {t.howItWorks.eyebrow}
@@ -120,7 +122,7 @@ export function LandingPageContent({ lang }: { lang: Lang }) {
             {t.workflow.map(({ step, copy }, i) => (
               <article
                 key={step}
-                className="bg-white border border-zinc-200 rounded-xl p-5 shadow-sm hover:shadow-md transition-shadow"
+                className="bg-white border border-zinc-200 rounded-xl p-5 shadow-sm transition-all duration-300 hover:-translate-y-2 hover:shadow-xl hover:border-emerald-600"
               >
                 <span className="flex h-8 w-8 items-center justify-center rounded-md bg-zinc-100 text-sm font-bold text-zinc-700 mb-4">
                   {i + 1}
@@ -130,10 +132,10 @@ export function LandingPageContent({ lang }: { lang: Lang }) {
               </article>
             ))}
           </div>
-        </section>
+        </Reveal>
 
         {/* ─── Comparison ──────────────────────────────────────────── */}
-        <section className="bg-white border-b border-dashed border-zinc-200">
+        <Reveal className="bg-white border-b border-dashed border-zinc-200">
           <div className="mx-auto max-w-5xl px-6 py-20">
             <div className="text-center mb-12">
               <p className="text-xs font-bold uppercase tracking-widest text-emerald-700 mb-3">
@@ -168,10 +170,10 @@ export function LandingPageContent({ lang }: { lang: Lang }) {
               </table>
             </div>
           </div>
-        </section>
+        </Reveal>
 
         {/* ─── What You Get ─────────────────────────────────────────── */}
-        <section className="bg-zinc-50 border-y border-dashed border-zinc-200">
+        <Reveal className="bg-zinc-50 border-y border-dashed border-zinc-200">
           <div className="mx-auto max-w-5xl px-6 py-20 grid gap-12 lg:grid-cols-2 lg:items-start">
             <div>
               <p className="text-xs font-bold uppercase tracking-widest text-emerald-700 mb-3">
@@ -201,10 +203,10 @@ export function LandingPageContent({ lang }: { lang: Lang }) {
               </div>
             </div>
           </div>
-        </section>
+        </Reveal>
 
         {/* ─── Quality & Trust ──────────────────────────────────────── */}
-        <section className="mx-auto max-w-5xl px-6 py-24">
+        <Reveal className="mx-auto max-w-5xl px-6 py-24">
           <div className="text-center mb-12">
             <p className="text-xs font-bold uppercase tracking-widest text-emerald-700 mb-3">
               {t.quality.eyebrow}
@@ -216,7 +218,7 @@ export function LandingPageContent({ lang }: { lang: Lang }) {
             {t.qualityChecks.map((item) => (
               <article
                 key={item}
-                className="bg-white border border-zinc-200 rounded-xl p-4 shadow-sm flex items-center justify-between"
+                className="bg-white border border-zinc-200 rounded-xl p-4 shadow-sm flex items-center justify-between transition-all duration-300 hover:-translate-y-2 hover:shadow-xl hover:border-emerald-600"
               >
                 <span className="font-semibold text-sm text-zinc-800">{item}</span>
                 <span className="ml-2 shrink-0 text-xs font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 rounded-full px-2 py-0.5">
@@ -228,10 +230,10 @@ export function LandingPageContent({ lang }: { lang: Lang }) {
           <p className="text-center text-xs text-zinc-400 mt-8 max-w-lg mx-auto leading-relaxed">
             Veridian&apos;s promise is a verified visual AR preview — not exact CAD geometry or manufacturing-grade precision.
           </p>
-        </section>
+        </Reveal>
 
         {/* ─── Dashboard Preview ────────────────────────────────────── */}
-        <section className="bg-zinc-50 border-y border-dashed border-zinc-200">
+        <Reveal className="bg-zinc-50 border-y border-dashed border-zinc-200">
           <div className="mx-auto max-w-5xl px-6 py-20">
             <div className="text-center">
               <p className="text-xs font-bold uppercase tracking-widest text-emerald-700 mb-3">
@@ -247,10 +249,10 @@ export function LandingPageContent({ lang }: { lang: Lang }) {
               </Button>
             </div>
           </div>
-        </section>
+        </Reveal>
 
         {/* ─── FAQ ──────────────────────────────────────────────────── */}
-        <section id="faq" className="bg-zinc-50 border-y border-dashed border-zinc-200">
+        <Reveal id="faq" className="bg-zinc-50 border-y border-dashed border-zinc-200">
           <div className="mx-auto max-w-5xl px-6 py-20">
             <div className="text-center mb-12">
               <p className="text-xs font-bold uppercase tracking-widest text-emerald-700 mb-3">
@@ -275,10 +277,10 @@ export function LandingPageContent({ lang }: { lang: Lang }) {
               ))}
             </div>
           </div>
-        </section>
+        </Reveal>
 
         {/* ─── Final CTA ────────────────────────────────────────────── */}
-        <section className="bg-emerald-950 text-white">
+        <Reveal className="bg-emerald-950 text-white">
           <div className="mx-auto max-w-3xl px-6 py-24 text-center space-y-6">
             <p className="text-xs font-bold uppercase tracking-widest text-emerald-400">
               {t.finalCta.eyebrow}
@@ -301,7 +303,7 @@ export function LandingPageContent({ lang }: { lang: Lang }) {
               </Button>
             </div>
           </div>
-        </section>
+        </Reveal>
       </main>
       <BackToTop />
     </div>
