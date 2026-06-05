@@ -58,9 +58,9 @@ export function MarketingNav({ lang = "en" }: { lang?: Lang }) {
               </button>
             </div>
 
-            <div className="group-data-[state=active]:block lg:group-data-[state=active]:flex mb-6 hidden w-full flex-wrap items-center justify-end space-y-8 rounded-3xl border bg-white p-6 shadow-2xl shadow-zinc-300/20 md:flex-nowrap lg:m-0 lg:flex lg:w-fit lg:gap-6 lg:space-y-0 lg:border-transparent lg:bg-transparent lg:p-0 lg:shadow-none">
-              <div className="lg:pr-4">
-                <ul className="space-y-6 text-base lg:flex lg:gap-4 lg:space-y-0 lg:text-sm">
+            <div className={`group-data-[state=active]:block lg:group-data-[state=active]:flex mb-6 hidden w-full flex-wrap items-center justify-end space-y-8 rounded-3xl border bg-white p-6 shadow-2xl shadow-zinc-300/20 md:flex-nowrap lg:m-0 lg:flex lg:w-fit lg:space-y-0 lg:border-transparent lg:bg-transparent lg:p-0 lg:shadow-none ${lang === "sr" ? "lg:gap-2" : "lg:gap-6"}`}>
+              <div className={lang === "sr" ? "lg:pr-2" : "lg:pr-4"}>
+                <ul className={`space-y-6 text-base lg:flex lg:space-y-0 lg:text-sm ${lang === "sr" ? "lg:gap-2" : "lg:gap-4"}`}>
                   {menuItems.map((item, i) => (
                     <li key={i}>
                       <Link
@@ -74,7 +74,7 @@ export function MarketingNav({ lang = "en" }: { lang?: Lang }) {
                 </ul>
               </div>
 
-              <div className="flex w-full flex-col space-y-3 sm:flex-row sm:gap-3 sm:space-y-0 md:w-fit lg:border-l lg:pl-6">
+              <div className={`flex w-full flex-col space-y-3 sm:flex-row sm:space-y-0 md:w-fit lg:border-l ${lang === "sr" ? "sm:gap-2 lg:pl-3" : "sm:gap-3 lg:pl-6"}`}>
                 {/* Language switcher — shows only the other language */}
                 <Link
                   href={lang === "sr" ? "/" : "/sr"}

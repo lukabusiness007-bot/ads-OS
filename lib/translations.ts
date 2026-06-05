@@ -153,7 +153,7 @@ export const translations = {
 
   sr: {
     nav: {
-      features: "Funkcionalnosti",
+      features: "Funkcije",
       howItWorks: "Kako funkcioniše",
       pricing: "Cene",
       faq: "Pitanja",
