@@ -6,7 +6,14 @@ const CSP = [
   "default-src 'self'",
   // 'wasm-unsafe-eval' is required by @google/model-viewer's WebAssembly engine
   // 'unsafe-eval' is required by React in development mode only
-  `script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval'${isDev ? " 'unsafe-eval'" : ""}`,
+  // blob: lets model-viewer spawn its Draco/KTX2 texture-decoder workers
+  `script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval' blob:${isDev ? " 'unsafe-eval'" : ""}`,
+  // model-viewer decodes KTX2/Basis-compressed textures in a blob: web worker.
+  // Without an explicit worker-src this falls back to default-src 'self', which
+  // blocks the worker and leaves the mesh untextured (renders all white).
+  "worker-src 'self' blob:",
+  // child-src fallback for older browsers that don't honor worker-src
+  "child-src 'self' blob:",
   // fonts.googleapis.com is loaded by model-viewer's AR UI
   "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
   "img-src 'self' data: blob: https:",
