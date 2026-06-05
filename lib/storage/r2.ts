@@ -206,6 +206,14 @@ function getCloudflareR2Endpoint(accountId: string | undefined) {
   return `https://${accountId}.r2.cloudflarestorage.com`;
 }
 
+export function publicUrlForKey(key: string): string | null {
+  try {
+    return createPublicR2Url(getR2Config().publicBaseUrl, key);
+  } catch {
+    return null;
+  }
+}
+
 function createPublicR2Url(publicBaseUrl: string, key: string) {
   const base = publicBaseUrl.replace(/\/+$/, "");
   const encodedKey = key

@@ -5,6 +5,7 @@ import {
   isSupabaseServiceRoleConfigured
 } from "./server";
 import type { HostedPageAnalyticsEvent, ModelAsset, Product, ProductCategory, ProductStatus } from "@/lib/types";
+import { publicUrlForKey } from "@/lib/storage/r2";
 
 type SupabaseClient = Awaited<ReturnType<typeof createServerSupabaseClient>>;
 type SupabaseAdminClient = ReturnType<typeof createServiceRoleSupabaseClient>;
@@ -490,11 +491,14 @@ function mapProductRow(row: DbRow, organization: OrganizationContext, analytics?
 }
 
 function mapModelAsset(row: DbRow): ModelAsset {
+  const glbKey = typeof row.glb_r2_key === "string" ? row.glb_r2_key : null;
+  const usdzKey = typeof row.usdz_r2_key === "string" ? row.usdz_r2_key : null;
+  const posterKey = typeof row.poster_r2_key === "string" ? row.poster_r2_key : null;
   return {
-    glbUrl: String(row.public_glb_url ?? ""),
-    usdzUrl: typeof row.public_usdz_url === "string" ? row.public_usdz_url : undefined,
-    posterUrl: typeof row.public_poster_url === "string" ? row.public_poster_url : "",
-    thumbnailUrl: typeof row.public_poster_url === "string" ? row.public_poster_url : undefined,
+    glbUrl: (glbKey ? publicUrlForKey(glbKey) : null) ?? String(row.public_glb_url ?? ""),
+    usdzUrl: (usdzKey ? publicUrlForKey(usdzKey) : null) ?? (typeof row.public_usdz_url === "string" ? row.public_usdz_url : undefined),
+    posterUrl: (posterKey ? publicUrlForKey(posterKey) : null) ?? (typeof row.public_poster_url === "string" ? row.public_poster_url : ""),
+    thumbnailUrl: (posterKey ? publicUrlForKey(posterKey) : null) ?? (typeof row.public_poster_url === "string" ? row.public_poster_url : undefined),
     fileSizeMb: toNumber(row.file_size_mb),
     triangleCount: toNumber(row.triangle_count),
     textureMax: Number(row.texture_max ?? 4096),

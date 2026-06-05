@@ -7,7 +7,7 @@
  */
 
 import { createServiceRoleSupabaseClient } from "@/lib/supabase/server";
-import { createPresignedR2GetUrl } from "@/lib/storage/r2";
+import { createPresignedR2GetUrl, publicUrlForKey } from "@/lib/storage/r2";
 import { runModelPackageChecks } from "@/lib/generation-pipeline";
 import type {
   AdminOverviewStats,
@@ -436,9 +436,9 @@ export async function getProductForReview(
   // Run model package checks
   const modelChecks: ModelPackageCheck[] = modelAsset
     ? runModelPackageChecks({
-        glbUrl: modelAsset.public_glb_url ?? "",
-        usdzUrl: modelAsset.public_usdz_url ?? undefined,
-        posterUrl: modelAsset.public_poster_url ?? "",
+        glbUrl: (modelAsset.glb_r2_key ? publicUrlForKey(modelAsset.glb_r2_key) : null) ?? modelAsset.public_glb_url ?? "",
+        usdzUrl: (modelAsset.usdz_r2_key ? publicUrlForKey(modelAsset.usdz_r2_key) : null) ?? modelAsset.public_usdz_url ?? undefined,
+        posterUrl: (modelAsset.poster_r2_key ? publicUrlForKey(modelAsset.poster_r2_key) : null) ?? modelAsset.public_poster_url ?? "",
         fileSizeMb: modelAsset.file_size_mb ?? 0,
         triangleCount: modelAsset.triangle_count,
         textureMax: modelAsset.texture_max,
@@ -567,9 +567,9 @@ export async function evaluateModelForAutoApproval(
   if (!asset) return "needs_human";
 
   const checks = runModelPackageChecks({
-    glbUrl: (asset as AdminModelAsset).public_glb_url ?? "",
-    usdzUrl: (asset as AdminModelAsset).public_usdz_url ?? undefined,
-    posterUrl: (asset as AdminModelAsset).public_poster_url ?? "",
+    glbUrl: ((asset as AdminModelAsset).glb_r2_key ? publicUrlForKey((asset as AdminModelAsset).glb_r2_key!) : null) ?? (asset as AdminModelAsset).public_glb_url ?? "",
+    usdzUrl: ((asset as AdminModelAsset).usdz_r2_key ? publicUrlForKey((asset as AdminModelAsset).usdz_r2_key!) : null) ?? (asset as AdminModelAsset).public_usdz_url ?? undefined,
+    posterUrl: ((asset as AdminModelAsset).poster_r2_key ? publicUrlForKey((asset as AdminModelAsset).poster_r2_key!) : null) ?? (asset as AdminModelAsset).public_poster_url ?? "",
     fileSizeMb: (asset as AdminModelAsset).file_size_mb ?? 0,
     triangleCount: (asset as AdminModelAsset).triangle_count,
     textureMax: (asset as AdminModelAsset).texture_max,

@@ -1,14 +1,22 @@
 import type { NextConfig } from "next";
 
+const isDev = process.env.NODE_ENV === "development";
+
 const CSP = [
   "default-src 'self'",
-  "script-src 'self' 'unsafe-inline'",
-  "style-src 'self' 'unsafe-inline'",
+  // 'wasm-unsafe-eval' is required by @google/model-viewer's WebAssembly engine
+  // 'unsafe-eval' is required by React in development mode only
+  `script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval'${isDev ? " 'unsafe-eval'" : ""}`,
+  // fonts.googleapis.com is loaded by model-viewer's AR UI
+  "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
   "img-src 'self' data: blob: https:",
   "media-src 'self' blob: https:",
-  "connect-src 'self' https://*.supabase.co https://*.supabase.in https://accounts.google.com",
+  // https://*.r2.dev  — public R2 bucket for GLB/USDZ/poster assets
+  // wss://*.supabase.co — Supabase Realtime WebSocket
+  "connect-src 'self' https://*.supabase.co https://*.supabase.in https://accounts.google.com https://*.r2.dev wss://*.supabase.co",
   "frame-src 'self' https://accounts.google.com",
-  "font-src 'self' data:",
+  // fonts.gstatic.com is loaded by model-viewer's AR UI
+  "font-src 'self' data: https://fonts.gstatic.com",
   "object-src 'none'",
   "base-uri 'self'",
   "form-action 'self'",

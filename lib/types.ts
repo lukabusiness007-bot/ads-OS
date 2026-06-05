@@ -442,6 +442,8 @@ export type AdminModelAsset = {
   product_id: string;
   generation_job_id: string | null;
   glb_r2_key: string | null;
+  usdz_r2_key: string | null;
+  poster_r2_key: string | null;
   public_glb_url: string | null;
   public_usdz_url: string | null;
   public_poster_url: string | null;
