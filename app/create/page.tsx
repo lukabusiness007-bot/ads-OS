@@ -205,7 +205,7 @@ export default function CreateProductPage() {
           <h2>Product details</h2>
           <div className="field">
             <label htmlFor="product-name">Product name</label>
-            <input id="product-name" name="productName" defaultValue="Arc Oak Dining Chair" required />
+            <input id="product-name" name="productName" placeholder="e.g. Arc Oak Dining Chair" required />
           </div>
           <div className="field">
             <label htmlFor="category">Product category</label>
@@ -222,7 +222,7 @@ export default function CreateProductPage() {
             <textarea
               id="description"
               name="description"
-              defaultValue="Solid oak dining chair with curved back support."
+              placeholder="e.g. Solid oak dining chair with curved back support."
             />
           </div>
 
@@ -230,15 +230,15 @@ export default function CreateProductPage() {
           <div className="grid three">
             <div className="field">
               <label htmlFor="width">Width cm</label>
-              <input id="width" name="width" inputMode="decimal" defaultValue="48" required />
+              <input id="width" name="width" inputMode="decimal" placeholder="48" required />
             </div>
             <div className="field">
               <label htmlFor="height">Height cm</label>
-              <input id="height" name="height" inputMode="decimal" defaultValue="82" required />
+              <input id="height" name="height" inputMode="decimal" placeholder="82" required />
             </div>
             <div className="field">
               <label htmlFor="depth">Depth cm</label>
-              <input id="depth" name="depth" inputMode="decimal" defaultValue="52" required />
+              <input id="depth" name="depth" inputMode="decimal" placeholder="52" required />
             </div>
           </div>
 
@@ -249,20 +249,19 @@ export default function CreateProductPage() {
               id="customer-url"
               name="customerUrl"
               type="url"
-              defaultValue="https://northline.example/products/arc-oak-chair"
+              placeholder="https://yourstore.com/products/product-name"
               required
             />
           </div>
           <div className="field">
             <label htmlFor="price">Display price optional</label>
-            <input id="price" name="price" defaultValue="89 EUR" />
+            <input id="price" name="price" placeholder="e.g. 89 EUR" />
           </div>
 
           <h2>Photos</h2>
           <div className="assumptionNote">
             Large originals are optimized in this browser first. The app targets about{" "}
-            {formatMegabytes(TARGET_GENERATION_PHOTO_SIZE_BYTES)} per photo before upload, so you should not hit the
-            old {formatMegabytes(MAX_GENERATION_PHOTO_BYTES_TOTAL)} upload ceiling.
+            {formatMegabytes(TARGET_GENERATION_PHOTO_SIZE_BYTES)} per photo so upload and generation stay fast.
           </div>
           <div className="field">
             <label htmlFor="photos">Upload 4 required product photos</label>
@@ -354,12 +353,11 @@ export default function CreateProductPage() {
             </span>
             <span className="badge neutral">JPG or PNG</span>
             <span className="badge neutral">Auto-optimized</span>
-            <span className="badge neutral">Stored in R2</span>
+            <span className="badge neutral">Secure upload</span>
           </div>
 
           <div className="assumptionNote">
-            {organization.name} can review generated color, material, and shape fidelity before publishing the hosted AR
-            page.
+            Your team can review generated color, material, shape, and scale before publishing the hosted AR page.
           </div>
         </aside>
       </section>
@@ -373,7 +371,7 @@ function validatePhotoSelection(files: File[]) {
   }
 
   if (files.some((file) => !isSupportedPhoto(file))) {
-    return "Use JPG or PNG photos only. WebP is blocked for this Meshy route.";
+    return "Use JPG or PNG photos only for this generation workflow.";
   }
 
   return "";

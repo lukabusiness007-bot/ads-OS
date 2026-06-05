@@ -14,22 +14,22 @@ export function LandingPageContent({ lang }: { lang: Lang }) {
 
       <main>
         {/* ─── Hero ──────────────────────────────────────────────────── */}
-        <section className="pt-24 bg-white overflow-hidden">
+        <section className="pt-16 sm:pt-24 bg-white overflow-hidden">
           <div className="mx-auto max-w-5xl px-6">
             {/* Copy block */}
-            <div className="mx-auto max-w-2xl text-center pt-16 pb-10">
+            <div className="mx-auto max-w-2xl text-center pt-8 pb-6 sm:pt-16 sm:pb-10">
               <p className="text-xs font-bold uppercase tracking-widest text-emerald-700 mb-4">
                 {t.hero.eyebrow}
               </p>
               <h1 className="text-4xl font-semibold md:text-5xl lg:text-6xl text-zinc-900 text-balance leading-tight mb-6">
                 {t.hero.heading}
               </h1>
-              <p className="text-lg text-zinc-500 max-w-xl mx-auto leading-relaxed mb-8">
+              <p className="text-base sm:text-lg text-zinc-500 max-w-xl mx-auto leading-relaxed mb-6 sm:mb-8">
                 {t.hero.body}
               </p>
-              <div className="flex flex-wrap gap-3 justify-center mb-10">
+              <div className="flex flex-wrap gap-3 justify-center mb-6 sm:mb-10">
                 <Button asChild size="lg">
-                  <Link href="/dashboard">{t.hero.cta}</Link>
+                  <Link href="/contact/demo?source=hero">{t.hero.cta}</Link>
                 </Button>
                 <Button asChild variant="outline" size="lg">
                   <Link href="/p/northline-home/arc-oak-dining-chair">{t.hero.ctaSecondary}</Link>
@@ -37,7 +37,7 @@ export function LandingPageContent({ lang }: { lang: Lang }) {
               </div>
 
               {/* Trust strip */}
-              <div className="grid grid-cols-2 gap-x-8 gap-y-3 max-w-sm mx-auto text-left border-t border-zinc-100 pt-8">
+              <div className="hidden sm:grid grid-cols-2 gap-x-8 gap-y-3 max-w-sm mx-auto text-left border-t border-zinc-100 pt-8">
                 {t.trustStrip.map((item) => (
                   <div key={item} className="flex items-center gap-2">
                     <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600 shrink-0" />
@@ -333,7 +333,7 @@ export function LandingPageContent({ lang }: { lang: Lang }) {
               <h2 className="text-3xl font-semibold text-zinc-900 mb-3">{t.dashboard.heading}</h2>
               <p className="text-zinc-500 max-w-xl mx-auto leading-relaxed">{t.dashboard.body}</p>
               <Button asChild size="lg" className="mt-8">
-                <Link href="/dashboard">
+                <Link href="/login?next=%2Fdashboard&intent=pilot">
                   {t.dashboard.cta}
                   <ArrowRight className="ml-2 h-4 w-4" />
                 </Link>
@@ -380,7 +380,7 @@ export function LandingPageContent({ lang }: { lang: Lang }) {
             <p className="text-emerald-200 leading-relaxed max-w-lg mx-auto">{t.finalCta.body}</p>
             <div className="flex flex-wrap gap-3 justify-center pt-2">
               <Button asChild size="lg" className="bg-white text-emerald-900 hover:bg-emerald-50">
-                <Link href="/dashboard">{t.finalCta.cta}</Link>
+                <Link href="/contact/demo?source=final-cta">{t.finalCta.cta}</Link>
               </Button>
               <Button
                 asChild

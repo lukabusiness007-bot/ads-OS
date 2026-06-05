@@ -270,6 +270,43 @@ textarea {
   min-height: 100vh;
 }
 
+.mobileAppBar,
+.sidebarBackdrop {
+  display: none;
+}
+
+.mobileBrand {
+  align-items: center;
+  color: #f8fbf5;
+  display: inline-flex;
+  gap: 10px;
+  min-width: 0;
+}
+
+.mobileBrand strong,
+.mobileBrand small {
+  display: block;
+}
+
+.mobileBrand small {
+  color: #b8c7bb;
+  font-size: 12px;
+  line-height: 1.2;
+}
+
+.mobileNavButton {
+  align-items: center;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 8px;
+  color: #f8fbf5;
+  cursor: pointer;
+  display: inline-flex;
+  height: 40px;
+  justify-content: center;
+  width: 40px;
+}
+
 .sidebar {
   background: #17201a;
   color: #f8fbf5;
@@ -1731,15 +1768,52 @@ h3 {
 
 @media (max-width: 900px) {
   .appShell {
-    grid-template-columns: 1fr;
+    display: block;
+  }
+
+  .mobileAppBar {
+    align-items: center;
+    background: #17201a;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    display: flex;
+    gap: 14px;
+    justify-content: space-between;
+    min-height: 64px;
+    padding: 12px 16px;
+    position: sticky;
+    top: 0;
+    z-index: 74;
+  }
+
+  .sidebarBackdrop {
+    background: rgba(23, 32, 26, 0.48);
+    border: 0;
+    display: block;
+    inset: 0;
+    padding: 0;
+    position: fixed;
+    z-index: 75;
   }
 
   .sidebar {
-    position: static;
+    box-shadow: 18px 0 48px rgba(23, 32, 26, 0.32);
+    height: 100dvh;
+    left: 0;
+    max-width: calc(100vw - 40px);
+    position: fixed;
+    top: 0;
+    transform: translateX(-105%);
+    transition: transform 180ms ease;
+    width: 320px;
+    z-index: 76;
+  }
+
+  .sidebar.sidebarOpen {
+    transform: translateX(0);
   }
 
   .nav {
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: 1fr;
   }
 
   .grid.two,

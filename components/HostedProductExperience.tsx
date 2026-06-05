@@ -60,8 +60,8 @@ export function HostedProductExperience({ merchantSlug, productSlug, product }: 
             </span>
             <span className="muted">
               {product.modelAsset
-                ? "Poster loads first, then the interactive model opens in place."
-                : "The hosted page can be tested after a GLB/USDZ package is available."}
+                ? "Tap the preview to open the interactive 3D model."
+                : "The hosted page unlocks after a model package is available."}
             </span>
           </div>
         </div>
@@ -123,9 +123,9 @@ export function HostedProductExperience({ merchantSlug, productSlug, product }: 
         </div>
         {product.modelAsset ? (
           <div className="assetGrid">
-            <span className="badge neutral">GLB {product.modelAsset.fileSizeMb.toFixed(1)} MB</span>
-            <span className="badge neutral">{product.modelAsset.triangleCount.toLocaleString()} triangles</span>
-            <span className="badge neutral">{product.modelAsset.textureMax}px textures</span>
+            <span className="badge neutral">True-to-scale preview</span>
+            <span className="badge neutral">Human-reviewed</span>
+            <span className="badge neutral">Mobile AR ready</span>
           </div>
         ) : (
           <span className="badge neutral">Waiting for model asset</span>

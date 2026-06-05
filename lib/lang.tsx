@@ -15,7 +15,7 @@ export const t = {
       logout: "Odjavi se",
       footer: "Modeli su pregledani od strane čoveka pre objavljivanja. Pilot: 10–25 proizvoda.",
       brand: "Pilot komandni centar",
-      demoBadge: "Demo prikaz",
+      demoBadge: "Pilot radni prostor",
     },
     langToggle: "EN",
 
@@ -248,8 +248,8 @@ export const t = {
       billing: "Billing",
       logout: "Log out",
       footer: "Models are human-reviewed before publishing. Pilot: 10–25 products.",
-      brand: "Pilot Command Center",
-      demoBadge: "Demo view",
+      brand: "Pilot workspace",
+      demoBadge: "Pilot workspace",
     },
     langToggle: "SR",
 
@@ -481,13 +481,13 @@ const LangContext = createContext<{
   tr: Translations
   toggle: () => void
 }>({
-  lang: "sr",
-  tr: t.sr,
+  lang: "en",
+  tr: t.en,
   toggle: () => {},
 })
 
 export function LanguageProvider({ children }: { children: React.ReactNode }) {
-  const [lang, setLang] = useState<Lang>("sr")
+  const [lang, setLang] = useState<Lang>("en")
   const toggle = () => setLang((l) => (l === "sr" ? "en" : "sr"))
   return (
     <LangContext.Provider value={{ lang, tr: t[lang], toggle }}>

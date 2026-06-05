@@ -43,6 +43,7 @@ async function resolveIdentifier(identifier: string): Promise<{ email: string | 
 function LoginPageContent() {
   const searchParams = useSearchParams();
   const next = searchParams.get("next") || "/dashboard";
+  const intent = searchParams.get("intent");
   const [identifier, setIdentifier] = useState("");
   const [password, setPassword] = useState("");
   const [message, setMessage] = useState("");
@@ -115,13 +116,27 @@ function LoginPageContent() {
       <>
         <p className="eyebrow">Merchant login</p>
         <h1>Sign in to Veridian</h1>
-        <p className="muted">Access your products, generation jobs, billing, published pages, and analytics.</p>
+        <p className="muted">
+          {intent
+            ? `Continue with the ${formatIntent(intent)} pilot plan, then create your first AR product.`
+            : "Access your products, generation progress, billing, published pages, and analytics."}
+        </p>
 
         {!configured ? (
-          <div className="assumptionNote">
-            Supabase is not configured yet. Add `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY` to
-            enable real logins.
-          </div>
+          <>
+            <div className="assumptionNote">
+              Pilot account access is not enabled in this environment yet. Book a demo to review the workflow and
+              connect a production workspace.
+            </div>
+            <div className="assetGrid">
+              <Link className="button accent" href={`/contact/demo${intent ? `?plan=${encodeURIComponent(intent)}` : ""}`}>
+                Book a pilot demo
+              </Link>
+              <Link className="button secondary" href="/p/northline-home/arc-oak-dining-chair">
+                View sample page
+              </Link>
+            </div>
+          </>
         ) : (
           <>
             <div className="field">
@@ -169,6 +184,12 @@ function LoginPageContent() {
       </>
     </LoginShell>
   );
+}
+
+function formatIntent(intent: string) {
+  return intent
+    .replace(/[-_]+/g, " ")
+    .replace(/\b\w/g, (letter) => letter.toUpperCase());
 }
 
 function LoginShell({ children, message }: { children?: React.ReactNode; message?: string }) {

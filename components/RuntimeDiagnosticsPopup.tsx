@@ -25,7 +25,6 @@ type RuntimeDiagnosticsPopupProps = {
 };
 
 const debugQueryParam = "debug";
-const debugStorageKey = "veridian-debug-popup";
 
 export function RuntimeDiagnosticsPopup({
   initialIssues = [],
@@ -42,10 +41,12 @@ export function RuntimeDiagnosticsPopup({
     }
 
     const params = new URLSearchParams(window.location.search);
-    const debugEnabled = params.has(debugQueryParam) || window.localStorage.getItem(debugStorageKey) === "1";
+    const debugEnabled =
+      params.has(debugQueryParam) ||
+      process.env.NEXT_PUBLIC_ENABLE_RUNTIME_DIAGNOSTICS === "1";
 
-    if (params.has(debugQueryParam)) {
-      window.localStorage.setItem(debugStorageKey, "1");
+    if (!debugEnabled && initialIssues.length === 0) {
+      return;
     }
 
     let isMounted = true;
@@ -64,7 +65,7 @@ export function RuntimeDiagnosticsPopup({
 
         setDiagnostics(payload);
 
-        if ((debugEnabled || payload.issues.some((issue) => issue.severity === "error")) && payload.issues.length > 0) {
+        if (debugEnabled && payload.issues.length > 0) {
           setIsOpen(true);
         }
       } catch (error) {
@@ -120,7 +121,7 @@ export function RuntimeDiagnosticsPopup({
       window.removeEventListener("error", handleWindowError);
       window.removeEventListener("unhandledrejection", handleUnhandledRejection);
     };
-  }, []);
+  }, [initialIssues.length]);
 
   const issues = useMemo(() => {
     const combined = [...runtimeIssues, ...(diagnostics?.issues ?? [])];

@@ -11,7 +11,7 @@ export default async function AnalyticsPage() {
         <div>
           <p className="eyebrow">Analytics</p>
           <h1>Hosted page performance</h1>
-          <p className="muted">Page views, viewer interactions, AR clicks, and store clicks are stored in Supabase.</p>
+          <p className="muted">Track page views, viewer interactions, AR clicks, and store clicks for each published product.</p>
         </div>
         <Link className="button secondary" href="/billing">
           View billing

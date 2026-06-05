@@ -270,7 +270,7 @@ export default function PricingPageSr() {
                     }
                     variant={tier.recommended || tier.id === "business" ? "default" : "outline"}
                   >
-                    <Link href="/dashboard">
+                    <Link href={getPricingCtaHref(tier.id, Boolean(tier.monthlyUsd))}>
                       {tier.monthlyUsd ? "Počnite" : "Kontaktirajte nas"}
                       <ArrowRight className="ml-1.5 h-3.5 w-3.5" />
                     </Link>
@@ -439,7 +439,7 @@ export default function PricingPageSr() {
             </p>
             <div className="flex flex-wrap gap-3 justify-center pt-2">
               <Button asChild size="lg" className="bg-white text-emerald-900 hover:bg-emerald-50">
-                <Link href="/dashboard">Zakažite pilot demo</Link>
+                <Link href="/contact/demo?source=sr-pricing">Zakažite pilot demo</Link>
               </Button>
               <Button
                 asChild
@@ -458,4 +458,12 @@ export default function PricingPageSr() {
       <SerbianPricingActivityToast />
     </div>
   )
+}
+
+function getPricingCtaHref(tierId: string, isSelfServe: boolean) {
+  if (!isSelfServe || tierId === "business") {
+    return `/contact/demo?plan=${encodeURIComponent(tierId)}&lang=sr`;
+  }
+
+  return `/login?intent=${encodeURIComponent(tierId)}`;
 }

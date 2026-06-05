@@ -13,7 +13,7 @@ export default async function PublishedLinksPage() {
         <div>
           <p className="eyebrow">Published links</p>
           <h1>Hosted AR product pages</h1>
-          <p className="muted">Published pages are read from Supabase and served publicly at `/p/org/product`.</p>
+          <p className="muted">Copy verified product links for your store pages, ads, emails, or QR codes.</p>
         </div>
         <Link className="button accent" href="/create">
           Create AR product

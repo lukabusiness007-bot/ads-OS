@@ -37,7 +37,7 @@ export function SeoContentPage({ page }: SeoContentPageProps) {
             </h1>
             <p className="mb-8 max-w-2xl text-lg leading-relaxed text-zinc-500">{page.intro}</p>
             <div className="flex flex-wrap gap-3">
-              <Link className="button accent" href="/dashboard">
+              <Link className="button accent" href="/contact/demo?source=seo-page">
                 {page.cta}
               </Link>
               <Link className="button secondary" href="/p/northline-home/arc-oak-dining-chair">
@@ -101,7 +101,7 @@ export function SeoContentPage({ page }: SeoContentPageProps) {
             </div>
             <Link
               className="button"
-              href="/dashboard"
+              href="/contact/demo?source=seo-final"
               style={{ background: "#ffffff", borderColor: "#ffffff", color: "#064e3b" }}
             >
               {page.cta}

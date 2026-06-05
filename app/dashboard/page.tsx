@@ -6,15 +6,16 @@ import { getDashboardData } from "@/lib/supabase/data";
 export default async function DashboardPage() {
   const data = await getDashboardData();
   const usagePct = Math.min(100, Math.round((data.totals.published / 25) * 100));
+  const hasProducts = data.products.length > 0;
 
   return (
     <AppShell>
       <header className="topbar">
         <div>
-          <p className="eyebrow">{data.organization?.name ?? "Merchant dashboard"}</p>
+          <p className="eyebrow">{data.organization?.name ?? "Pilot workspace"}</p>
           <h1 style={{ marginBottom: 6 }}>Overview</h1>
           <p className="muted" style={{ maxWidth: 560 }}>
-            Real products, generation jobs, published pages, billing usage, and analytics now come from Supabase.
+            Track products, generation progress, published pages, plan usage, and shopper engagement in one place.
           </p>
         </div>
         <Link className="button accent" href="/create">
@@ -24,11 +25,15 @@ export default async function DashboardPage() {
 
       {!data.isConfigured && (
         <div className="assumptionNote">
-          Supabase is not configured yet. Add the Supabase env vars, run the migration, then sign in to see real data.
+          Live workspace storage is not connected yet. Finish production setup before inviting pilot merchants.
         </div>
       )}
 
-      {data.setupErrorMessage && <div className="assumptionNote">{data.setupErrorMessage}</div>}
+      {data.setupErrorMessage && (
+        <div className="assumptionNote">
+          Workspace setup needs attention before live product data can be saved.
+        </div>
+      )}
 
       <section className="grid four">
         <article className="card metric">
@@ -68,10 +73,31 @@ export default async function DashboardPage() {
             </Link>
           </div>
           <ul className="actionList">
-            <li>
-              <strong>{data.totals.processing} scans in processing</strong>
-              <span>{data.totals.published} published pages are live.</span>
-            </li>
+            {hasProducts ? (
+              <li>
+                <strong>{data.totals.processing} products in generation</strong>
+                <span>{data.totals.published} published pages are live.</span>
+              </li>
+            ) : (
+              <>
+                <li>
+                  <strong>1. Create your first product</strong>
+                  <span>Add the product name, category, store URL, price, and real dimensions.</span>
+                </li>
+                <li>
+                  <strong>2. Upload 4 clean photos</strong>
+                  <span>Use front, side or three-quarter, back, and top or detail views.</span>
+                </li>
+                <li>
+                  <strong>3. Review the generated preview</strong>
+                  <span>Check resemblance, scale, orientation, loading, and AR readiness before publishing.</span>
+                </li>
+                <li>
+                  <strong>4. Publish and measure</strong>
+                  <span>Add the hosted link to your store, then track AR and store clicks here.</span>
+                </li>
+              </>
+            )}
           </ul>
         </article>
 
@@ -95,7 +121,7 @@ export default async function DashboardPage() {
         <div className="row">
           <div>
             <h2>Products</h2>
-            <p className="muted">Products are loaded from Supabase for the signed-in organization.</p>
+            <p className="muted">Your pilot catalog will show product status, hosted links, and engagement metrics here.</p>
           </div>
           <Link className="button secondary sm" href="/published-links">
             Published links
@@ -103,8 +129,8 @@ export default async function DashboardPage() {
         </div>
         <ProductTable
           items={data.products}
-          emptyTitle="No real products yet"
-          emptyDescription="Create your first AR product to start filling the Supabase database."
+          emptyTitle="No products yet"
+          emptyDescription="Create your first AR product to begin the pilot workflow."
         />
       </section>
     </AppShell>

@@ -26,7 +26,11 @@ function StatusPageContent() {
   // first client render match. Reading it in the useState initializer caused a
   // hydration mismatch (React error #418).
   useEffect(() => {
-    setStoredProduct(readStoredProduct());
+    const timeoutId = window.setTimeout(() => {
+      setStoredProduct(readStoredProduct());
+    }, 0);
+
+    return () => window.clearTimeout(timeoutId);
   }, []);
 
   const productId = searchParams.get("productId") ?? storedProduct?.productId ?? "";

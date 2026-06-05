@@ -1,16 +1,57 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="1200" height="800" viewBox="0 0 1200 800" role="img" aria-labelledby="title desc">
-  <title id="title">Sample 3D product poster</title>
-  <desc id="desc">A simple oak chair preview used for local 3D and AR testing.</desc>
-  <rect width="1200" height="800" fill="#f4f6f2"/>
-  <path d="M0 650 C220 590 410 690 650 625 C850 570 1010 610 1200 545 L1200 800 L0 800 Z" fill="#e5ebe4"/>
-  <g transform="translate(430 160)">
-    <rect x="110" y="30" width="230" height="190" rx="18" fill="#c99f6f" stroke="#8b6238" stroke-width="10"/>
-    <rect x="85" y="225" width="285" height="68" rx="18" fill="#b9854d" stroke="#81552d" stroke-width="10"/>
-    <path d="M118 286 L86 572" stroke="#654223" stroke-width="24" stroke-linecap="round"/>
-    <path d="M336 286 L388 572" stroke="#654223" stroke-width="24" stroke-linecap="round"/>
-    <path d="M160 289 L146 535" stroke="#74502e" stroke-width="20" stroke-linecap="round"/>
-    <path d="M294 289 L304 535" stroke="#74502e" stroke-width="20" stroke-linecap="round"/>
-    <ellipse cx="230" cy="590" rx="225" ry="34" fill="#cad6cd"/>
+  <title id="title">Arc Oak Dining Chair AR preview</title>
+  <desc id="desc">A polished oak dining chair preview on a calm ecommerce studio background.</desc>
+  <defs>
+    <linearGradient id="bg" x1="0" x2="1" y1="0" y2="1">
+      <stop offset="0" stop-color="#fbfbf7"/>
+      <stop offset="0.58" stop-color="#f0f3ec"/>
+      <stop offset="1" stop-color="#e7ede4"/>
+    </linearGradient>
+    <linearGradient id="oak" x1="0" x2="1" y1="0" y2="1">
+      <stop offset="0" stop-color="#d9b277"/>
+      <stop offset="0.48" stop-color="#bd8850"/>
+      <stop offset="1" stop-color="#8d5d33"/>
+    </linearGradient>
+    <linearGradient id="oakLight" x1="0" x2="1" y1="0" y2="1">
+      <stop offset="0" stop-color="#edcf9d"/>
+      <stop offset="0.5" stop-color="#c9945b"/>
+      <stop offset="1" stop-color="#9b6337"/>
+    </linearGradient>
+    <linearGradient id="seat" x1="0" x2="1" y1="0" y2="1">
+      <stop offset="0" stop-color="#d9b274"/>
+      <stop offset="1" stop-color="#a96f3d"/>
+    </linearGradient>
+    <filter id="shadow" x="-30%" y="-30%" width="160%" height="160%">
+      <feDropShadow dx="0" dy="26" stdDeviation="26" flood-color="#17201a" flood-opacity="0.18"/>
+    </filter>
+  </defs>
+
+  <rect width="1200" height="800" fill="url(#bg)"/>
+  <ellipse cx="610" cy="638" rx="300" ry="54" fill="#cfd9cf" opacity="0.72"/>
+  <ellipse cx="600" cy="650" rx="220" ry="30" fill="#aebdaf" opacity="0.24"/>
+
+  <g filter="url(#shadow)">
+    <path d="M383 171 C432 139 549 123 661 139 C756 153 812 190 813 246 L807 371 C804 407 775 429 730 433 L479 438 C423 439 388 412 389 367 Z" fill="url(#oakLight)" stroke="#8f633a" stroke-width="10"/>
+    <path d="M438 207 C481 184 570 176 659 188 C722 197 762 219 763 254 L758 346 C756 370 738 384 703 388 L501 393 C463 393 438 374 438 344 Z" fill="#e4bf83" opacity="0.78"/>
+    <path d="M403 365 L744 342 C793 339 830 365 825 399 L806 513 C801 544 774 563 735 560 L401 539 C357 536 334 508 346 470 L372 391 C377 377 388 368 403 365 Z" fill="url(#seat)" stroke="#865934" stroke-width="10"/>
+    <path d="M392 390 L745 368 C775 367 793 381 789 400 L782 436 L363 462 L374 417 C378 402 383 393 392 390 Z" fill="#e8c288" opacity="0.56"/>
+
+    <path d="M397 516 L351 676" stroke="#784b28" stroke-width="28" stroke-linecap="round"/>
+    <path d="M493 525 L470 678" stroke="#8b582e" stroke-width="24" stroke-linecap="round"/>
+    <path d="M704 520 L752 676" stroke="#704525" stroke-width="28" stroke-linecap="round"/>
+    <path d="M783 510 L867 666" stroke="#86532d" stroke-width="24" stroke-linecap="round"/>
+
+    <path d="M359 455 L784 429" stroke="#6e4425" stroke-width="12" stroke-linecap="round" opacity="0.45"/>
+    <path d="M438 238 C495 219 608 215 717 237" fill="none" stroke="#a66f3d" stroke-width="8" stroke-linecap="round" opacity="0.35"/>
+    <path d="M434 286 C494 271 606 266 717 283" fill="none" stroke="#a66f3d" stroke-width="7" stroke-linecap="round" opacity="0.32"/>
+    <path d="M432 333 C504 319 615 315 712 326" fill="none" stroke="#a66f3d" stroke-width="7" stroke-linecap="round" opacity="0.3"/>
+    <path d="M411 413 C500 397 653 389 771 396" fill="none" stroke="#f2d2a4" stroke-width="7" stroke-linecap="round" opacity="0.45"/>
+    <path d="M389 476 C491 459 645 452 787 461" fill="none" stroke="#704525" stroke-width="6" stroke-linecap="round" opacity="0.24"/>
   </g>
-  <text x="600" y="720" text-anchor="middle" font-family="Arial, sans-serif" font-size="32" font-weight="700" fill="#17201a">Sample product model</text>
+
+  <g transform="translate(826 132)">
+    <rect x="0" y="0" width="188" height="52" rx="26" fill="#ffffff" stroke="#dce2d5"/>
+    <circle cx="30" cy="26" r="8" fill="#1f6f5b"/>
+    <text x="50" y="31" font-family="Arial, sans-serif" font-size="16" font-weight="700" fill="#17201a">Verified AR preview</text>
+  </g>
 </svg>

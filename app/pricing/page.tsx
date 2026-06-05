@@ -160,7 +160,7 @@ export default function PricingPage() {
                     }
                     variant={tier.recommended || tier.id === "business" ? "default" : "outline"}
                   >
-                    <Link href="/dashboard">
+                    <Link href={getPricingCtaHref(tier.id, Boolean(tier.monthlyUsd))}>
                       {tier.monthlyUsd ? "Get started" : "Contact us"}
                       <ArrowRight className="ml-1.5 h-3.5 w-3.5" />
                     </Link>
@@ -329,7 +329,7 @@ export default function PricingPage() {
             </p>
             <div className="flex flex-wrap gap-3 justify-center pt-2">
               <Button asChild size="lg" className="bg-white text-emerald-900 hover:bg-emerald-50">
-                <Link href="/dashboard">Book a pilot demo</Link>
+                <Link href="/contact/demo?source=pricing">Book a pilot demo</Link>
               </Button>
               <Button
                 asChild
@@ -347,4 +347,12 @@ export default function PricingPage() {
       </main>
     </div>
   )
+}
+
+function getPricingCtaHref(tierId: string, isSelfServe: boolean) {
+  if (!isSelfServe || tierId === "business") {
+    return `/contact/demo?plan=${encodeURIComponent(tierId)}`;
+  }
+
+  return `/login?intent=${encodeURIComponent(tierId)}`;
 }

@@ -1,8 +1,9 @@
 "use client"
 
+import { useState } from "react"
 import Link from "next/link"
 import { usePathname, useRouter } from "next/navigation"
-import { LayoutGrid, PlusSquare, Link2, BarChart2, CreditCard, LogOut } from "lucide-react"
+import { LayoutGrid, PlusSquare, Link2, BarChart2, CreditCard, LogOut, Menu, X } from "lucide-react"
 import { useLang } from "@/lib/lang"
 import { isSupabaseConfigured } from "@/lib/supabase/config"
 import { createBrowserSupabaseClient } from "@/lib/supabase/client"
@@ -12,6 +13,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   const router = useRouter()
   const { tr, toggle } = useLang()
   const n = tr.nav
+  const [mobileNavOpen, setMobileNavOpen] = useState(false)
 
   const navItems = [
     { href: "/dashboard", label: n.products, icon: LayoutGrid },
@@ -32,15 +34,41 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 
   return (
     <div className="appShell">
-      <aside className="sidebar">
+      <header className="mobileAppBar">
+        <Link href="/dashboard" className="mobileBrand" aria-label="Veridian dashboard">
+          <span className="brandMark">AR</span>
+          <span>
+            <strong>Veridian</strong>
+            <small>{n.brand}</small>
+          </span>
+        </Link>
+        <button
+          className="mobileNavButton"
+          type="button"
+          onClick={() => setMobileNavOpen((open) => !open)}
+          aria-expanded={mobileNavOpen}
+          aria-controls="app-sidebar"
+          aria-label={mobileNavOpen ? "Close navigation" : "Open navigation"}
+        >
+          {mobileNavOpen ? <X size={20} strokeWidth={2} /> : <Menu size={20} strokeWidth={2} />}
+        </button>
+      </header>
+
+      {mobileNavOpen && (
+        <button
+          className="sidebarBackdrop"
+          type="button"
+          onClick={() => setMobileNavOpen(false)}
+          aria-label="Close navigation"
+        />
+      )}
+
+      <aside className={mobileNavOpen ? "sidebar sidebarOpen" : "sidebar"} id="app-sidebar">
         <div className="brand">
           <div className="brandLeft">
             <span className="brandMark">AR</span>
             <strong>Veridian</strong>
             <span>{n.brand}</span>
-            <span className="badge warning" style={{ alignSelf: "flex-start", marginTop: 2 }}>
-              {n.demoBadge}
-            </span>
           </div>
           <button
             className="langPill"
@@ -61,6 +89,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                 key={href}
                 className={isActive ? "navActive" : undefined}
                 aria-current={isActive ? "page" : undefined}
+                onClick={() => setMobileNavOpen(false)}
               >
                 <Icon size={15} strokeWidth={2} aria-hidden />
                 {label}

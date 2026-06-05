@@ -88,7 +88,7 @@ export default function BillingPage() {
                 <div>
                   {tier.monthlyUsd ? (
                     <>
-                      <span style={{ fontSize: 20, fontWeight: 700 }}>${tier.monthlyUsd}</span>
+                      <span style={{ fontSize: 20, fontWeight: 700 }}>€{tier.monthlyUsd}</span>
                       <span className="muted" style={{ fontSize: 12 }}>{b.perMonth}</span>
                     </>
                   ) : (
@@ -128,7 +128,7 @@ export default function BillingPage() {
                   </button>
                 )}
                 {tier.id === "business" && (
-                  <a className="button secondary" href="mailto:hello@arads.example" style={{ width: "100%", textAlign: "center" }}>
+                  <a className="button secondary" href="mailto:hello@veridianar.com" style={{ width: "100%", textAlign: "center" }}>
                     {b.talkToUs}
                   </a>
                 )}
