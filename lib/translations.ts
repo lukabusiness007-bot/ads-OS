@@ -9,6 +9,7 @@ export const translations = {
       faq: "FAQ",
       samplePage: "Sample page",
       bookDemo: "Book demo",
+      login: "Log in",
     },
     hero: {
       eyebrow: "Furniture AR previews from 4 photos",
@@ -158,6 +159,7 @@ export const translations = {
       faq: "Pitanja",
       samplePage: "Primer stranice",
       bookDemo: "Zakažite demo",
+      login: "Prijava",
     },
     hero: {
       eyebrow: "AR pregledi nameštaja iz 4 fotografije",

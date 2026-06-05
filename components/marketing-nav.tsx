@@ -71,6 +71,9 @@ export function MarketingNav({ lang = "en" }: { lang?: Lang }) {
                   {lang === "sr" ? "EN" : "SR"}
                 </Link>
 
+                <Button asChild variant="ghost" size="sm">
+                  <Link href="/login">{t.login}</Link>
+                </Button>
                 <Button asChild variant="outline" size="sm">
                   <Link href="/p/northline-home/arc-oak-dining-chair">{t.samplePage}</Link>
                 </Button>
