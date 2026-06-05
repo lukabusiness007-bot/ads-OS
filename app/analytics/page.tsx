@@ -9,52 +9,52 @@ export default async function AnalyticsPage() {
     <AppShell>
       <header className="topbar">
         <div>
-          <p className="eyebrow">Analitika</p>
-          <h1>Učinak hostovanih stranica</h1>
-          <p className="muted">Pratite preglede stranica, interakcije sa pregledačem, AR klikove i klikove na prodavnicu za svaki objavljeni proizvod.</p>
+          <p className="eyebrow">Analytics</p>
+          <h1>Hosted page performance</h1>
+          <p className="muted">Track page views, viewer interactions, AR clicks, and store clicks for each published product.</p>
         </div>
         <Link className="button secondary" href="/billing">
-          Pogledaj naplatu
+          View billing
         </Link>
       </header>
 
       <section className="grid four">
         <article className="card metric">
-          <span className="sectionLabel">Pregledi stranica</span>
+          <span className="sectionLabel">Page views</span>
           <strong>{data.totals.pageViews}</strong>
-          <span className="badge neutral">Svi proizvodi</span>
+          <span className="badge neutral">All products</span>
         </article>
         <article className="card metric">
-          <span className="sectionLabel">Interakcije</span>
+          <span className="sectionLabel">Interactions</span>
           <strong>{data.totals.viewerInteractions}</strong>
-          <span className="badge neutral">3D pregledač</span>
+          <span className="badge neutral">3D viewer</span>
         </article>
         <article className="card metric">
-          <span className="sectionLabel">AR klikovi</span>
+          <span className="sectionLabel">AR clicks</span>
           <strong>{data.totals.arClicks}</strong>
-          <span className="badge neutral">Pogledaj u prostoriji</span>
+          <span className="badge neutral">View in room</span>
         </article>
         <article className="card metric">
-          <span className="sectionLabel">CTA na prodavnicu</span>
+          <span className="sectionLabel">Store CTA</span>
           <strong>{data.totals.storeClicks}</strong>
-          <span className="badge success">Nazad u prodavnicu</span>
+          <span className="badge success">Back to store</span>
         </article>
       </section>
 
       <section className="panel">
         <div style={{ marginBottom: 16 }}>
-          <h2>Pregled po proizvodu</h2>
-          <p className="muted">Metrike angažovanosti za svaku objavljenu stranicu proizvoda.</p>
+          <h2>Product breakdown</h2>
+          <p className="muted">Engagement metrics for each published product page.</p>
         </div>
         <div className="responsiveTable">
           <table className="table">
             <thead>
               <tr>
-                <th>Proizvod</th>
-                <th>Pregledi stranica</th>
-                <th>Interakcije</th>
-                <th>AR klikovi</th>
-                <th>Klikovi na prodavnicu</th>
+                <th>Product</th>
+                <th>Page views</th>
+                <th>Interactions</th>
+                <th>AR clicks</th>
+                <th>Store clicks</th>
               </tr>
             </thead>
             <tbody>
@@ -62,24 +62,24 @@ export default async function AnalyticsPage() {
                 <tr>
                   <td colSpan={5}>
                     <div className="emptyTableState">
-                      <strong>Još nema analitike</strong>
-                      <p className="muted">Objavite stranicu proizvoda i događaji kupaca će se pojaviti ovde.</p>
+                      <strong>No analytics yet</strong>
+                      <p className="muted">Publish a product page and customer events will appear here.</p>
                     </div>
                   </td>
                 </tr>
               ) : (
                 data.products.map((product) => (
                   <tr key={product.id}>
-                    <td data-label="Proizvod">
+                    <td data-label="Product">
                       <strong>{product.name}</strong>
                       <p className="muted" style={{ marginBottom: 0, fontSize: 13 }}>
                         {product.category.replace("_", " ")}
                       </p>
                     </td>
-                    <td data-label="Pregledi stranica">{product.analytics?.pageViews ?? 0}</td>
-                    <td data-label="Interakcije">{product.analytics?.viewerInteractions ?? 0}</td>
-                    <td data-label="AR klikovi">{product.analytics?.arButtonClicks ?? 0}</td>
-                    <td data-label="Klikovi na prodavnicu">{product.analytics?.ctaClicks ?? 0}</td>
+                    <td data-label="Page views">{product.analytics?.pageViews ?? 0}</td>
+                    <td data-label="Interactions">{product.analytics?.viewerInteractions ?? 0}</td>
+                    <td data-label="AR clicks">{product.analytics?.arButtonClicks ?? 0}</td>
+                    <td data-label="Store clicks">{product.analytics?.ctaClicks ?? 0}</td>
                   </tr>
                 ))
               )}

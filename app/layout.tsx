@@ -7,11 +7,11 @@ import { jsonLd, organizationJsonLd, siteConfig } from "@/lib/seo";
 export const metadata: Metadata = {
   metadataBase: new URL(siteConfig.url),
   title: {
-    default: "AR stranice proizvoda — kupujte sa sigurnošću | Veridian",
+    default: "Furniture AR Product Pages That Help Shoppers Buy With Confidence | Veridian",
     template: "%s | Veridian"
   },
   description:
-    "Pretvorite 4 fotografije nameštaja u verifikovane 3D/AR stranice proizvoda. Neka kupci vide veličinu, oblik i stil u svojoj sobi pre nego što kupe.",
+    "Turn 4 furniture photos into verified 3D/AR product pages. Let shoppers see size, shape, and style in their room before they buy.",
   applicationName: siteConfig.fullName,
   appleWebApp: {
     title: siteConfig.name
@@ -24,7 +24,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="sr">
+    <html lang="en">
       <body>
         <script type="application/ld+json" dangerouslySetInnerHTML={jsonLd(organizationJsonLd())} />
         <LanguageProvider>{children}</LanguageProvider>

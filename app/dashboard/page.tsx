@@ -12,52 +12,52 @@ export default async function DashboardPage() {
     <AppShell>
       <header className="topbar">
         <div>
-          <p className="eyebrow">{data.organization?.name ?? "Pilot radni prostor"}</p>
-          <h1 style={{ marginBottom: 6 }}>Pregled</h1>
+          <p className="eyebrow">{data.organization?.name ?? "Pilot workspace"}</p>
+          <h1 style={{ marginBottom: 6 }}>Overview</h1>
           <p className="muted" style={{ maxWidth: 560 }}>
-            Pratite proizvode, napredak generisanja, objavljene stranice, korišćenje plana i angažovanost kupaca na jednom mestu.
+            Track products, generation progress, published pages, plan usage, and shopper engagement in one place.
           </p>
         </div>
         <Link className="button accent" href="/create">
-          Kreiraj AR proizvod
+          Create AR product
         </Link>
       </header>
 
       {!data.isConfigured && (
         <div className="assumptionNote">
-          Skladište radnog prostora još nije povezano. Završite produkcijsko podešavanje pre pozivanja pilot prodavaca.
+          Live workspace storage is not connected yet. Finish production setup before inviting pilot merchants.
         </div>
       )}
 
       {data.setupErrorMessage && (
         <div className="assumptionNote">
-          Podešavanje radnog prostora zahteva pažnju pre nego što se podaci o proizvodima mogu sačuvati.
+          Workspace setup needs attention before live product data can be saved.
         </div>
       )}
 
       <section className="grid four">
         <article className="card metric">
-          <span className="sectionLabel">Ukupno proizvoda</span>
+          <span className="sectionLabel">Total products</span>
           <strong>{data.totals.products}</strong>
-          <span className="badge neutral">Katalog</span>
+          <span className="badge neutral">Catalog</span>
         </article>
         <article className="card metric">
-          <span className="sectionLabel">Objavljene stranice</span>
+          <span className="sectionLabel">Published pages</span>
           <strong>
             {data.totals.published}
             <span style={{ fontSize: 16, fontWeight: 500, color: "var(--muted)" }}>/25</span>
           </strong>
-          <span className="badge neutral">Aktivno hostovano</span>
+          <span className="badge neutral">Hosted live</span>
         </article>
         <article className="card metric">
-          <span className="sectionLabel">AR klikovi</span>
+          <span className="sectionLabel">AR clicks</span>
           <strong>{data.totals.arClicks}</strong>
-          <span className="badge neutral">Pogledaj u prostoriji</span>
+          <span className="badge neutral">View in room</span>
         </article>
         <article className="card metric">
-          <span className="sectionLabel">Klikovi na prodavnicu</span>
+          <span className="sectionLabel">Store clicks</span>
           <strong>{data.totals.storeClicks}</strong>
-          <span className="badge neutral">Nazad u prodavnicu</span>
+          <span className="badge neutral">Back to store</span>
         </article>
       </section>
 
@@ -65,36 +65,36 @@ export default async function DashboardPage() {
         <article className="panel stack">
           <div className="row">
             <div>
-              <h2>Sledeće akcije</h2>
-              <p className="muted">Fokusirajte se na proizvode kojima trebaju fotografije, pregled ili objavljivanje.</p>
+              <h2>Next actions</h2>
+              <p className="muted">Focus on products that need photos, review, or publishing.</p>
             </div>
             <Link className="button secondary sm" href="/create">
-              Dodaj proizvod
+              Add product
             </Link>
           </div>
           <ul className="actionList">
             {hasProducts ? (
               <li>
-                <strong>{data.totals.processing} proizvoda u generisanju</strong>
-                <span>{data.totals.published} objavljenih stranica je aktivno.</span>
+                <strong>{data.totals.processing} products in generation</strong>
+                <span>{data.totals.published} published pages are live.</span>
               </li>
             ) : (
               <>
                 <li>
-                  <strong>1. Kreirajte prvi proizvod</strong>
-                  <span>Unesite naziv proizvoda, kategoriju, URL prodavnice, cenu i stvarne dimenzije.</span>
+                  <strong>1. Create your first product</strong>
+                  <span>Add the product name, category, store URL, price, and real dimensions.</span>
                 </li>
                 <li>
-                  <strong>2. Otpremite 4 jasne fotografije</strong>
-                  <span>Koristite prednji, bočni ili tročetvrtinski, zadnji i gornji ili detaljni pogled.</span>
+                  <strong>2. Upload 4 clean photos</strong>
+                  <span>Use front, side or three-quarter, back, and top or detail views.</span>
                 </li>
                 <li>
-                  <strong>3. Pregledajte generisani prikaz</strong>
-                  <span>Proverite sličnost, razmeru, orijentaciju, učitavanje i AR spremnost pre objavljivanja.</span>
+                  <strong>3. Review the generated preview</strong>
+                  <span>Check resemblance, scale, orientation, loading, and AR readiness before publishing.</span>
                 </li>
                 <li>
-                  <strong>4. Objavite i merite</strong>
-                  <span>Dodajte hostovani link u svoju prodavnicu, zatim pratite AR i klikove na prodavnicu ovde.</span>
+                  <strong>4. Publish and measure</strong>
+                  <span>Add the hosted link to your store, then track AR and store clicks here.</span>
                 </li>
               </>
             )}
@@ -102,17 +102,17 @@ export default async function DashboardPage() {
         </article>
 
         <article className="panel stack">
-          <h2>Korišćenje plana</h2>
+          <h2>Plan usage</h2>
           <div>
             <div className="usageBar" aria-label={`${data.totals.published} / 25`}>
               <span style={{ width: `${usagePct}%` }} />
             </div>
             <p className="muted" style={{ marginTop: 8, fontSize: 13 }}>
-              {data.totals.published} / 25 objavljenih stranica iskorišćeno
+              {data.totals.published} / 25 published pages used
             </p>
           </div>
           <Link className="button ghost" href="/billing">
-            Pogledaj detalje naplate
+            View billing details
           </Link>
         </article>
       </section>
@@ -120,17 +120,17 @@ export default async function DashboardPage() {
       <section className="panel">
         <div className="row">
           <div>
-            <h2>Proizvodi</h2>
-            <p className="muted">Vaš pilot katalog će ovde prikazati status proizvoda, hostovane linkove i metrike angažovanosti.</p>
+            <h2>Products</h2>
+            <p className="muted">Your pilot catalog will show product status, hosted links, and engagement metrics here.</p>
           </div>
           <Link className="button secondary sm" href="/published-links">
-            Objavljeni linkovi
+            Published links
           </Link>
         </div>
         <ProductTable
           items={data.products}
-          emptyTitle="Još nema proizvoda"
-          emptyDescription="Kreirajte prvi AR proizvod da biste započeli pilot tok rada."
+          emptyTitle="No products yet"
+          emptyDescription="Create your first AR product to begin the pilot workflow."
         />
       </section>
     </AppShell>
