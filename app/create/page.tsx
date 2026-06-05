@@ -29,6 +29,14 @@ import type {
 } from "@/lib/types";
 
 const categories: ProductCategory[] = ["chair", "table", "sofa", "lamp", "shelf", "small_decor"];
+const categoryLabels: Record<ProductCategory, string> = {
+  chair: "Stolica",
+  table: "Sto",
+  sofa: "Sofa",
+  lamp: "Lampa",
+  shelf: "Polica",
+  small_decor: "Sitni dekor"
+};
 type UploadPhase = "idle" | "preparing" | "ready" | "uploading" | "starting" | "queued";
 
 export default function CreateProductPage() {
@@ -105,7 +113,7 @@ export default function CreateProductPage() {
       setErrorMessage(
         error instanceof Error
           ? error.message
-          : "We could not prepare these photos in the browser. Try clearer source photos with fewer pixels."
+          : "Nismo mogli da pripremimo ove fotografije u pregledaču. Pokušajte sa jasnijim izvornim fotografijama sa manje piksela."
       );
     }
   }
@@ -148,7 +156,7 @@ export default function CreateProductPage() {
       const payload = readStartGenerationPayload(response.body, response.status);
 
       if (response.status < 200 || response.status >= 300 || !payload.productId || !payload.taskId) {
-        throw new Error(payload.errorMessage ?? "Generation could not start.");
+        throw new Error(payload.errorMessage ?? "Generisanje nije moglo da započne.");
       }
 
       setUploadPhase("queued");
@@ -156,7 +164,7 @@ export default function CreateProductPage() {
       window.localStorage.setItem(GENERATED_PRODUCT_STORAGE_KEY, JSON.stringify(storedProduct));
       router.push(`/status?productId=${encodeURIComponent(payload.productId)}&taskId=${encodeURIComponent(payload.taskId)}`);
     } catch (error) {
-      setErrorMessage(error instanceof Error ? error.message : "Generation could not start.");
+      setErrorMessage(error instanceof Error ? error.message : "Generisanje nije moglo da započne.");
       setIsSubmitting(false);
       setUploadPhase(preparedPhotos.length === REQUIRED_GENERATION_PHOTOS ? "ready" : "idle");
     }
@@ -180,19 +188,19 @@ export default function CreateProductPage() {
     <AppShell>
       <header className="topbar">
         <div>
-          <p className="eyebrow">Create AR product</p>
-          <h1>Generate a 3D model from product photos</h1>
+          <p className="eyebrow">Kreiraj AR proizvod</p>
+          <h1>Generišite 3D model iz fotografija proizvoda</h1>
           <p className="muted">
-            Add product details, upload 4 clean JPG or PNG product photos, then the app creates web and AR model files.
+            Dodajte detalje proizvoda, otpremite 4 jasne JPG ili PNG fotografije, zatim aplikacija kreira web i AR fajlove modela.
           </p>
         </div>
         <Link className="button secondary" href="/dashboard">
-          Back to products
+          Nazad na proizvode
         </Link>
       </header>
 
-      <section className="flowProgress" aria-label="Product creation progress">
-        {["Product details", "Photos", "Generate", "Review"].map((step, index) => (
+      <section className="flowProgress" aria-label="Napredak kreiranja proizvoda">
+        {["Detalji proizvoda", "Fotografije", "Generisanje", "Pregled"].map((step, index) => (
           <div className={index === 0 ? "flowStep active" : "flowStep"} key={step}>
             <span>{index + 1}</span>
             <strong>{step}</strong>
@@ -202,69 +210,69 @@ export default function CreateProductPage() {
 
       <section className="grid two">
         <form className="panel form" onSubmit={handleSubmit}>
-          <h2>Product details</h2>
+          <h2>Detalji proizvoda</h2>
           <div className="field">
-            <label htmlFor="product-name">Product name</label>
-            <input id="product-name" name="productName" placeholder="e.g. Arc Oak Dining Chair" required />
+            <label htmlFor="product-name">Naziv proizvoda</label>
+            <input id="product-name" name="productName" placeholder="npr. Arc hrastova trpezarijska stolica" required />
           </div>
           <div className="field">
-            <label htmlFor="category">Product category</label>
+            <label htmlFor="category">Kategorija proizvoda</label>
             <select id="category" name="category" defaultValue="chair">
               {categories.map((category) => (
                 <option key={category} value={category}>
-                  {category.replace("_", " ")}
+                  {categoryLabels[category]}
                 </option>
               ))}
             </select>
           </div>
           <div className="field">
-            <label htmlFor="description">Short product description</label>
+            <label htmlFor="description">Kratki opis proizvoda</label>
             <textarea
               id="description"
               name="description"
-              placeholder="e.g. Solid oak dining chair with curved back support."
+              placeholder="npr. Trpezarijska stolica od punog hrasta sa zakrivljenim naslonom."
             />
           </div>
 
-          <h2>Dimensions</h2>
+          <h2>Dimenzije</h2>
           <div className="grid three">
             <div className="field">
-              <label htmlFor="width">Width cm</label>
+              <label htmlFor="width">Širina cm</label>
               <input id="width" name="width" inputMode="decimal" placeholder="48" required />
             </div>
             <div className="field">
-              <label htmlFor="height">Height cm</label>
+              <label htmlFor="height">Visina cm</label>
               <input id="height" name="height" inputMode="decimal" placeholder="82" required />
             </div>
             <div className="field">
-              <label htmlFor="depth">Depth cm</label>
+              <label htmlFor="depth">Dubina cm</label>
               <input id="depth" name="depth" inputMode="decimal" placeholder="52" required />
             </div>
           </div>
 
-          <h2>Store URL</h2>
+          <h2>URL prodavnice</h2>
           <div className="field">
-            <label htmlFor="customer-url">Product page on your store</label>
+            <label htmlFor="customer-url">Stranica proizvoda na vašoj prodavnici</label>
             <input
               id="customer-url"
               name="customerUrl"
               type="url"
-              placeholder="https://yourstore.com/products/product-name"
+              placeholder="https://vasaprodavnica.com/proizvodi/naziv-proizvoda"
               required
             />
           </div>
           <div className="field">
-            <label htmlFor="price">Display price optional</label>
-            <input id="price" name="price" placeholder="e.g. 89 EUR" />
+            <label htmlFor="price">Prikaz cene (opciono)</label>
+            <input id="price" name="price" placeholder="npr. 89 EUR" />
           </div>
 
-          <h2>Photos</h2>
+          <h2>Fotografije</h2>
           <div className="assumptionNote">
-            Large originals are optimized in this browser first. The app targets about{" "}
-            {formatMegabytes(TARGET_GENERATION_PHOTO_SIZE_BYTES)} per photo so upload and generation stay fast.
+            Veliki originali se prvo optimizuju u ovom pregledaču. Aplikacija cilja oko{" "}
+            {formatMegabytes(TARGET_GENERATION_PHOTO_SIZE_BYTES)} po fotografiji kako bi otpremanje i generisanje ostali brzi.
           </div>
           <div className="field">
-            <label htmlFor="photos">Upload 4 required product photos</label>
+            <label htmlFor="photos">Otpremite 4 obavezne fotografije proizvoda</label>
             <input
               id="photos"
               type="file"
@@ -280,7 +288,7 @@ export default function CreateProductPage() {
               <div className="uploadProgressHeader">
                 <strong>{progressLabel}</strong>
                 {uploadPhase === "starting" ? (
-                  <span>Processing</span>
+                  <span>Obrada</span>
                 ) : (
                   <span>{measurableProgress}%</span>
                 )}
@@ -299,8 +307,8 @@ export default function CreateProductPage() {
 
           <div className="toggleField">
             <div>
-              <label htmlFor="image-enhancement">Image enhancement</label>
-              <p className="muted">Leave off for accurate colors. Turn on only when photos are dark, noisy, or low contrast.</p>
+              <label htmlFor="image-enhancement">Poboljšanje slike</label>
+              <p className="muted">Ostavite isključeno za tačne boje. Uključite samo kada su fotografije tamne, zrnaste ili niskog kontrasta.</p>
             </div>
             <input id="image-enhancement" name="imageEnhancement" type="checkbox" disabled={isSubmitting} />
           </div>
@@ -314,31 +322,31 @@ export default function CreateProductPage() {
 
         <aside className="panel stack">
           <div>
-            <p className="eyebrow">Photo guidance</p>
-            <h2>Keep the upload small and clear</h2>
+            <p className="eyebrow">Saveti za fotografije</p>
+            <h2>Neka otpremanje bude malo i jasno</h2>
             <p className="muted">
-              Use one product per photo, plain neutral backgrounds, sharp focus, and the same even lighting. Front,
-              side or three-quarter, back, and top or detail views give the best color-faithful HD texture. Each photo
-              is prepared in your browser before upload, so large originals are reduced automatically to about{" "}
-              {formatMegabytes(TARGET_GENERATION_PHOTO_SIZE_BYTES)}.
+              Koristite jedan proizvod po fotografiji, jednostavne neutralne pozadine, oštar fokus i isto ravnomerno
+              osvetljenje. Prednji, bočni ili tročetvrtinski, zadnji i gornji ili detaljni pogled daju najvernije HD
+              teksture. Svaka fotografija se priprema u vašem pregledaču pre otpremanja, pa se veliki originali
+              automatski smanjuju na oko {formatMegabytes(TARGET_GENERATION_PHOTO_SIZE_BYTES)}.
             </p>
           </div>
 
           <div className="photoChecklist">
-            {["Front view", "Side or three-quarter view", "Back view", "Top or detail view"].map((label, index) => {
+            {["Prednji pogled", "Bočni ili tročetvrtinski pogled", "Zadnji pogled", "Gornji ili detaljni pogled"].map((label, index) => {
               const photo = photos[index];
               const prepared = preparedPhotos[index];
 
               return (
                 <div className={prepared ? "uploadSlot ready" : photo ? "uploadSlot pending" : "uploadSlot"} key={label}>
-                  <span>{prepared ? "Ready" : photo ? "Preparing" : "Required"}</span>
+                  <span>{prepared ? "Spremno" : photo ? "Priprema" : "Obavezno"}</span>
                   <strong>{label}</strong>
                   <p className="muted">
-                    {photo ? photo.name : "JPG or PNG, neutral light, no filters or glare."}
+                    {photo ? photo.name : "JPG ili PNG, neutralno svetlo, bez filtera ili odsjaja."}
                   </p>
                   {prepared && (
                     <p className="uploadMeta">
-                      {formatFileSize(prepared.originalSize)} original to {formatFileSize(prepared.preparedSize)} upload
+                      {formatFileSize(prepared.originalSize)} original na {formatFileSize(prepared.preparedSize)} otpremanje
                       {prepared.width && prepared.height ? `, ${prepared.width}x${prepared.height}` : ""}
                     </p>
                   )}
@@ -349,15 +357,15 @@ export default function CreateProductPage() {
 
           <div className="row">
             <span className={preparedPhotos.length === REQUIRED_GENERATION_PHOTOS ? "badge success" : "badge neutral"}>
-              {photos.length}/4 photos selected
+              {photos.length}/4 fotografije izabrane
             </span>
-            <span className="badge neutral">JPG or PNG</span>
-            <span className="badge neutral">Auto-optimized</span>
-            <span className="badge neutral">Secure upload</span>
+            <span className="badge neutral">JPG ili PNG</span>
+            <span className="badge neutral">Auto-optimizovano</span>
+            <span className="badge neutral">Bezbedno otpremanje</span>
           </div>
 
           <div className="assumptionNote">
-            Your team can review generated color, material, shape, and scale before publishing the hosted AR page.
+            Vaš tim može pregledati generisanu boju, materijal, oblik i razmeru pre objavljivanja hostovane AR stranice.
           </div>
         </aside>
       </section>
@@ -367,11 +375,11 @@ export default function CreateProductPage() {
 
 function validatePhotoSelection(files: File[]) {
   if (files.length !== REQUIRED_GENERATION_PHOTOS) {
-    return "Upload exactly 4 product photos: front, side or three-quarter, back, and top or detail.";
+    return "Otpremite tačno 4 fotografije proizvoda: prednju, bočnu ili tročetvrtinsku, zadnju i gornju ili detaljnu.";
   }
 
   if (files.some((file) => !isSupportedPhoto(file))) {
-    return "Use JPG or PNG photos only for this generation workflow.";
+    return "Za ovaj tok generisanja koristite samo JPG ili PNG fotografije.";
   }
 
   return "";
@@ -379,29 +387,29 @@ function validatePhotoSelection(files: File[]) {
 
 function validatePreparedPhotos(files: PreparedGenerationPhoto[]) {
   if (files.length !== REQUIRED_GENERATION_PHOTOS) {
-    return "Wait for the app to finish preparing all 4 photos before starting generation.";
+    return "Sačekajte da aplikacija završi pripremu svih 4 fotografije pre pokretanja generisanja.";
   }
 
   const oversizedPhoto = files.find((photo) => photo.preparedSize > MAX_GENERATION_PHOTO_SIZE_BYTES);
 
   if (oversizedPhoto) {
-    return `We could not prepare ${oversizedPhoto.originalName} under ${formatMegabytes(
+    return `Nismo mogli da pripremimo ${oversizedPhoto.originalName} ispod ${formatMegabytes(
       MAX_GENERATION_PHOTO_SIZE_BYTES
-    )}. Try a clearer source photo with fewer pixels.`;
+    )}. Pokušajte sa jasnijom izvornom fotografijom sa manje piksela.`;
   }
 
   const totalPhotoBytes = files.reduce((total, photo) => total + photo.preparedSize, 0);
 
   if (totalPhotoBytes > MAX_GENERATION_PHOTO_BYTES_TOTAL) {
-    return `The prepared photos are still too large together. The app needs the generated upload under ${formatMegabytes(
+    return `Pripremljene fotografije su zajedno i dalje prevelike. Aplikaciji je potrebno da generisano otpremanje bude ispod ${formatMegabytes(
       MAX_GENERATION_PHOTO_BYTES_TOTAL
     )}.`;
   }
 
   if (totalPhotoBytes > TARGET_GENERATION_PHOTO_BYTES_TOTAL) {
-    return `The browser prepared these photos, but they are still larger than the normal upload target of ${formatMegabytes(
+    return `Pregledač je pripremio ove fotografije, ali su i dalje veće od uobičajenog cilja otpremanja od ${formatMegabytes(
       TARGET_GENERATION_PHOTO_BYTES_TOTAL
-    )}. Try choosing clearer source photos with fewer pixels.`;
+    )}. Pokušajte da izaberete jasnije izvorne fotografije sa manje piksela.`;
   }
 
   return "";
@@ -457,7 +465,7 @@ async function createGenerationUploads(
   const payload = await readJsonPayload<CreateGenerationUploadsResponse>(response);
 
   if (!response.ok || !payload.productId || !payload.uploads) {
-    throw new Error(payload.errorMessage ?? "We could not prepare photo uploads. Please try again.");
+    throw new Error(payload.errorMessage ?? "Nismo mogli da pripremimo otpremanje fotografija. Pokušajte ponovo.");
   }
 
   return payload as CreateGenerationUploadsResponse;
@@ -469,7 +477,7 @@ async function uploadPreparedPhotos(
   onUploadProgress: (progress: number) => void
 ) {
   if (preparedPhotos.length !== uploads.length) {
-    throw new Error("The upload targets did not match the prepared photos. Please try again.");
+    throw new Error("Odredišta otpremanja se ne poklapaju sa pripremljenim fotografijama. Pokušajte ponovo.");
   }
 
   const uploadedBytesByIndex = new Array(preparedPhotos.length).fill(0) as number[];
@@ -516,10 +524,10 @@ function uploadPhotoToR2(
         return;
       }
 
-      reject(new Error("A photo upload failed. Please try again."));
+      reject(new Error("Otpremanje fotografije nije uspelo. Pokušajte ponovo."));
     };
-    request.onerror = () => reject(new Error("The upload connection failed. Please try again."));
-    request.onabort = () => reject(new Error("The upload was cancelled."));
+    request.onerror = () => reject(new Error("Veza za otpremanje nije uspela. Pokušajte ponovo."));
+    request.onabort = () => reject(new Error("Otpremanje je otkazano."));
     request.send(file);
   });
 }
@@ -542,8 +550,8 @@ async function startGenerationRequest(payload: StartGenerationRequest) {
 function readStartGenerationPayload(responseText: string, status: number) {
   const fallbackMessage =
     status === 413
-      ? "Generation could not start because the request was rejected before the app could process it. Please try again."
-      : "Generation could not start.";
+      ? "Generisanje nije moglo da započne jer je zahtev odbijen pre nego što je aplikacija mogla da ga obradi. Pokušajte ponovo."
+      : "Generisanje nije moglo da započne.";
 
   if (!responseText) {
     return { errorMessage: fallbackMessage } as Partial<StartGenerationResponse> & { errorMessage?: string };
@@ -572,46 +580,46 @@ async function readJsonPayload<T extends { errorMessage?: string }>(response: Re
 
 function getProgressLabel(phase: UploadPhase, currentFileName: string) {
   if (phase === "preparing") {
-    return currentFileName ? `Preparing ${currentFileName}` : "Preparing photos";
+    return currentFileName ? `Priprema ${currentFileName}` : "Priprema fotografija";
   }
 
   if (phase === "uploading") {
-    return "Uploading photos";
+    return "Otpremanje fotografija";
   }
 
   if (phase === "starting") {
-    return "Starting generation";
+    return "Pokretanje generisanja";
   }
 
   if (phase === "queued") {
-    return "Generation queued";
+    return "Generisanje na čekanju";
   }
 
   if (phase === "ready") {
-    return "Photos ready to upload";
+    return "Fotografije spremne za otpremanje";
   }
 
-  return "Photo upload";
+  return "Otpremanje fotografija";
 }
 
 function getSubmitLabel(phase: UploadPhase, isSubmitting: boolean) {
   if (phase === "preparing") {
-    return "Preparing photos...";
+    return "Priprema fotografija...";
   }
 
   if (isSubmitting && phase === "uploading") {
-    return "Uploading photos...";
+    return "Otpremanje fotografija...";
   }
 
   if (isSubmitting && phase === "starting") {
-    return "Starting generation...";
+    return "Pokretanje generisanja...";
   }
 
   if (isSubmitting && phase === "queued") {
-    return "Generation queued...";
+    return "Generisanje na čekanju...";
   }
 
-  return "Generate 3D model";
+  return "Generiši 3D model";
 }
 
 function formatFileSize(bytes: number) {
@@ -636,7 +644,7 @@ function createStoredProduct(
   taskId: string,
   photoCount: number
 ): StoredGeneratedProduct {
-  const name = getFormString(formData, "productName") || "Generated product";
+  const name = getFormString(formData, "productName") || "Generisani proizvod";
   const category = (getFormString(formData, "category") || "small_decor") as ProductCategory;
 
   return {
@@ -657,7 +665,7 @@ function createStoredProduct(
     photoCount,
     status: "queued",
     progress: 0,
-    message: "Generation is queued.",
+    message: "Generisanje je na čekanju.",
     updatedAt: new Date().toISOString()
   };
 }

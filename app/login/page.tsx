@@ -8,7 +8,7 @@ import { isSupabaseConfigured } from "@/lib/supabase/config";
 
 export default function LoginPage() {
   return (
-    <Suspense fallback={<LoginShell message="Loading login..." />}>
+    <Suspense fallback={<LoginShell message="Učitavanje prijave..." />}>
       <LoginPageContent />
     </Suspense>
   );
@@ -31,12 +31,12 @@ async function resolveIdentifier(identifier: string): Promise<{ email: string | 
       body: JSON.stringify({ username: identifier })
     });
     if (!res.ok) {
-      return { email: null, error: "Invalid username or password." };
+      return { email: null, error: "Pogrešno korisničko ime ili lozinka." };
     }
     const data = await res.json();
     return { email: data.email };
   } catch {
-    return { email: null, error: "Could not resolve username." };
+    return { email: null, error: "Nije moguće prepoznati korisničko ime." };
   }
 }
 
@@ -54,7 +54,7 @@ function LoginPageContent() {
 
     const { email, error: resolveError } = await resolveIdentifier(identifier.trim());
     if (!email) {
-      setMessage(resolveError ?? "Invalid username or password.");
+      setMessage(resolveError ?? "Pogrešno korisničko ime ili lozinka.");
       return;
     }
 
@@ -91,7 +91,7 @@ function LoginPageContent() {
       }
     });
 
-    setMessage(error ? error.message : "Check your email to confirm the account.");
+    setMessage(error ? error.message : "Proverite email da biste potvrdili nalog.");
   }
 
   async function signInWithGoogle() {
@@ -114,33 +114,33 @@ function LoginPageContent() {
   return (
     <LoginShell>
       <>
-        <p className="eyebrow">Merchant login</p>
-        <h1>Sign in to Veridian</h1>
+        <p className="eyebrow">Prijava prodavca</p>
+        <h1>Prijavite se na Veridian</h1>
         <p className="muted">
           {intent
-            ? `Continue with the ${formatIntent(intent)} pilot plan, then create your first AR product.`
-            : "Access your products, generation progress, billing, published pages, and analytics."}
+            ? `Nastavite sa ${formatIntent(intent)} pilot planom, zatim kreirajte svoj prvi AR proizvod.`
+            : "Pristupite svojim proizvodima, napretku generisanja, naplati, objavljenim stranicama i analitici."}
         </p>
 
         {!configured ? (
           <>
             <div className="assumptionNote">
-              Pilot account access is not enabled in this environment yet. Book a demo to review the workflow and
-              connect a production workspace.
+              Pristup pilot nalogu još nije omogućen u ovom okruženju. Zakažite demo da biste pregledali tok rada i
+              povezali produkcijski radni prostor.
             </div>
             <div className="assetGrid">
               <Link className="button accent" href={`/contact/demo${intent ? `?plan=${encodeURIComponent(intent)}` : ""}`}>
-                Book a pilot demo
+                Zakaži pilot demo
               </Link>
               <Link className="button secondary" href="/p/northline-home/arc-oak-dining-chair">
-                View sample page
+                Pogledaj primer stranice
               </Link>
             </div>
           </>
         ) : (
           <>
             <div className="field">
-              <label htmlFor="identifier">Email or username</label>
+              <label htmlFor="identifier">Email ili korisničko ime</label>
               <input
                 id="identifier"
                 type={isUsername ? "text" : "email"}
@@ -151,7 +151,7 @@ function LoginPageContent() {
               />
             </div>
             <div className="field">
-              <label htmlFor="password">Password</label>
+              <label htmlFor="password">Lozinka</label>
               <input
                 id="password"
                 type="password"
@@ -164,22 +164,22 @@ function LoginPageContent() {
             {message && <div className="assumptionNote">{message}</div>}
             <div className="assetGrid">
               <button className="button accent" type="button" onClick={signInWithPassword}>
-                Sign in
+                Prijavi se
               </button>
               {!isUsername && (
                 <button className="button secondary" type="button" onClick={signUpWithPassword}>
-                  Create account
+                  Kreiraj nalog
                 </button>
               )}
               <button className="button ghost" type="button" onClick={signInWithGoogle}>
-                Continue with Google
+                Nastavi sa Google nalogom
               </button>
             </div>
           </>
         )}
 
         <Link className="textLink" href="/">
-          Back to site
+          Nazad na sajt
         </Link>
       </>
     </LoginShell>
@@ -198,7 +198,7 @@ function LoginShell({ children, message }: { children?: React.ReactNode; message
       <section className="panel form authPanel">
         {children ?? (
           <>
-            <p className="eyebrow">Merchant login</p>
+            <p className="eyebrow">Prijava prodavca</p>
             <h1>{message}</h1>
           </>
         )}

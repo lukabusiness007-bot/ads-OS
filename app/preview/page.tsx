@@ -43,37 +43,37 @@ function PreviewPageContent() {
     <AppShell>
       <header className="topbar">
         <div>
-          <p className="eyebrow">Generated model</p>
-          <h1>{product?.name ?? "No generated model yet"}</h1>
+          <p className="eyebrow">Generisani model</p>
+          <h1>{product?.name ?? "Još nema generisanog modela"}</h1>
           <p className="muted">
-            Inspect the generated 3D model, launch AR on supported devices, then send the best version to quality review.
+            Pregledajte generisani 3D model, pokrenite AR na podržanim uređajima, zatim pošaljite najbolju verziju na proveru kvaliteta.
           </p>
         </div>
         <div className="row">
           <Link className="button secondary" href="/create">
-            Regenerate
+            Regeneriši
           </Link>
           <Link className={asset ? "button accent" : "button secondary"} href={asset ? "/approval" : statusHref}>
-            {asset ? "Send to quality review" : "Back to status"}
+            {asset ? "Pošalji na proveru kvaliteta" : "Nazad na status"}
           </Link>
         </div>
       </header>
 
       <section className="grid two">
         <div className="panel stack">
-          <ModelViewer asset={asset} alt={`${product?.name ?? "Generated product"} 3D model`} />
+          <ModelViewer asset={asset} alt={`3D model: ${product?.name ?? "Generisani proizvod"}`} />
           <div className="row">
-            <span className={asset?.glbUrl ? "badge success" : "badge neutral"}>GLB {asset?.glbUrl ? "ready" : "missing"}</span>
-            <span className={asset?.usdzUrl ? "badge success" : "badge neutral"}>USDZ {asset?.usdzUrl ? "ready" : "missing"}</span>
-            <span className={asset?.posterUrl ? "badge success" : "badge neutral"}>Poster {asset?.posterUrl ? "ready" : "missing"}</span>
+            <span className={asset?.glbUrl ? "badge success" : "badge neutral"}>GLB {asset?.glbUrl ? "spremno" : "nedostaje"}</span>
+            <span className={asset?.usdzUrl ? "badge success" : "badge neutral"}>USDZ {asset?.usdzUrl ? "spremno" : "nedostaje"}</span>
+            <span className={asset?.posterUrl ? "badge success" : "badge neutral"}>Poster {asset?.posterUrl ? "spremno" : "nedostaje"}</span>
           </div>
         </div>
 
         <aside className="panel stack">
-          <h2>Asset checks</h2>
+          <h2>Provere fajlova</h2>
           <p className="muted">
-            Generated output is copied into storage before the quality review gate, so the viewer never depends on
-            temporary provider URLs.
+            Generisani izlaz se kopira u skladište pre kapije za proveru kvaliteta, tako da pregledač nikada ne zavisi od
+            privremenih URL-ova provajdera.
           </p>
           {checks.length ? (
             <ul className="checklist">
@@ -87,19 +87,19 @@ function PreviewPageContent() {
               ))}
             </ul>
           ) : (
-            <div className="assumptionNote">Wait for generation to finish before opening the model preview.</div>
+            <div className="assumptionNote">Sačekajte da se generisanje završi pre otvaranja prikaza modela.</div>
           )}
           <div className="assetGrid">
-            <span className="badge neutral">Triangles {asset?.triangleCount ? asset.triangleCount.toLocaleString() : "unknown"}</span>
-            <span className="badge neutral">Metadata {asset?.metadataUrl ? "stored" : "pending"}</span>
-            <span className="badge neutral">Scale 1 unit = 1 meter</span>
+            <span className="badge neutral">Trouglovi {asset?.triangleCount ? asset.triangleCount.toLocaleString() : "nepoznato"}</span>
+            <span className="badge neutral">Metapodaci {asset?.metadataUrl ? "sačuvani" : "na čekanju"}</span>
+            <span className="badge neutral">Razmera 1 jedinica = 1 metar</span>
           </div>
           <div className="row">
             <a className="button secondary" href={asset?.glbUrl ?? "#"} aria-disabled={!asset?.glbUrl}>
-              Open GLB
+              Otvori GLB
             </a>
             <a className="button secondary" href={asset?.usdzUrl ?? "#"} aria-disabled={!asset?.usdzUrl}>
-              Open AR file
+              Otvori AR fajl
             </a>
           </div>
         </aside>
@@ -112,9 +112,9 @@ function PreviewFallback() {
   return (
     <AppShell>
       <section className="panel stack">
-        <p className="eyebrow">Generated model</p>
-        <h1>Loading preview</h1>
-        <p className="muted">Preparing the model viewer.</p>
+        <p className="eyebrow">Generisani model</p>
+        <h1>Učitavanje prikaza</h1>
+        <p className="muted">Priprema pregledača modela.</p>
       </section>
     </AppShell>
   );

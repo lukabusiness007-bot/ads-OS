@@ -77,7 +77,7 @@ function StatusPageContent() {
         }
       } catch (error) {
         if (!isCancelled) {
-          setPollError(error instanceof Error ? error.message : "We could not refresh generation status.");
+          setPollError(error instanceof Error ? error.message : "Nismo mogli da osvežimo status generisanja.");
         }
       } finally {
         if (!isCancelled) {
@@ -99,24 +99,24 @@ function StatusPageContent() {
 
   const effectiveStatus = statusPayload?.status ?? storedProduct?.status ?? "queued";
   const progress = statusPayload?.progress ?? storedProduct?.progress ?? 0;
-  const message = statusPayload?.message ?? storedProduct?.message ?? "Generation is queued.";
+  const message = statusPayload?.message ?? storedProduct?.message ?? "Generisanje je na čekanju.";
   const previewHref = `/preview?productId=${encodeURIComponent(productId)}`;
 
   const steps = useMemo(
     () => [
       {
-        title: "Photos uploaded",
-        detail: `${storedProduct?.photoCount ?? "4"} product photos were received and stored.`,
+        title: "Fotografije otpremljene",
+        detail: `${storedProduct?.photoCount ?? "4"} fotografije proizvoda su primljene i sačuvane.`,
         state: "done"
       },
       {
-        title: "Creating model",
+        title: "Kreiranje modela",
         detail:
           effectiveStatus === "failed"
             ? message
             : effectiveStatus === "queued" || effectiveStatus === "running"
             ? message
-            : "The 3D model was generated.",
+            : "3D model je generisan.",
         state:
           effectiveStatus === "failed"
             ? "failed"
@@ -125,23 +125,23 @@ function StatusPageContent() {
             : "done"
       },
       {
-        title: "Packaging AR files",
+        title: "Pakovanje AR fajlova",
         detail:
           effectiveStatus === "succeeded"
-            ? "GLB, USDZ, and poster files are stored for the viewer."
+            ? "GLB, USDZ i poster fajlovi su sačuvani za pregledač."
             : effectiveStatus === "failed"
-            ? "Packaging stopped because this generation run failed."
-            : "The model will be copied into storage as soon as generation finishes.",
+            ? "Pakovanje je zaustavljeno jer ovo generisanje nije uspelo."
+            : "Model će biti kopiran u skladište čim se generisanje završi.",
         state: effectiveStatus === "succeeded" ? "done" : effectiveStatus === "failed" ? "pending" : "active"
       },
       {
-        title: "Ready to review",
+        title: "Spremno za pregled",
         detail:
           effectiveStatus === "succeeded"
-            ? "Open the preview, inspect the model, then send it to quality review."
+            ? "Otvorite prikaz, pregledajte model, zatim ga pošaljite na proveru kvaliteta."
             : effectiveStatus === "failed"
-            ? "Start another generation after fixing the issue above."
-            : "Preview unlocks after packaging finishes.",
+            ? "Pokrenite novo generisanje nakon što rešite problem iznad."
+            : "Prikaz se otključava nakon završetka pakovanja.",
         state: effectiveStatus === "succeeded" ? "active" : "pending"
       }
     ],
@@ -152,11 +152,11 @@ function StatusPageContent() {
     return (
       <AppShell>
         <section className="panel stack">
-          <p className="eyebrow">Generation status</p>
-          <h1>No active generation</h1>
-          <p className="muted">Start a product generation first, then this page will show live progress.</p>
+          <p className="eyebrow">Status generisanja</p>
+          <h1>Nema aktivnog generisanja</h1>
+          <p className="muted">Prvo pokrenite generisanje proizvoda, zatim će ova stranica prikazati napredak uživo.</p>
           <Link className="button accent" href="/create">
-            Create AR product
+            Kreiraj AR proizvod
           </Link>
         </section>
       </AppShell>
@@ -166,9 +166,9 @@ function StatusPageContent() {
   return (
     <AppShell>
       <header>
-        <p className="eyebrow">Generation status</p>
-        <h1>{storedProduct?.name ?? "Generated product"}</h1>
-        <p className="muted">The app is creating the 3D model and packaging it for the web and AR viewer.</p>
+        <p className="eyebrow">Status generisanja</p>
+        <h1>{storedProduct?.name ?? "Generisani proizvod"}</h1>
+        <p className="muted">Aplikacija kreira 3D model i pakuje ga za web i AR pregledač.</p>
       </header>
 
       <section className="grid two">
@@ -182,16 +182,16 @@ function StatusPageContent() {
         </div>
 
         <aside className="panel stack">
-          <h2>Current status</h2>
+          <h2>Trenutni status</h2>
           <p className="muted">{pollError || message}</p>
           <div className="row">
             <span className={`badge ${statusTone(effectiveStatus)}`}>{statusLabel(effectiveStatus)}</span>
-            <span className="badge neutral">{Math.max(0, Math.min(100, progress))}% complete</span>
-            {isPolling && <span className="badge neutral">Refreshing</span>}
+            <span className="badge neutral">{Math.max(0, Math.min(100, progress))}% završeno</span>
+            {isPolling && <span className="badge neutral">Osvežavanje</span>}
           </div>
           <div className="uploadProgress">
             <div className="uploadProgressHeader">
-              <strong>Generation progress</strong>
+              <strong>Napredak generisanja</strong>
               <span>{Math.max(0, Math.min(100, progress))}%</span>
             </div>
             <div
@@ -209,11 +209,11 @@ function StatusPageContent() {
 
           {effectiveStatus === "succeeded" ? (
             <Link className="button accent" href={previewHref}>
-              Open generated model
+              Otvori generisani model
             </Link>
           ) : (
             <Link className="button secondary" href="/create">
-              Start another generation
+              Pokreni novo generisanje
             </Link>
           )}
         </aside>
@@ -226,9 +226,9 @@ function StatusFallback() {
   return (
     <AppShell>
       <section className="panel stack">
-        <p className="eyebrow">Generation status</p>
-        <h1>Loading status</h1>
-        <p className="muted">Preparing the generation timeline.</p>
+        <p className="eyebrow">Status generisanja</p>
+        <h1>Učitavanje statusa</h1>
+        <p className="muted">Priprema vremenske linije generisanja.</p>
       </section>
     </AppShell>
   );
@@ -256,7 +256,7 @@ function createUpdatedStoredProduct(
   return {
     productId,
     taskId,
-    name: previous?.name ?? "Generated product",
+    name: previous?.name ?? "Generisani proizvod",
     slug: previous?.slug ?? "generated-product",
     category: previous?.category ?? "small_decor",
     description: previous?.description,
@@ -303,16 +303,16 @@ function statusTone(status: string) {
 
 function statusLabel(status: string) {
   if (status === "succeeded") {
-    return "Ready to review";
+    return "Spremno za pregled";
   }
 
   if (status === "failed") {
-    return "Needs new photos";
+    return "Potrebne nove fotografije";
   }
 
   if (status === "running") {
-    return "Creating model";
+    return "Kreiranje modela";
   }
 
-  return "Queued";
+  return "Na čekanju";
 }

@@ -11,20 +11,20 @@ export default async function PublishedLinksPage() {
     <AppShell>
       <header className="topbar">
         <div>
-          <p className="eyebrow">Published links</p>
-          <h1>Hosted AR product pages</h1>
-          <p className="muted">Copy verified product links for your store pages, ads, emails, or QR codes.</p>
+          <p className="eyebrow">Objavljeni linkovi</p>
+          <h1>Hostovane AR stranice proizvoda</h1>
+          <p className="muted">Kopirajte verifikovane linkove proizvoda za stranice prodavnice, oglase, emailove ili QR kodove.</p>
         </div>
         <Link className="button accent" href="/create">
-          Create AR product
+          Kreiraj AR proizvod
         </Link>
       </header>
 
       <section className="panel linkGrid">
         {data.products.length === 0 ? (
           <div className="emptyTableState">
-            <strong>No products yet</strong>
-            <p className="muted">Create and publish a product to get its hosted link.</p>
+            <strong>Još nema proizvoda</strong>
+            <p className="muted">Kreirajte i objavite proizvod da biste dobili njegov hostovani link.</p>
           </div>
         ) : (
           data.products.map((product) => (
@@ -35,12 +35,12 @@ export default async function PublishedLinksPage() {
                 <div className="assetGrid">
                   <StatusBadge status={product.status} />
                   <span className={product.hostedPage?.status === "published" ? "badge success" : "badge neutral"}>
-                    {product.hostedPage?.status === "published" ? "Verified live" : "Not published"}
+                    {product.hostedPage?.status === "published" ? "Verifikovano aktivno" : "Nije objavljeno"}
                   </span>
                 </div>
               </div>
               <div className="rightStack">
-                <span className="sectionLabel">Hosted link</span>
+                <span className="sectionLabel">Hostovani link</span>
                 {product.hostedPage?.status === "published" ? (
                   <>
                     <Link className="textLink" href={product.hostedPage.publicUrl}>
@@ -48,15 +48,15 @@ export default async function PublishedLinksPage() {
                     </Link>
                     <div className="assetGrid">
                       <Link className="button secondary sm" href={product.hostedPage.publicUrl}>
-                        Preview
+                        Pregled
                       </Link>
                       <CopyButton value={product.hostedPage.publicUrl} />
                     </div>
                   </>
                 ) : (
-                  <span className="muted">Available after approval and publish.</span>
+                  <span className="muted">Dostupno nakon odobrenja i objavljivanja.</span>
                 )}
-                <span className="muted">CTA destination: {product.customerUrl}</span>
+                <span className="muted">CTA odredište: {product.customerUrl}</span>
               </div>
             </article>
           ))

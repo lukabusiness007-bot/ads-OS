@@ -1842,6 +1842,10 @@ h3 {
     flex-direction: column;
   }
 
+  .publicPage {
+    padding-bottom: 96px;
+  }
+
   .publicHero {
     grid-template-columns: 1fr;
     min-height: auto;
@@ -1854,6 +1858,23 @@ h3 {
 
   .publicProductInfo {
     align-content: start;
+  }
+
+  .publicActions {
+    background: #fff;
+    border-top: 1px solid var(--line);
+    bottom: 0;
+    box-shadow: 0 -4px 16px rgba(0, 0, 0, 0.06);
+    left: 0;
+    margin: 0;
+    padding: 12px 20px calc(12px + env(safe-area-inset-bottom));
+    position: fixed;
+    right: 0;
+    z-index: 50;
+  }
+
+  .publicActions .button {
+    width: 100%;
   }
 
   .publicBand {
@@ -1930,10 +1951,6 @@ h3 {
   .productFacts,
   .analyticsList {
     grid-template-columns: 1fr;
-  }
-
-  .publicActions .button {
-    width: 100%;
   }
 
   .marketingNav nav,
