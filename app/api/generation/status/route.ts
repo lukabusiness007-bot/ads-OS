@@ -399,7 +399,11 @@ function createPackagingFailureResponse(error: unknown, statusCode = 200) {
 
 function getPackagingFailureMessage(error: unknown) {
   if (error instanceof R2ConfigurationError) {
-    return "The model was generated, but asset storage is not configured. Add the R2 environment variables and poll status again.";
+    // Surface the specific reason (e.g. public base URL pointing at the S3
+    // endpoint) when present; otherwise fall back to the generic guidance.
+    return error.message && error.message !== "R2 storage is not configured."
+      ? `The model was generated, but asset storage is misconfigured: ${error.message}`
+      : "The model was generated, but asset storage is not configured. Add the R2 environment variables and poll status again.";
   }
 
   if (error instanceof R2RequestError) {

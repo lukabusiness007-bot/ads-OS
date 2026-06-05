@@ -8,8 +8,8 @@ type R2Config = {
 };
 
 export class R2ConfigurationError extends Error {
-  constructor() {
-    super("R2 storage is not configured.");
+  constructor(message = "R2 storage is not configured.") {
+    super(message);
     this.name = "R2ConfigurationError";
   }
 }
@@ -161,6 +161,19 @@ function getR2Config(): R2Config {
 
   if (!endpoint || !accessKeyId || !secretAccessKey || !bucket || !publicBaseUrl) {
     throw new R2ConfigurationError();
+  }
+
+  // The S3 API endpoint (<account>.r2.cloudflarestorage.com) requires SigV4 auth
+  // and serves no CORS headers, so objects behind it are unfetchable from a
+  // browser. R2_PUBLIC_BASE_URL must be the bucket's public domain (the managed
+  // pub-<hash>.r2.dev URL or a custom domain). Catch this misconfiguration here
+  // rather than silently persisting dead public_glb_url values.
+  if (/\.r2\.cloudflarestorage\.com/i.test(publicBaseUrl)) {
+    throw new R2ConfigurationError(
+      "R2_PUBLIC_BASE_URL points at the S3 API endpoint (r2.cloudflarestorage.com), " +
+        "which is not publicly fetchable. Set it to the bucket's public domain " +
+        "(e.g. https://pub-<hash>.r2.dev or a custom domain)."
+    );
   }
 
   cachedConfig = {

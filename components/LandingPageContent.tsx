@@ -1,6 +1,7 @@
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { MarketingNav } from "@/components/marketing-nav"
+import { HeroGem } from "@/components/HeroGem"
 import { ArrowRight, CheckCircle2, Shield } from "lucide-react"
 import type { Lang } from "@/lib/translations"
 import { translations } from "@/lib/translations"
@@ -47,110 +48,15 @@ export function LandingPageContent({ lang }: { lang: Lang }) {
               </div>
             </div>
 
-            {/* Browser mockup — hosted product page preview */}
-            <div className="mx-auto max-w-4xl relative pb-0">
-              <div className="absolute inset-x-8 bottom-0 h-24 bg-emerald-900/8 blur-3xl rounded-full" />
-              <div className="relative rounded-xl border border-zinc-200 shadow-2xl overflow-hidden [mask-image:linear-gradient(to_bottom,black_70%,transparent_100%)]">
-                {/* Chrome bar */}
-                <div className="bg-zinc-800 flex items-center gap-2.5 px-4 py-3 shrink-0">
-                  <div className="flex gap-1.5">
-                    <span className="h-3 w-3 rounded-full bg-[#ff5f57]" />
-                    <span className="h-3 w-3 rounded-full bg-[#febc2e]" />
-                    <span className="h-3 w-3 rounded-full bg-[#28c840]" />
-                  </div>
-                  <div className="ml-2 flex-1 bg-zinc-700 rounded text-xs text-zinc-300 px-3 py-1 font-mono text-center max-w-xs mx-auto">
-                    veridian.ar/p/northline-home/arc-oak-chair
-                  </div>
-                </div>
-
-                {/* Page body */}
-                <div
-                  className="flex bg-[#f7f8f4]"
-                  style={{ minHeight: "300px" }}
-                >
-                  {/* 3D Viewer panel */}
-                  <div className="relative flex flex-1 items-center justify-center overflow-hidden border-r border-zinc-200 bg-gradient-to-br from-zinc-50 to-amber-50/40 min-h-[280px]">
-                    {/* Chair silhouette */}
-                    <div className="relative z-10 flex flex-col items-center select-none">
-                      {/* Back */}
-                      <div
-                        className="w-24 h-16 rounded-t-md border shadow-md"
-                        style={{
-                          background: "linear-gradient(160deg,#d4b892,#c4a07a)",
-                          borderColor: "#b08a62",
-                        }}
-                      />
-                      {/* Seat */}
-                      <div
-                        className="w-28 h-4 rounded border shadow"
-                        style={{
-                          background: "linear-gradient(180deg,#c4a07a,#b58960)",
-                          borderColor: "#9a7450",
-                          marginTop: "-1px",
-                        }}
-                      />
-                      {/* Legs */}
-                      <div className="flex gap-10 mt-0.5">
-                        <div className="flex gap-4">
-                          <div className="w-2.5 h-14 rounded-sm" style={{ background: "#7c5230" }} />
-                          <div className="w-2.5 h-11 rounded-sm" style={{ background: "#7c5230" }} />
-                        </div>
-                        <div className="flex gap-4">
-                          <div className="w-2.5 h-11 rounded-sm" style={{ background: "#7c5230" }} />
-                          <div className="w-2.5 h-14 rounded-sm" style={{ background: "#7c5230" }} />
-                        </div>
-                      </div>
-                    </div>
-                    {/* AR overlay button */}
-                    <div className="absolute bottom-4 right-4 bg-white border border-zinc-200 rounded-lg px-3 py-2 text-xs font-semibold text-zinc-700 flex items-center gap-2 shadow-sm">
-                      <span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
-                      View in your room
-                    </div>
-                    <span className="absolute bottom-4 left-4 text-xs text-zinc-400">↻ Drag to rotate</span>
-                  </div>
-
-                  {/* Product info panel — hidden on narrow screens */}
-                  <div className="hidden sm:flex bg-white p-5 flex-col gap-4 border-l border-zinc-100" style={{ width: 220, flexShrink: 0 }}>
-                    {/* Merchant brand */}
-                    <div className="flex items-center gap-2">
-                      <div className="h-6 w-6 rounded bg-zinc-900 text-white text-xs font-extrabold flex items-center justify-center shrink-0">
-                        N
-                      </div>
-                      <span className="text-xs font-semibold text-zinc-500">Northline Home</span>
-                    </div>
-
-                    {/* Product name */}
-                    <div>
-                      <h2 className="text-sm font-bold text-zinc-900 leading-tight mb-1">Arc Oak Dining Chair</h2>
-                      <p className="text-xs text-zinc-500">Solid oak, natural finish</p>
-                    </div>
-
-                    {/* Dimensions */}
-                    <div className="grid grid-cols-3 gap-1.5">
-                      {[["W", "48 cm"], ["H", "82 cm"], ["D", "52 cm"]].map(([label, value]) => (
-                        <div
-                          key={label}
-                          className="border border-zinc-100 rounded-lg p-1.5 text-center bg-zinc-50"
-                        >
-                          <div className="text-[9px] text-zinc-400 font-bold uppercase">{label}</div>
-                          <div className="text-xs font-bold text-zinc-800">{value}</div>
-                        </div>
-                      ))}
-                    </div>
-
-                    {/* Verification badge */}
-                    <div className="flex items-center gap-1.5 text-[10px] font-semibold text-emerald-700 bg-emerald-50 border border-emerald-100 rounded-lg px-2.5 py-2">
-                      <CheckCircle2 className="h-3 w-3 shrink-0" />
-                      3D preview generated and verified
-                    </div>
-
-                    {/* CTA */}
-                    <div className="bg-zinc-900 text-white text-xs font-bold text-center py-2.5 rounded-lg mt-auto">
-                      View on store →
-                    </div>
-                  </div>
-                </div>
+            {/* Hero visual — spinning Veridian crystal */}
+            <div className="mx-auto max-w-2xl relative pb-0">
+              {/* Emerald glow beneath */}
+              <div className="absolute inset-x-1/4 bottom-4 h-28 bg-emerald-500/20 blur-3xl rounded-full pointer-events-none" />
+              {/* model-viewer container */}
+              <div style={{ height: 480 }} className="relative">
+                <HeroGem />
               </div>
+              <p className="text-center text-xs text-zinc-400 -mt-2 pb-8">↻ Drag to rotate</p>
             </div>
           </div>
         </section>
