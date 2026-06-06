@@ -24,7 +24,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="sr">
       <body>
         <script type="application/ld+json" dangerouslySetInnerHTML={jsonLd(organizationJsonLd())} />
         <LanguageProvider>{children}</LanguageProvider>
