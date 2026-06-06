@@ -2,6 +2,7 @@
 
 import { Suspense, useState } from "react";
 import Link from "next/link";
+import { Logo } from "@/components/Logo";
 import { useSearchParams } from "next/navigation";
 import { createBrowserSupabaseClient } from "@/lib/supabase/client";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
@@ -196,6 +197,9 @@ function LoginShell({ children, message }: { children?: React.ReactNode; message
   return (
     <main className="authPage">
       <section className="panel form authPanel">
+        <Link href="/" aria-label="augmenta3D home" style={{ display: "inline-block", marginBottom: "24px" }}>
+          <Logo theme="light" markClassName="h-8 w-auto" />
+        </Link>
         {children ?? (
           <>
             <p className="eyebrow">Merchant login</p>

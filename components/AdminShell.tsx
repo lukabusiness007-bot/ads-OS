@@ -6,6 +6,7 @@ import { LayoutGrid, CheckSquare, Users, Building2, ScrollText, LogOut, Bell } f
 import { isSupabaseConfigured } from "@/lib/supabase/config"
 import { createBrowserSupabaseClient } from "@/lib/supabase/client"
 import { NotificationBell } from "@/components/NotificationBell"
+import { LogoMark } from "@/components/Logo"
 
 const navItems = [
   { href: "/admin",        label: "Overview",     icon: LayoutGrid  },
@@ -51,7 +52,7 @@ export function AdminShell({
         <aside className="sidebar">
           <div className="brand">
             <div className="brandLeft">
-              <span className="brandMark">AR</span>
+              <LogoMark theme="dark" className="brandMark" />
               <strong>Augmenta</strong>
               <span>Admin</span>
               <span className="badge danger" style={{ alignSelf: "flex-start", marginTop: 2 }}>

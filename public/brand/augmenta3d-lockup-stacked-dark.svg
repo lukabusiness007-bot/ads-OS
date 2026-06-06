@@ -1,0 +1,15 @@
+<svg width="560" height="360" viewBox="0 0 560 360" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Augmenta3D">
+  <rect width="560" height="360" fill="#16140F"/>
+  <g transform="translate(232,58)">
+    <polygon points="48,7 96,35 48,63 0,35" fill="#EDE6D6"/>
+    <polygon points="0,35 48,63 48,119 0,91" fill="#3E6B57"/>
+    <polygon points="96,35 48,63 48,119 96,91" fill="#9FB7A6"/>
+    <g stroke="#EDE6D6" stroke-width="4" fill="none" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M-18,2 v-12 h12"/>
+      <path d="M114,2 v-12 h-12"/>
+      <path d="M-18,124 v12 h12"/>
+      <path d="M114,124 v12 h-12"/>
+    </g>
+  </g>
+  <text x="280" y="286" text-anchor="middle" font-family="'Archivo','Helvetica Neue',Arial,sans-serif" font-size="44" font-weight="600" letter-spacing="0.5" fill="#EDE6D6">augmenta<tspan fill="#3E6B57">3D</tspan></text>
+</svg>

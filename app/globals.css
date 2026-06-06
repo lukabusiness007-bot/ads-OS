@@ -375,15 +375,9 @@ textarea {
 }
 
 .brandMark {
-  align-items: center;
-  background: #d6eadf;
-  border-radius: 6px;
-  color: #17201a;
   display: inline-flex;
-  font-weight: 800;
-  height: 34px;
-  justify-content: center;
-  width: 34px;
+  height: 36px;
+  width: auto;
 }
 
 .brand strong {

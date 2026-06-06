@@ -7,6 +7,7 @@ import { LayoutGrid, PlusSquare, Link2, BarChart2, CreditCard, LogOut, Menu, X }
 import { useLang } from "@/lib/lang"
 import { isSupabaseConfigured } from "@/lib/supabase/config"
 import { createBrowserSupabaseClient } from "@/lib/supabase/client"
+import { LogoMark } from "@/components/Logo"
 
 export function AppShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname()
@@ -36,7 +37,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
     <div className="appShell">
       <header className="mobileAppBar">
         <Link href="/dashboard" className="mobileBrand" aria-label="Augmenta dashboard">
-          <span className="brandMark">AR</span>
+          <LogoMark theme="dark" className="brandMark" />
           <span>
             <strong>Augmenta</strong>
             <small>{n.brand}</small>
@@ -66,7 +67,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       <aside className={mobileNavOpen ? "sidebar sidebarOpen" : "sidebar"} id="app-sidebar">
         <div className="brand">
           <div className="brandLeft">
-            <span className="brandMark">AR</span>
+            <LogoMark theme="dark" className="brandMark" />
             <strong>Augmenta</strong>
             <span>{n.brand}</span>
           </div>

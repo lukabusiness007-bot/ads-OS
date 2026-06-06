@@ -3,6 +3,7 @@
 import * as React from "react"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
+import { Logo } from "@/components/Logo"
 import { Menu, X } from "lucide-react"
 import type { Lang } from "@/lib/translations"
 import { translations } from "@/lib/translations"
@@ -41,11 +42,10 @@ export function MarketingNav({ lang = "en" }: { lang?: Lang }) {
         <div className="m-auto max-w-5xl px-6">
           <div className={`flex flex-wrap items-center justify-between gap-6 py-3 transition-all duration-300 lg:flex-nowrap lg:gap-0 ${scrolled ? "lg:py-3" : "lg:py-4"}`}>
             <div className="flex w-full justify-between lg:w-auto">
-              <Link href={homePath} aria-label="home" className="flex items-center gap-2.5">
-                <span className="flex h-8 w-8 items-center justify-center rounded-md bg-emerald-900 text-xs font-extrabold text-white">
-                  AR
-                </span>
-                <span className="font-bold text-zinc-900 hidden sm:block">Augmenta</span>
+              <Link href={homePath} aria-label="augmenta3D home" className="flex items-center">
+                {/* Full lockup on sm+, compact cube mark on mobile */}
+                <Logo theme="light" className="hidden sm:inline-flex" markClassName="h-8 w-auto" />
+                <Logo variant="mark" theme="light" className="h-8 w-auto sm:hidden" />
               </Link>
 
               <button

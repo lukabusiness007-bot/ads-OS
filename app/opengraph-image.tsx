@@ -1,5 +1,10 @@
 import { ImageResponse } from "next/og";
 
+// Inline SVG cube mark as base64 data URI — ImageResponse doesn't support raw SVG children,
+// but <img src="data:image/svg+xml;base64,..."> renders correctly.
+const CUBE_SVG_B64 =
+  "PHN2ZyB3aWR0aD0iNjQiIGhlaWdodD0iNjQiIHZpZXdCb3g9IjAgMCA2NCA2NCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iNjQiIGhlaWdodD0iNjQiIHJ4PSIxNCIgZmlsbD0iIzE2MTQwRiIvPjxnIHRyYW5zZm9ybT0idHJhbnNsYXRlKDE0LDEyKSI+PHBvbHlnb24gcG9pbnRzPSIxOCwyIDM2LDEyIDE4LDIyIDAsMTIiIGZpbGw9IiNFREU2RDYiLz48cG9seWdvbiBwb2ludHM9IjAsMTIgMTgsMjIgMTgsNDIgMCwzMiIgZmlsbD0iIzNFNkI1NyIvPjxwb2x5Z29uIHBvaW50cz0iMzYsMTIgMTgsMjIgMTgsNDIgMzYsMzIiIGZpbGw9IiM5RkI3QTYiLz48L2c+PC9zdmc+";
+
 export const alt = "Augmenta furniture AR product pages";
 export const size = {
   width: 1200,
@@ -38,24 +43,17 @@ export default function Image() {
               gap: 18
             }}
           >
-            <div
-              style={{
-                alignItems: "center",
-                background: "#17201a",
-                borderRadius: 16,
-                color: "#ffffff",
-                display: "flex",
-                fontSize: 30,
-                fontWeight: 800,
-                height: 72,
-                justifyContent: "center",
-                width: 72
-              }}
-            >
-              AR
-            </div>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={`data:image/svg+xml;base64,${CUBE_SVG_B64}`}
+              width={72}
+              height={72}
+              alt=""
+            />
             <div style={{ display: "flex", flexDirection: "column" }}>
-              <span style={{ color: "#1f6f5b", fontSize: 24, fontWeight: 800 }}>Augmenta</span>
+              <span style={{ color: "#16140F", fontSize: 28, fontWeight: 600 }}>
+                augmenta<span style={{ color: "#3E6B57" }}>3D</span>
+              </span>
               <span style={{ color: "#697266", fontSize: 22 }}>Furniture AR Commerce</span>
             </div>
           </div>
