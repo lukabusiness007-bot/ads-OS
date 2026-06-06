@@ -7,8 +7,8 @@ import { jsonLd, organizationJsonLd, siteConfig } from "@/lib/seo";
 export const metadata: Metadata = {
   metadataBase: new URL(siteConfig.url),
   title: {
-    default: "Furniture AR Product Pages That Help Shoppers Buy With Confidence | Veridian",
-    template: "%s | Veridian"
+    default: "Furniture AR Product Pages That Help Shoppers Buy With Confidence | Augmenta",
+    template: "%s | Augmenta"
   },
   description:
     "Turn 4 furniture photos into verified 3D/AR product pages. Let shoppers see size, shape, and style in their room before they buy.",

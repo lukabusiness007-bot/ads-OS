@@ -10,7 +10,7 @@ export function HeroGem() {
   const props = {
     src: "/models/veridian-icosahedron.glb",
     poster: "/img/veridian-poster.png",
-    alt: "Veridian emerald crystal — spinning 3D brand mark",
+    alt: "Augmenta emerald crystal — spinning 3D brand mark",
     "auto-rotate": true,
     "auto-rotate-delay": "0",
     "rotation-per-second": "24deg",

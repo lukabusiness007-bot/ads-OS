@@ -45,7 +45,7 @@ export function MarketingNav({ lang = "en" }: { lang?: Lang }) {
                 <span className="flex h-8 w-8 items-center justify-center rounded-md bg-emerald-900 text-xs font-extrabold text-white">
                   AR
                 </span>
-                <span className="font-bold text-zinc-900 hidden sm:block">Veridian AR Commerce</span>
+                <span className="font-bold text-zinc-900 hidden sm:block">Augmenta</span>
               </Link>
 
               <button

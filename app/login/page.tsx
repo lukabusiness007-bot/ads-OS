@@ -115,7 +115,7 @@ function LoginPageContent() {
     <LoginShell>
       <>
         <p className="eyebrow">Merchant login</p>
-        <h1>Sign in to Veridian</h1>
+        <h1>Sign in to Augmenta</h1>
         <p className="muted">
           {intent
             ? `Continue with the ${formatIntent(intent)} pilot plan, then create your first AR product.`

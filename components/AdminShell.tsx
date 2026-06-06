@@ -52,7 +52,7 @@ export function AdminShell({
           <div className="brand">
             <div className="brandLeft">
               <span className="brandMark">AR</span>
-              <strong>Veridian</strong>
+              <strong>Augmenta</strong>
               <span>Admin</span>
               <span className="badge danger" style={{ alignSelf: "flex-start", marginTop: 2 }}>
                 Internal

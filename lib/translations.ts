@@ -14,7 +14,7 @@ export const translations = {
     hero: {
       eyebrow: "Furniture AR previews from 4 photos",
       heading: "If they can see it in their room, they’re more likely to buy it.",
-      body: "Your furniture already looks good. The problem is your customers can’t picture it at home. Veridian turns product photos into 3D/AR pages so shoppers can see size, shape, and style before they leave your store.",
+      body: "Your furniture already looks good. The problem is your customers can’t picture it at home. Augmenta turns product photos into 3D/AR pages so shoppers can see size, shape, and style before they leave your store.",
       cta: "Show my products in their room",
       ctaSecondary: "See a furniture demo",
     },
@@ -25,7 +25,7 @@ export const translations = {
       eyebrow: "The merchant problem",
       heading: "Your shoppers are buying furniture from flat photos. That is why they hesitate, ask questions, and return products.",
       p1: "Scale is hard to judge online. A chair looks smaller. A sofa feels deeper. A lamp looks right until it is in the room.",
-      p2: "Veridian gives every key product a 3D/AR preview so buyers can inspect size, shape, and fit before checkout. It is built to increase buyer confidence, reduce hesitation, and give shoppers a stronger reason to buy.",
+      p2: "Augmenta gives every key product a 3D/AR preview so buyers can inspect size, shape, and fit before checkout. It is built to increase buyer confidence, reduce hesitation, and give shoppers a stronger reason to buy.",
     },
     trustStrip: [
       "No 3D team needed",
@@ -40,7 +40,7 @@ export const translations = {
     workflow: [
       { step: "Add product", copy: "Enter the product name, dimensions, category, and store URL." },
       { step: "Upload photos", copy: "Use 4 clean product photos: front, side or angle, back, and material detail." },
-      { step: "Generate model", copy: "Meshy creates the 3D asset while Veridian packages the web and AR files." },
+      { step: "Generate model", copy: "Meshy creates the 3D asset while Augmenta packages the web and AR files." },
       { step: "Review before live", copy: "Approve the visual preview before shoppers can see it." },
       { step: "Publish anywhere", copy: "Use the hosted link on product pages, ads, emails, or QR codes." },
       { step: "Track results", copy: "Track page views, AR clicks, and clicks back to your store." },
@@ -48,7 +48,7 @@ export const translations = {
     seoSections: [
       {
         heading: "Built for furniture stores, not 3D teams",
-        body: "Your team should not have to manage modeling software, file formats, or AR packaging just to test product previews. Add the product details and photos; Veridian turns them into a hosted shopping page."
+        body: "Your team should not have to manage modeling software, file formats, or AR packaging just to test product previews. Add the product details and photos; Augmenta turns them into a hosted shopping page."
       },
       {
         heading: "From 4 product photos to a live AR page",
@@ -60,7 +60,7 @@ export const translations = {
       },
       {
         heading: "Verified visual previews, not CAD manufacturing files",
-        body: "Veridian is designed for ecommerce confidence. The public page shows a checked visual preview with dimensions, AR launch, and a CTA back to your store."
+        body: "Augmenta is designed for ecommerce confidence. The public page shows a checked visual preview with dimensions, AR launch, and a CTA back to your store."
       }
     ],
     whatYouGet: {
@@ -78,7 +78,7 @@ export const translations = {
     quality: {
       eyebrow: "Quality & trust",
       heading: "Human-reviewed before publishing.",
-      body: "Veridian checks model resemblance, scale, orientation, file loading, and AR readiness before a page goes live.",
+      body: "Augmenta checks model resemblance, scale, orientation, file loading, and AR readiness before a page goes live.",
     },
     qualityChecks: ["Resemblance", "Scale", "Orientation", "File loading", "AR readiness"],
     dashboard: {
@@ -125,13 +125,13 @@ export const translations = {
       {
         question: "Doesn't Shopify already display 3D models?",
         answer:
-          "Shopify can display 3D models if you already have the right files. Veridian helps create, check, host, publish, and measure AR product pages without asking your team to manage a 3D pipeline.",
+          "Shopify can display 3D models if you already have the right files. Augmenta helps create, check, host, publish, and measure AR product pages without asking your team to manage a 3D pipeline.",
       },
     ],
     comparison: {
       eyebrow: "Why not just hire a studio?",
-      heading: "Veridian vs. traditional 3D studio",
-      colVeridian: "Veridian",
+      heading: "Augmenta vs. traditional 3D studio",
+      colAugmenta: "Augmenta",
       colStudio: "Traditional 3D studio",
       rows: [
         { aspect: "Time to live page", veridian: "5–7 days", studio: "6–12 weeks" },
@@ -164,7 +164,7 @@ export const translations = {
     hero: {
       eyebrow: "AR pregledi nameštaja iz 4 fotografije",
       heading: "Ako ga vide u svojoj sobi, lakše donose odluku da kupe.",
-      body: "Vaš nameštaj već izgleda dobro. Problem je što kupac ne može lako da ga zamisli kod kuće. Veridian pretvara fotografije proizvoda u 3D/AR stranice kako bi kupac video veličinu, oblik i stil pre nego što napusti prodavnicu.",
+      body: "Vaš nameštaj već izgleda dobro. Problem je što kupac ne može lako da ga zamisli kod kuće. Augmenta pretvara fotografije proizvoda u 3D/AR stranice kako bi kupac video veličinu, oblik i stil pre nego što napusti prodavnicu.",
       cta: "Prikaži moje proizvode u sobi",
       ctaSecondary: "Pogledajte demo nameštaja",
     },
@@ -175,7 +175,7 @@ export const translations = {
       eyebrow: "Problem trgovca",
       heading: "Vaši kupci kupuju nameštaj sa ravnih fotografija. Zato oklevaju, postavljaju pitanja i vraćaju proizvode.",
       p1: "Razmera je teška za procenu online. Stolica deluje manja. Sofa izgleda plića. Lampa izgleda dobro dok ne stigne u prostor.",
-      p2: "Veridian daje ključnim proizvodima 3D/AR pregled kako bi kupci proverili veličinu, oblik i uklapanje pre kupovine. Napravljen je da poveća sigurnost kupca, smanji oklevanje i da jači razlog za kupovinu.",
+      p2: "Augmenta daje ključnim proizvodima 3D/AR pregled kako bi kupci proverili veličinu, oblik i uklapanje pre kupovine. Napravljen je da poveća sigurnost kupca, smanji oklevanje i da jači razlog za kupovinu.",
     },
     trustStrip: [
       "Bez internog 3D tima",
@@ -190,7 +190,7 @@ export const translations = {
     workflow: [
       { step: "Dodajte proizvod", copy: "Unesite naziv, dimenzije, kategoriju i URL prodavnice." },
       { step: "Otpremite slike", copy: "Koristite 4 jasne fotografije: prednju, bočnu ili ugaonu, zadnju i detalj materijala ako postoji." },
-      { step: "Generišite model", copy: "Meshy kreira 3D asset, a Veridian pakuje web i AR fajlove." },
+      { step: "Generišite model", copy: "Meshy kreira 3D asset, a Augmenta pakuje web i AR fajlove." },
       { step: "Pregled pre objave", copy: "Odobrite vizuelni pregled pre nego što ga kupci vide." },
       { step: "Objavite bilo gde", copy: "Koristite hostovani link na product page-u, u oglasima, emailovima ili QR kodovima." },
       { step: "Pratite rezultate", copy: "Pratite preglede stranica, AR klikove i klikove nazad u vašu prodavnicu." },
@@ -198,7 +198,7 @@ export const translations = {
     seoSections: [
       {
         heading: "Napravljeno za prodavnice nameštaja, ne za 3D timove",
-        body: "Vaš tim ne treba da vodi softver za modelovanje, formate fajlova i AR pakovanje samo da bi testirao 3D pregled. Dodajte podatke i fotografije; Veridian pravi hostovanu prodajnu stranicu."
+        body: "Vaš tim ne treba da vodi softver za modelovanje, formate fajlova i AR pakovanje samo da bi testirao 3D pregled. Dodajte podatke i fotografije; Augmenta pravi hostovanu prodajnu stranicu."
       },
       {
         heading: "Od 4 fotografije do žive AR stranice",
@@ -210,7 +210,7 @@ export const translations = {
       },
       {
         heading: "Verifikovani vizuelni pregledi, ne CAD fajlovi",
-        body: "Veridian je napravljen za e-commerce sigurnost. Javna stranica prikazuje proveren vizuelni pregled, dimenzije, AR pokretanje i CTA nazad ka prodavnici."
+        body: "Augmenta je napravljen za e-commerce sigurnost. Javna stranica prikazuje proveren vizuelni pregled, dimenzije, AR pokretanje i CTA nazad ka prodavnici."
       }
     ],
     whatYouGet: {
@@ -228,7 +228,7 @@ export const translations = {
     quality: {
       eyebrow: "Kvalitet i poverenje",
       heading: "Pregledano od strane čoveka pre objavljivanja.",
-      body: "Veridian proverava sličnost modela, razmeru, orijentaciju, učitavanje fajla i AR spremnost pre nego što stranica bude objavljena.",
+      body: "Augmenta proverava sličnost modela, razmeru, orijentaciju, učitavanje fajla i AR spremnost pre nego što stranica bude objavljena.",
     },
     qualityChecks: ["Sličnost", "Razmera", "Orijentacija", "Učitavanje fajla", "AR spremnost"],
     dashboard: {
@@ -275,13 +275,13 @@ export const translations = {
       {
         question: "Zar Shopify već ne prikazuje 3D modele?",
         answer:
-          "Shopify može da prikaže 3D modele ako već imate prave fajlove. Veridian pomaže da kreirate, proverite, hostujete, objavite i merite AR stranice proizvoda bez upravljanja 3D pipelinom.",
+          "Shopify može da prikaže 3D modele ako već imate prave fajlove. Augmenta pomaže da kreirate, proverite, hostujete, objavite i merite AR stranice proizvoda bez upravljanja 3D pipelinom.",
       },
     ],
     comparison: {
       eyebrow: "Zašto ne angažovati studio?",
-      heading: "Veridian vs. tradicionalni 3D studio",
-      colVeridian: "Veridian",
+      heading: "Augmenta vs. tradicionalni 3D studio",
+      colAugmenta: "Augmenta",
       colStudio: "Tradicionalni 3D studio",
       rows: [
         { aspect: "Vreme do žive stranice", veridian: "5–7 dana", studio: "6–12 nedelja" },

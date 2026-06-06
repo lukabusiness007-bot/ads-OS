@@ -815,7 +815,7 @@ export const expansionFeatures: ExpansionFeature[] = [
     mvpScope: [
       "Custom subdomain support",
       "Logo, color, and CTA label controls",
-      "Optional Veridian trust mark"
+      "Optional Augmenta trust mark"
     ],
     blockedBy: ["Hosted-page subscription maturity", "Support process for DNS setup"]
   },

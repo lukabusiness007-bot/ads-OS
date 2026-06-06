@@ -7,7 +7,7 @@ import { MarketingNav } from "@/components/marketing-nav";
 export const metadata: Metadata = {
   title: "Book a Furniture AR Pilot Demo",
   description:
-    "Book a Veridian pilot demo and see how guided photo upload, review, hosted product links, and analytics fit your furniture catalog."
+    "Book a Augmenta pilot demo and see how guided photo upload, review, hosted product links, and analytics fit your furniture catalog."
 };
 
 export default function DemoContactPage() {
@@ -30,7 +30,7 @@ export default function DemoContactPage() {
             </p>
             <div className="flex flex-wrap gap-3">
               <Button asChild size="lg">
-                <a href="mailto:hello@veridianar.com?subject=Veridian%20pilot%20demo">
+                <a href="mailto:hello@veridianar.com?subject=Augmenta%20pilot%20demo">
                   Email us
                   <ArrowRight className="ml-2 h-4 w-4" />
                 </a>

@@ -16,7 +16,7 @@ import {
 export const metadata: Metadata = buildSeoMetadata({
   title: "Furniture AR Pricing For 3D Product Pages",
   description:
-    "Start with 10 furniture products and prove shopper engagement before scaling. Veridian pricing combines hosted AR pages with approved model creation.",
+    "Start with 10 furniture products and prove shopper engagement before scaling. Augmenta pricing combines hosted AR pages with approved model creation.",
   path: "/pricing",
   lang: "en",
   alternates: marketingAlternates("/pricing", "/sr/pricing")

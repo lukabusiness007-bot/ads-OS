@@ -18,8 +18,8 @@ export async function sendAdminNotificationEmail(payload: AdminEmailPayload): Pr
 
   const subject =
     payload.action === "awaiting_review"
-      ? `[Veridian] Model ready for review: ${payload.productName}`
-      : `[Veridian] Generation failed: ${payload.productName}`;
+      ? `[Augmenta] Model ready for review: ${payload.productName}`
+      : `[Augmenta] Generation failed: ${payload.productName}`;
 
   const reviewUrl = `${process.env.NEXT_PUBLIC_SITE_URL ?? "https://veridianar.com"}/admin/review/${payload.productId}`;
 
@@ -30,7 +30,7 @@ export async function sendAdminNotificationEmail(payload: AdminEmailPayload): Pr
     <p><strong>Status:</strong> ${payload.action.replaceAll("_", " ")}</p>
     <p><a href="${reviewUrl}">Open review inspector →</a></p>
     <hr/>
-    <p style="color:#888;font-size:12px">Veridian Admin · Internal only</p>
+    <p style="color:#888;font-size:12px">Augmenta Admin · Internal only</p>
   `.trim();
 
   try {
@@ -41,7 +41,7 @@ export async function sendAdminNotificationEmail(payload: AdminEmailPayload): Pr
         "Content-Type": "application/json"
       },
       body: JSON.stringify({
-        from: "Veridian Admin <noreply@veridianar.com>",
+        from: "Augmenta Admin <noreply@veridianar.com>",
         to,
         subject,
         html

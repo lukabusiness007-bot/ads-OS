@@ -35,10 +35,10 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   return (
     <div className="appShell">
       <header className="mobileAppBar">
-        <Link href="/dashboard" className="mobileBrand" aria-label="Veridian dashboard">
+        <Link href="/dashboard" className="mobileBrand" aria-label="Augmenta dashboard">
           <span className="brandMark">AR</span>
           <span>
-            <strong>Veridian</strong>
+            <strong>Augmenta</strong>
             <small>{n.brand}</small>
           </span>
         </Link>
@@ -67,7 +67,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         <div className="brand">
           <div className="brandLeft">
             <span className="brandMark">AR</span>
-            <strong>Veridian</strong>
+            <strong>Augmenta</strong>
             <span>{n.brand}</span>
           </div>
           <button

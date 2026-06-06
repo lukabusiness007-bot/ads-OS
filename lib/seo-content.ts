@@ -26,20 +26,20 @@ const enPages: SeoContentPage[] = [
     slug: "furniture-ar",
     lang: "en",
     alternateSlug: "ar-za-namestaj",
-    title: "Furniture AR For Online Stores | Veridian",
+    title: "Furniture AR For Online Stores | Augmenta",
     description:
       "Furniture AR product pages help shoppers see size, shape, and style in their room before buying online.",
     eyebrow: "Furniture AR",
     h1: "Furniture AR that helps shoppers picture the product at home",
     intro:
-      "Furniture buyers hesitate because a sofa, chair, lamp, or shelf is hard to judge from flat photos. Veridian turns 4 product photos into a verified 3D/AR page so shoppers can inspect the piece before checkout.",
+      "Furniture buyers hesitate because a sofa, chair, lamp, or shelf is hard to judge from flat photos. Augmenta turns 4 product photos into a verified 3D/AR page so shoppers can inspect the piece before checkout.",
     cta: "Show my products in their room",
     secondaryCta: "See a furniture demo",
     sections: [
       {
         heading: "Built for furniture stores, not 3D teams",
         body:
-          "Your team uploads the product, dimensions, store URL, and a small set of clean photos. Veridian handles the generation flow, model packaging, hosted page, and review gate."
+          "Your team uploads the product, dimensions, store URL, and a small set of clean photos. Augmenta handles the generation flow, model packaging, hosted page, and review gate."
       },
       {
         heading: "Help shoppers judge size before checkout",
@@ -60,7 +60,7 @@ const enPages: SeoContentPage[] = [
       {
         question: "Is this exact CAD geometry?",
         answer:
-          "No. Veridian is positioned as a verified visual preview for ecommerce confidence, not a manufacturing or engineering file."
+          "No. Augmenta is positioned as a verified visual preview for ecommerce confidence, not a manufacturing or engineering file."
       }
     ]
   },
@@ -68,7 +68,7 @@ const enPages: SeoContentPage[] = [
     slug: "3d-product-viewer-for-furniture",
     lang: "en",
     alternateSlug: "3d-pregledac-proizvoda-za-namestaj",
-    title: "3D Product Viewer For Furniture Stores | Veridian",
+    title: "3D Product Viewer For Furniture Stores | Augmenta",
     description:
       "Add a 3D product viewer to furniture pages so shoppers can rotate, inspect, and understand products before buying.",
     eyebrow: "3D product viewer",
@@ -109,13 +109,13 @@ const enPages: SeoContentPage[] = [
     slug: "ar-product-pages-for-furniture-stores",
     lang: "en",
     alternateSlug: "ar-stranice-proizvoda-za-prodavnice-namestaja",
-    title: "AR Product Pages For Furniture Stores | Veridian",
+    title: "AR Product Pages For Furniture Stores | Augmenta",
     description:
       "Create hosted AR product pages for furniture stores from 4 product photos, with review, analytics, and store CTAs.",
     eyebrow: "AR product pages",
     h1: "Hosted AR product pages for furniture stores",
     intro:
-      "Veridian gives every selected furniture SKU its own hosted product page with a 3D viewer, AR launch, dimensions, merchant branding, and a CTA back to the store.",
+      "Augmenta gives every selected furniture SKU its own hosted product page with a 3D viewer, AR launch, dimensions, merchant branding, and a CTA back to the store.",
     cta: "Show my products in their room",
     secondaryCta: "See a furniture demo",
     sections: [
@@ -150,13 +150,13 @@ const enPages: SeoContentPage[] = [
     slug: "shopify-furniture-ar",
     lang: "en",
     alternateSlug: "shopify-ar-za-namestaj",
-    title: "Shopify Furniture AR Pages | Veridian",
+    title: "Shopify Furniture AR Pages | Augmenta",
     description:
       "Use hosted AR product links with Shopify furniture stores to help shoppers preview products in their space.",
     eyebrow: "Shopify furniture AR",
     h1: "Add AR previews to Shopify furniture products without a 3D team",
     intro:
-      "Shopify can display 3D models when you already have the right assets. Veridian helps create, verify, host, and measure the AR preview link for selected furniture SKUs.",
+      "Shopify can display 3D models when you already have the right assets. Augmenta helps create, verify, host, and measure the AR preview link for selected furniture SKUs.",
     cta: "Show my products in their room",
     secondaryCta: "See a furniture demo",
     sections: [
@@ -191,13 +191,13 @@ const enPages: SeoContentPage[] = [
     slug: "reduce-furniture-returns",
     lang: "en",
     alternateSlug: "smanjite-povrate-namestaja",
-    title: "Reduce Furniture Returns With Better Product Previews | Veridian",
+    title: "Reduce Furniture Returns With Better Product Previews | Augmenta",
     description:
       "Use 3D and AR previews to reduce shopper uncertainty about furniture size, scale, and fit before checkout.",
     eyebrow: "Furniture return reduction",
     h1: "Reduce furniture return risk by helping shoppers understand the product first",
     intro:
-      "Furniture returns often start before the order is placed: the shopper cannot judge size, scale, or fit from static images. Veridian is built to reduce uncertainty before checkout.",
+      "Furniture returns often start before the order is placed: the shopper cannot judge size, scale, or fit from static images. Augmenta is built to reduce uncertainty before checkout.",
     cta: "Show my products in their room",
     secondaryCta: "See a furniture demo",
     sections: [
@@ -233,7 +233,7 @@ const enPages: SeoContentPage[] = [
     slug: "how-to-photograph-furniture-for-3d-models",
     lang: "en",
     alternateSlug: "kako-fotografisati-namestaj-za-3d-modele",
-    title: "How To Photograph Furniture For 3D Models | Veridian",
+    title: "How To Photograph Furniture For 3D Models | Augmenta",
     description:
       "A practical photo guide for creating better furniture 3D models from product images.",
     eyebrow: "Photo guide",
@@ -277,20 +277,20 @@ const srPages: SeoContentPage[] = [
     slug: "ar-za-namestaj",
     lang: "sr",
     alternateSlug: "furniture-ar",
-    title: "AR za namestaj i online prodavnice | Veridian",
+    title: "AR za namestaj i online prodavnice | Augmenta",
     description:
       "AR stranice proizvoda za prodavnice namestaja pomazu kupcima da vide velicinu, oblik i stil u svom prostoru pre kupovine.",
     eyebrow: "AR za namestaj",
     h1: "AR za namestaj koji kupcu pomaze da zamisli proizvod kod kuce",
     intro:
-      "Kupac namestaja okleva jer sofu, stolicu, lampu ili policu tesko procenjuje sa ravnih fotografija. Veridian od 4 fotografije pravi verifikovanu 3D/AR stranicu proizvoda.",
+      "Kupac namestaja okleva jer sofu, stolicu, lampu ili policu tesko procenjuje sa ravnih fotografija. Augmenta od 4 fotografije pravi verifikovanu 3D/AR stranicu proizvoda.",
     cta: "Prikazi moje proizvode u prostoru kupca",
     secondaryCta: "Pogledaj demo za namestaj",
     sections: [
       {
         heading: "Napravljeno za prodavnice namestaja, ne za 3D timove",
         body:
-          "Vas tim dodaje proizvod, dimenzije, URL prodavnice i nekoliko cistih fotografija. Veridian vodi generisanje, pakovanje modela, hostovanu stranicu i proveru kvaliteta."
+          "Vas tim dodaje proizvod, dimenzije, URL prodavnice i nekoliko cistih fotografija. Augmenta vodi generisanje, pakovanje modela, hostovanu stranicu i proveru kvaliteta."
       },
       {
         heading: "Pomozite kupcu da proceni velicinu pre placanja",
@@ -310,7 +310,7 @@ const srPages: SeoContentPage[] = [
       },
       {
         question: "Da li je ovo tacna CAD geometrija?",
-        answer: "Ne. Veridian je vizuelni pregled za sigurniju online kupovinu, ne inzenjerski ili proizvodni fajl."
+        answer: "Ne. Augmenta je vizuelni pregled za sigurniju online kupovinu, ne inzenjerski ili proizvodni fajl."
       }
     ]
   },
@@ -318,7 +318,7 @@ const srPages: SeoContentPage[] = [
     slug: "3d-pregledac-proizvoda-za-namestaj",
     lang: "sr",
     alternateSlug: "3d-product-viewer-for-furniture",
-    title: "3D pregledac proizvoda za prodavnice namestaja | Veridian",
+    title: "3D pregledac proizvoda za prodavnice namestaja | Augmenta",
     description:
       "Dodajte 3D pregledac na stranice namestaja kako bi kupci mogli da rotiraju, pregledaju i razumeju proizvod pre kupovine.",
     eyebrow: "3D pregledac proizvoda",
@@ -359,13 +359,13 @@ const srPages: SeoContentPage[] = [
     slug: "ar-stranice-proizvoda-za-prodavnice-namestaja",
     lang: "sr",
     alternateSlug: "ar-product-pages-for-furniture-stores",
-    title: "AR stranice proizvoda za prodavnice namestaja | Veridian",
+    title: "AR stranice proizvoda za prodavnice namestaja | Augmenta",
     description:
       "Kreirajte hostovane AR stranice proizvoda za prodavnice namestaja od 4 fotografije, uz proveru, analitiku i CTA ka prodavnici.",
     eyebrow: "AR stranice proizvoda",
     h1: "Hostovane AR stranice proizvoda za prodavnice namestaja",
     intro:
-      "Veridian svakom izabranom SKU-u daje hostovanu stranicu sa 3D pregledacem, AR pokretanjem, dimenzijama, brendom prodavca i CTA dugmetom ka prodavnici.",
+      "Augmenta svakom izabranom SKU-u daje hostovanu stranicu sa 3D pregledacem, AR pokretanjem, dimenzijama, brendom prodavca i CTA dugmetom ka prodavnici.",
     cta: "Prikazi moje proizvode u prostoru kupca",
     secondaryCta: "Pogledaj demo za namestaj",
     sections: [
@@ -400,13 +400,13 @@ const srPages: SeoContentPage[] = [
     slug: "shopify-ar-za-namestaj",
     lang: "sr",
     alternateSlug: "shopify-furniture-ar",
-    title: "Shopify AR za prodavnice namestaja | Veridian",
+    title: "Shopify AR za prodavnice namestaja | Augmenta",
     description:
       "Koristite hostovane AR linkove uz Shopify prodavnicu namestaja kako bi kupci videli proizvod u svom prostoru.",
     eyebrow: "Shopify AR za namestaj",
     h1: "Dodajte AR pregled Shopify proizvodima bez internog 3D tima",
     intro:
-      "Shopify moze da prikaze 3D modele kada vec imate prave assete. Veridian pomaze da kreirate, proverite, hostujete i merite AR pregled za izabrane SKU-ove.",
+      "Shopify moze da prikaze 3D modele kada vec imate prave assete. Augmenta pomaze da kreirate, proverite, hostujete i merite AR pregled za izabrane SKU-ove.",
     cta: "Prikazi moje proizvode u prostoru kupca",
     secondaryCta: "Pogledaj demo za namestaj",
     sections: [
@@ -441,13 +441,13 @@ const srPages: SeoContentPage[] = [
     slug: "smanjite-povrate-namestaja",
     lang: "sr",
     alternateSlug: "reduce-furniture-returns",
-    title: "Smanjite rizik povrata namestaja boljim pregledom | Veridian",
+    title: "Smanjite rizik povrata namestaja boljim pregledom | Augmenta",
     description:
       "Koristite 3D i AR preglede da smanjite nesigurnost kupca oko velicine, razmere i uklapanja namestaja pre placanja.",
     eyebrow: "Povrati namestaja",
     h1: "Smanjite rizik povrata tako sto kupac bolje razume proizvod",
     intro:
-      "Povrat namestaja cesto pocinje pre narudzbine: kupac ne moze da proceni velicinu, razmeru ili uklapanje sa staticnih slika. Veridian smanjuje tu nesigurnost pre placanja.",
+      "Povrat namestaja cesto pocinje pre narudzbine: kupac ne moze da proceni velicinu, razmeru ili uklapanje sa staticnih slika. Augmenta smanjuje tu nesigurnost pre placanja.",
     cta: "Prikazi moje proizvode u prostoru kupca",
     secondaryCta: "Pogledaj demo za namestaj",
     sections: [
@@ -482,7 +482,7 @@ const srPages: SeoContentPage[] = [
     slug: "kako-fotografisati-namestaj-za-3d-modele",
     lang: "sr",
     alternateSlug: "how-to-photograph-furniture-for-3d-models",
-    title: "Kako fotografisati namestaj za 3D modele | Veridian",
+    title: "Kako fotografisati namestaj za 3D modele | Augmenta",
     description:
       "Praktican vodic za fotografisanje namestaja kako bi 3D i AR pregledi bili kvalitetniji.",
     eyebrow: "Vodic za fotografije",

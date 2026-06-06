@@ -4,7 +4,7 @@ import { noIndexMetadata } from "@/lib/seo";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Admin — Veridian",
+  title: "Admin — Augmenta",
   ...noIndexMetadata
 };
 

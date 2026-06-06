@@ -51,7 +51,7 @@ export function LandingPageContent({ lang }: { lang: Lang }) {
               </div>
             </div>
 
-            {/* Hero visual — spinning Veridian crystal */}
+            {/* Hero visual — spinning Augmenta crystal */}
             <div className="mx-auto max-w-2xl relative pb-0">
               {/* Emerald glow beneath */}
               <div className="absolute inset-x-1/4 bottom-4 h-28 bg-emerald-500/20 blur-3xl rounded-full pointer-events-none" />
@@ -151,7 +151,7 @@ export function LandingPageContent({ lang }: { lang: Lang }) {
                   <tr>
                     <th className="text-left py-3.5 px-5 font-semibold text-zinc-400 w-2/5" />
                     <th className="text-left py-3.5 px-5 font-bold text-emerald-900">
-                      {t.comparison.colVeridian}
+                      {t.comparison.colAugmenta}
                     </th>
                     <th className="text-left py-3.5 px-5 font-semibold text-zinc-400">
                       {t.comparison.colStudio}
@@ -228,7 +228,7 @@ export function LandingPageContent({ lang }: { lang: Lang }) {
             ))}
           </div>
           <p className="text-center text-xs text-zinc-400 mt-8 max-w-lg mx-auto leading-relaxed">
-            Veridian&apos;s promise is a verified visual AR preview — not exact CAD geometry or manufacturing-grade precision.
+            Augmenta&apos;s promise is a verified visual AR preview — not exact CAD geometry or manufacturing-grade precision.
           </p>
         </Reveal>
 

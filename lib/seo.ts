@@ -3,8 +3,8 @@ import type { Metadata } from "next";
 export type SeoLang = "en" | "sr";
 
 export const siteConfig = {
-  name: "Veridian",
-  fullName: "Veridian AR Commerce",
+  name: "Augmenta",
+  fullName: "Augmenta",
   url: (process.env.NEXT_PUBLIC_SITE_URL ?? "https://veridianar.com").replace(/\/$/, ""),
   ogImagePath: "/opengraph-image",
   contactEmail: "hello@veridianar.com"

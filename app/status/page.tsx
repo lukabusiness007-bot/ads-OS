@@ -263,7 +263,7 @@ function createUpdatedStoredProduct(
     dimensions: previous?.dimensions ?? { width: 0, height: 0, depth: 0 },
     customerUrl: previous?.customerUrl ?? "#",
     price: previous?.price,
-    brandName: previous?.brandName ?? "Veridian",
+    brandName: previous?.brandName ?? "Augmenta",
     photoCount: previous?.photoCount ?? 0,
     status: payload.status,
     progress: payload.progress,
