@@ -13,7 +13,7 @@ export const translations = {
     },
     hero: {
       eyebrow: "Furniture AR previews from 4 photos",
-      heading: "If they can see it in their room, they’re more likely to buy it.",
+      heading: "They can’t buy what they can’t picture.",
       body: "Your furniture already looks good. The problem is your customers can’t picture it at home. Augmenta turns product photos into 3D/AR pages so shoppers can see size, shape, and style before they leave your store.",
       cta: "Show my products in their room",
       ctaSecondary: "See a furniture demo",
@@ -163,7 +163,7 @@ export const translations = {
     },
     hero: {
       eyebrow: "AR pregledi nameštaja iz 4 fotografije",
-      heading: "Ako ga vide u svojoj sobi, lakše donose odluku da kupe.",
+      heading: "Ne mogu kupiti ono što ne mogu da zamisle.",
       body: "Vaš nameštaj već izgleda dobro. Problem je što kupac ne može lako da ga zamisli kod kuće. Augmenta pretvara fotografije proizvoda u 3D/AR stranice kako bi kupac video veličinu, oblik i stil pre nego što napusti prodavnicu.",
       cta: "Prikaži moje proizvode u sobi",
       ctaSecondary: "Pogledajte demo nameštaja",
