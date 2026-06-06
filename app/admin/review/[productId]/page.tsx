@@ -65,7 +65,7 @@ export default async function ReviewInspectorPage({
         <div className="stack">
           <div className="panel stack">
             <h2 style={{ margin: 0 }}>Generated model</h2>
-            <ModelViewer asset={modelAssetForViewer} alt={`3D model of ${product.name}`} debug />
+            <ModelViewer asset={modelAssetForViewer} alt={`3D model of ${product.name}`} />
             {model_asset && (
               <div className="row" style={{ flexWrap: "wrap", gap: 8, fontSize: 13 }}>
                 <span className="badge neutral">{model_asset.file_size_mb?.toFixed(1) ?? "?"} MB</span>

@@ -8,15 +8,13 @@ type ModelViewerProps = {
   alt: string
   onInteract?: () => void
   onArClick?: () => void
-  debug?: boolean
 }
 
 type LoadError = { message: string; detail?: string }
 
-export function ModelViewer({ asset, alt, onInteract, onArClick, debug }: ModelViewerProps) {
+export function ModelViewer({ asset, alt, onInteract, onArClick }: ModelViewerProps) {
   const [loadError, setLoadError] = React.useState<LoadError | null>(null)
   const [isFullscreen, setIsFullscreen] = React.useState(false)
-  const [diag, setDiag] = React.useState<string>("analyzing GLB…")
   const viewerRef = React.useRef<HTMLElement | null>(null)
   const wrapperRef = React.useRef<HTMLDivElement | null>(null)
 
@@ -111,40 +109,6 @@ export function ModelViewer({ asset, alt, onInteract, onArClick, debug }: ModelV
     return () => document.removeEventListener("keydown", onKeyDown)
   }, [isFullscreen])
 
-  // TEMP DIAGNOSTIC — fetch the GLB and report its materials/textures so we can
-  // tell why a model renders white. Remove once the white-model issue is fixed.
-  React.useEffect(() => {
-    if (!debug) return
-    const glbUrl = asset?.glbUrl
-    if (!glbUrl) return
-    let cancelled = false
-    ;(async () => {
-      try {
-        const buf = await (await fetch(glbUrl)).arrayBuffer()
-        const view = new DataView(buf)
-        if (String.fromCharCode(view.getUint8(0), view.getUint8(1), view.getUint8(2), view.getUint8(3)) !== "glTF") {
-          if (!cancelled) setDiag(`NOT a GLB (size ${buf.byteLength}B)`)
-          return
-        }
-        const jsonLen = view.getUint32(12, true)
-        const json = JSON.parse(new TextDecoder().decode(new Uint8Array(buf, 20, jsonLen)))
-        const mats = (json.materials ?? []).map((m: Record<string, unknown>) => {
-          const pbr = (m.pbrMetallicRoughness ?? {}) as Record<string, unknown>
-          return `${(m.name as string) ?? "?"}: base=${JSON.stringify(pbr.baseColorFactor ?? "—")} tex=${pbr.baseColorTexture ? "Y" : "N"} metal=${pbr.metallicRoughnessTexture ? "Y" : "N"}`
-        })
-        const summary = [
-          `materials=${(json.materials ?? []).length} textures=${(json.textures ?? []).length} images=${(json.images ?? []).length}`,
-          `extReq=${JSON.stringify(json.extensionsRequired ?? [])} extUsed=${JSON.stringify(json.extensionsUsed ?? [])}`,
-          ...mats,
-          `url=${glbUrl}`
-        ].join("\n")
-        if (!cancelled) setDiag(summary)
-      } catch (e) {
-        if (!cancelled) setDiag(`diag error: ${e instanceof Error ? e.message : String(e)}`)
-      }
-    })()
-    return () => { cancelled = true }
-  }, [asset?.glbUrl, debug])
 
   function toggleFullscreen() {
     const wrapper = wrapperRef.current
@@ -232,30 +196,6 @@ export function ModelViewer({ asset, alt, onInteract, onArClick, debug }: ModelV
         {isFullscreen ? "✕" : "⛶"}
       </button>
 
-      {/* TEMP DIAGNOSTIC overlay — remove once white-model issue is resolved */}
-      {debug && (
-      <pre
-        style={{
-          position: "absolute",
-          left: 8,
-          bottom: 8,
-          right: 8,
-          margin: 0,
-          padding: "8px 10px",
-          background: "rgba(0,0,0,0.82)",
-          color: "#0f0",
-          font: "11px/1.4 ui-monospace, monospace",
-          whiteSpace: "pre-wrap",
-          wordBreak: "break-all",
-          borderRadius: 6,
-          maxHeight: "45%",
-          overflow: "auto",
-          zIndex: 20,
-        }}
-      >
-        {diag}
-      </pre>
-      )}
     </div>
   )
 }

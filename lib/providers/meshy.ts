@@ -81,11 +81,9 @@ export async function createMeshyMultiImageTask(
       ai_model: "latest",
       should_texture: true,
       enable_pbr: true,
-      hd_texture: true,
       texture_image_url: primaryTextureReference,
       target_formats: ["glb", "usdz"],
       image_enhancement: options.imageEnhancement ?? false,
-      remove_lighting: true,
       auto_size: true,
       origin_at: "bottom"
     })
