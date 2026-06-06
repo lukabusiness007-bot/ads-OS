@@ -5,7 +5,7 @@ import type { SeoContentPage as SeoContentPageType } from "@/lib/seo-content";
 import {
   getSeoContentPath
 } from "@/lib/seo-content";
-import { breadcrumbJsonLd, jsonLd } from "@/lib/seo";
+import { breadcrumbJsonLd, faqPageJsonLd, jsonLd } from "@/lib/seo";
 
 type SeoContentPageProps = {
   page: SeoContentPageType;
@@ -27,6 +27,10 @@ export function SeoContentPage({ page }: SeoContentPageProps) {
             { name: page.h1, path: currentPath }
           ])
         )}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={jsonLd(faqPageJsonLd(page.faqs))}
       />
 
       <main className="pt-24">

@@ -134,7 +134,7 @@ export const translations = {
       colAugmenta: "Augmenta",
       colStudio: "Traditional 3D studio",
       rows: [
-        { aspect: "Time to live page", veridian: "5–7 days", studio: "6–12 weeks" },
+        { aspect: "Time to live page", veridian: "15 min", studio: "6–12 weeks" },
         { aspect: "Cost per approved model", veridian: "€30–120", studio: "€300–1,200" },
         { aspect: "Hosted page included", veridian: "✓ Included", studio: "Not included" },
         { aspect: "Human quality review", veridian: "✓ Included", studio: "Varies by studio" },
@@ -142,6 +142,12 @@ export const translations = {
         { aspect: "Pilot-friendly (10–25 SKUs)", veridian: "✓ Built for this", studio: "Minimum order may apply" },
       ],
     },
+    stats: [
+      { value: "4 photos", label: "is all you upload" },
+      { value: "5–7 days", label: "to a live AR page" },
+      { value: "GLB + USDZ", label: "both formats included" },
+      { value: "Human review", label: "before every publish" },
+    ],
     finalCta: {
       eyebrow: "Ready for a focused pilot?",
       heading: "Start with the furniture products shoppers hesitate on most",
@@ -284,7 +290,7 @@ export const translations = {
       colAugmenta: "Augmenta",
       colStudio: "Tradicionalni 3D studio",
       rows: [
-        { aspect: "Vreme do žive stranice", veridian: "5–7 dana", studio: "6–12 nedelja" },
+        { aspect: "Vreme do žive stranice", veridian: "15 min", studio: "6–12 nedelja" },
         { aspect: "Cena po odobrenom modelu", veridian: "€30–120", studio: "€300–1.200" },
         { aspect: "Hostovana stranica uključena", veridian: "✓ Uključeno", studio: "Nije uključeno" },
         { aspect: "Recenzija kvaliteta", veridian: "✓ Uključeno", studio: "Zavisi od studija" },
@@ -292,6 +298,12 @@ export const translations = {
         { aspect: "Pogodno za pilot (10–25 SKU)", veridian: "✓ Napravljeno za ovo", studio: "Može biti minimum narudžbine" },
       ],
     },
+    stats: [
+      { value: "4 fotografije", label: "je sve što otpremate" },
+      { value: "5–7 dana", label: "do žive AR stranice" },
+      { value: "GLB + USDZ", label: "oba formata uključena" },
+      { value: "Ljudski pregled", label: "pre svake objave" },
+    ],
     finalCta: {
       eyebrow: "Spremni za fokusirani pilot?",
       heading: "Počnite sa proizvodima oko kojih kupci najviše oklevaju",

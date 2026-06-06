@@ -15,6 +15,19 @@ export const metadata: Metadata = {
   applicationName: siteConfig.fullName,
   appleWebApp: {
     title: siteConfig.name
+  },
+  themeColor: "#064e3b",
+  colorScheme: "light",
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-snippet": -1,
+      "max-image-preview": "large",
+      "max-video-preview": -1
+    }
   }
 };
 
@@ -24,7 +37,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="sr">
+    <html lang="en">
       <body>
         <script type="application/ld+json" dangerouslySetInnerHTML={jsonLd(organizationJsonLd())} />
         <LanguageProvider>{children}</LanguageProvider>

@@ -2250,3 +2250,64 @@ h3 {
 @keyframes caret-blink {
   50% { opacity: 0; }
 }
+
+/* ─── Directional reveal variants ────────────────────────────────────────── */
+
+.reveal-left {
+  opacity: 0;
+  transform: translateX(-32px);
+  transition: opacity 0.6s cubic-bezier(0.4, 0, 0.2, 1), transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.reveal-right {
+  opacity: 0;
+  transform: translateX(32px);
+  transition: opacity 0.6s cubic-bezier(0.4, 0, 0.2, 1), transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.reveal-scale {
+  opacity: 0;
+  transform: scale(0.96);
+  transition: opacity 0.55s cubic-bezier(0.4, 0, 0.2, 1), transform 0.55s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.reveal-visible {
+  opacity: 1;
+  transform: translateY(0) translateX(0) scale(1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .reveal-left,
+  .reveal-right,
+  .reveal-scale {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+}
+
+/* ─── Dot-grid texture utility ───────────────────────────────────────────── */
+
+.bg-dotgrid {
+  background-image: radial-gradient(circle, rgba(16, 185, 129, 0.12) 1px, transparent 1px);
+  background-size: 22px 22px;
+}
+
+/* ─── Glow blob decorative accent ───────────────────────────────────────── */
+/* Usage: relative parent + <div class="glow-blob glow-blob--emerald" />     */
+
+.glow-blob {
+  position: absolute;
+  border-radius: 9999px;
+  filter: blur(72px);
+  pointer-events: none;
+  z-index: 0;
+}
+
+.glow-blob--emerald {
+  background: rgba(16, 185, 129, 0.18);
+}
+
+.glow-blob--amber {
+  background: rgba(138, 90, 37, 0.13);
+}

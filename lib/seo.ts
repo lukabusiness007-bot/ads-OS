@@ -7,6 +7,7 @@ export const siteConfig = {
   fullName: "Augmenta",
   url: (process.env.NEXT_PUBLIC_SITE_URL ?? "https://veridianar.com").replace(/\/$/, ""),
   ogImagePath: "/opengraph-image",
+  logoPath: "/img/augmenta-logo.png",
   contactEmail: "hello@veridianar.com"
 };
 
@@ -66,6 +67,17 @@ export function buildSeoMetadata({
         "x-default": absoluteUrl(alternates["x-default"])
       }
     },
+    robots: {
+      index: true,
+      follow: true,
+      googleBot: {
+        index: true,
+        follow: true,
+        "max-snippet": -1,
+        "max-image-preview": "large",
+        "max-video-preview": -1
+      }
+    },
     openGraph: {
       title,
       description,
@@ -112,12 +124,74 @@ export function organizationJsonLd() {
     name: siteConfig.fullName,
     alternateName: siteConfig.name,
     url: siteConfig.url,
-    logo: absoluteUrl(siteConfig.ogImagePath),
+    logo: {
+      "@type": "ImageObject",
+      url: absoluteUrl(siteConfig.ogImagePath),
+      width: 1200,
+      height: 630
+    },
     contactPoint: {
       "@type": "ContactPoint",
       email: siteConfig.contactEmail,
-      contactType: "sales"
+      contactType: "sales",
+      availableLanguage: ["English", "Serbian"]
     }
+  };
+}
+
+export function faqPageJsonLd(items: ReadonlyArray<{ readonly question: string; readonly answer: string }>) {
+  return {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    mainEntity: items.map((item) => ({
+      "@type": "Question",
+      name: item.question,
+      acceptedAnswer: {
+        "@type": "Answer",
+        text: item.answer
+      }
+    }))
+  };
+}
+
+export function howToJsonLd(
+  name: string,
+  description: string,
+  steps: Array<{ name: string; text: string }>
+) {
+  return {
+    "@context": "https://schema.org",
+    "@type": "HowTo",
+    name,
+    description,
+    step: steps.map((s, i) => ({
+      "@type": "HowToStep",
+      position: i + 1,
+      name: s.name,
+      text: s.text
+    }))
+  };
+}
+
+export function serviceJsonLd(lang: SeoLang) {
+  const isSr = lang === "sr";
+  return {
+    "@context": "https://schema.org",
+    "@type": "Service",
+    name: isSr
+      ? "3D i AR stranice proizvoda za nameštaj"
+      : "3D and AR Product Pages for Furniture Stores",
+    description: isSr
+      ? "SaaS platforma koja pretvara fotografije nameštaja u verifikovane 3D/AR stranice proizvoda."
+      : "SaaS platform that turns furniture photos into verified 3D and AR product pages.",
+    provider: {
+      "@type": "Organization",
+      name: siteConfig.fullName,
+      url: siteConfig.url
+    },
+    areaServed: "Worldwide",
+    serviceType: "SaaS — 3D/AR ecommerce product pages",
+    url: absoluteUrl(isSr ? "/sr" : "/")
   };
 }
 

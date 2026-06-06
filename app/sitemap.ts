@@ -32,6 +32,12 @@ export default function sitemap(): MetadataRoute.Sitemap {
       en: "/pricing",
       sr: "/sr/pricing",
       priority: 0.8
+    },
+    {
+      path: "/contact/demo",
+      en: "/contact/demo",
+      sr: "/contact/demo",
+      priority: 0.7
     }
   ];
 

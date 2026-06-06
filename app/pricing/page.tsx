@@ -8,6 +8,7 @@ import { CheckCircle2, ArrowRight } from "lucide-react"
 import {
   breadcrumbJsonLd,
   buildSeoMetadata,
+  faqPageJsonLd,
   jsonLd,
   marketingAlternates,
   webApplicationJsonLd
@@ -34,6 +35,23 @@ export default function PricingPage() {
             { name: "Pricing", path: "/pricing" }
           ])
         )}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={jsonLd(faqPageJsonLd([
+          {
+            question: "Is model creation billed separately from hosting?",
+            answer: "Yes. The monthly subscription covers hosted pages, AR viewer, and analytics. Model creation is a separate one-time fee per approved SKU.",
+          },
+          {
+            question: "What if a model fails quality review?",
+            answer: "The page stays unpublished and we revise or regenerate the model. You are only charged for approved, published models.",
+          },
+          {
+            question: "Can I start with fewer SKUs?",
+            answer: "Absolutely. The Starter plan covers up to 5 published SKUs. You can upgrade at any time as your catalog grows.",
+          },
+        ]))}
       />
       <MarketingNav lang="en" />
 

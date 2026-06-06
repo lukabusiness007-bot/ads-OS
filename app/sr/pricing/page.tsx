@@ -7,6 +7,7 @@ import { CheckCircle2, ArrowRight } from "lucide-react"
 import {
   breadcrumbJsonLd,
   buildSeoMetadata,
+  faqPageJsonLd,
   jsonLd,
   marketingAlternates,
   webApplicationJsonLd
@@ -144,10 +145,27 @@ export default function PricingPageSr() {
         type="application/ld+json"
         dangerouslySetInnerHTML={jsonLd(
           breadcrumbJsonLd([
-            { name: "Pocetna", path: "/sr" },
+            { name: "Početna", path: "/sr" },
             { name: "Cene", path: "/sr/pricing" }
           ])
         )}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={jsonLd(faqPageJsonLd([
+          {
+            question: "Da li se kreacija modela naplaćuje odvojeno od hostinga?",
+            answer: "Da. Mesečna pretplata pokriva hostovane stranice, AR preglednik i analitiku. Kreacija modela je zasebna jednokratna naknada po odobrenom SKU-u.",
+          },
+          {
+            question: "Šta ako model ne prođe pregled kvaliteta?",
+            answer: "Stranica ostaje neobjavljena i revidiramo ili regenerišemo model. Naplaćujemo samo odobrene, objavljene modele.",
+          },
+          {
+            question: "Mogu li početi sa manjim brojem SKU-ova?",
+            answer: "Apsolutno. Starter plan pokriva do 5 objavljenih SKU-ova. Možete nadograditi u bilo kom trenutku kako vaš katalog raste.",
+          },
+        ]))}
       />
       <MarketingNav lang="sr" />
 

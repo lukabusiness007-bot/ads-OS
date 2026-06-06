@@ -3,16 +3,37 @@ import Link from "next/link";
 import { ArrowRight, CheckCircle2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { MarketingNav } from "@/components/marketing-nav";
+import { buildSeoMetadata, jsonLd, faqPageJsonLd } from "@/lib/seo";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = buildSeoMetadata({
   title: "Book a Furniture AR Pilot Demo",
   description:
-    "Book a Augmenta pilot demo and see how guided photo upload, review, hosted product links, and analytics fit your furniture catalog."
-};
+    "Book an Augmenta pilot demo and see how guided photo upload, human review, hosted product links, and analytics fit your furniture catalog.",
+  path: "/contact/demo",
+  lang: "en",
+  alternates: { en: "/contact/demo", sr: "/contact/demo", "x-default": "/contact/demo" }
+});
 
 export default function DemoContactPage() {
   return (
     <div className="min-h-screen bg-white">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={jsonLd(faqPageJsonLd([
+          {
+            question: "Which furniture products are best for an AR pilot?",
+            answer: "Start with high-consideration products where shoppers most often ask about size, scale, fit, or material — sofas, dining tables, chairs, and large shelving units are typical first picks.",
+          },
+          {
+            question: "How should my team photograph products?",
+            answer: "Use 4 clean product photos: front, side or three-quarter angle, back, and a material detail shot. Consistent lighting and a plain background give the best generation results.",
+          },
+          {
+            question: "What does the quality review check?",
+            answer: "A human reviewer checks model resemblance, scale, orientation, file loading, and AR readiness before the page is published. You only pay for approved models.",
+          },
+        ]))}
+      />
       <MarketingNav lang="en" />
 
       <main className="pt-24">
