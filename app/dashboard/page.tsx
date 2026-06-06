@@ -8,6 +8,11 @@ export default async function DashboardPage() {
   const usagePct = Math.min(100, Math.round((data.totals.published / 25) * 100));
   const hasProducts = data.products.length > 0;
 
+  const awaitingReview = data.products.filter((p) => p.status === "awaiting_review").length;
+  const readyToPublish = data.products.filter((p) => p.status === "approved").length;
+  const needsRevision = data.products.filter((p) => p.status === "rejected" || p.status === "generation_failed").length;
+  const generating = data.products.filter((p) => p.status === "generating").length;
+
   return (
     <AppShell>
       <header className="topbar">
@@ -73,12 +78,7 @@ export default async function DashboardPage() {
             </Link>
           </div>
           <ul className="actionList">
-            {hasProducts ? (
-              <li>
-                <strong>{data.totals.processing} products in generation</strong>
-                <span>{data.totals.published} published pages are live.</span>
-              </li>
-            ) : (
+            {!hasProducts ? (
               <>
                 <li>
                   <strong>1. Create your first product</strong>
@@ -96,6 +96,48 @@ export default async function DashboardPage() {
                   <strong>4. Publish and measure</strong>
                   <span>Add the hosted link to your store, then track AR and store clicks here.</span>
                 </li>
+              </>
+            ) : (
+              <>
+                {needsRevision > 0 && (
+                  <li>
+                    <strong>{needsRevision} product{needsRevision !== 1 ? "s" : ""} need{needsRevision === 1 ? "s" : ""} revision</strong>
+                    <span>Generation failed or the model was rejected. Re-upload photos or contact support.</span>
+                  </li>
+                )}
+                {awaitingReview > 0 && (
+                  <li>
+                    <strong>{awaitingReview} product{awaitingReview !== 1 ? "s" : ""} awaiting your review</strong>
+                    <span>
+                      <Link href="/approval" style={{ color: "var(--accent)", fontWeight: 700 }}>Go to Approval →</Link>
+                      {" "}Check resemblance, scale, and AR readiness before publishing.
+                    </span>
+                  </li>
+                )}
+                {readyToPublish > 0 && (
+                  <li>
+                    <strong>{readyToPublish} product{readyToPublish !== 1 ? "s" : ""} approved — ready to publish</strong>
+                    <span>
+                      <Link href="/published-links" style={{ color: "var(--accent)", fontWeight: 700 }}>Go to Published links →</Link>
+                      {" "}Copy the hosted link and add it to your store, ads, or QR codes.
+                    </span>
+                  </li>
+                )}
+                {generating > 0 && (
+                  <li>
+                    <strong>{generating} product{generating !== 1 ? "s" : ""} generating</strong>
+                    <span>
+                      <Link href="/status" style={{ color: "var(--accent)", fontWeight: 700 }}>Check status →</Link>
+                      {" "}3D model creation is in progress. This typically takes 5–7 days.
+                    </span>
+                  </li>
+                )}
+                {data.totals.published > 0 && needsRevision === 0 && awaitingReview === 0 && readyToPublish === 0 && (
+                  <li>
+                    <strong>{data.totals.published} page{data.totals.published !== 1 ? "s" : ""} live</strong>
+                    <span>Share hosted links in your store, ads, or emails to start driving AR engagement.</span>
+                  </li>
+                )}
               </>
             )}
           </ul>

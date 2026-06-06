@@ -3,7 +3,6 @@ import { Button } from "@/components/ui/button"
 import { MarketingNav } from "@/components/marketing-nav"
 import { HeroGem } from "@/components/HeroGem"
 import { Reveal, RevealStagger } from "@/components/Reveal"
-import { TypingHeading } from "@/components/TypingHeading"
 import { DashboardMock } from "@/components/DashboardMock"
 import { ArrowRight, CheckCircle2, Shield } from "lucide-react"
 import { BackToTop } from "@/components/BackToTop"
@@ -27,7 +26,7 @@ export function LandingPageContent({ lang }: { lang: Lang }) {
                 {t.hero.eyebrow}
               </p>
               <h1 className="text-4xl font-semibold md:text-5xl lg:text-6xl text-zinc-900 text-balance leading-tight mb-6">
-                <TypingHeading text={t.hero.heading} />
+                {t.hero.heading}
               </h1>
               <p className="text-base sm:text-lg text-zinc-500 max-w-xl mx-auto leading-relaxed mb-6 sm:mb-8">
                 {t.hero.body}
@@ -44,7 +43,7 @@ export function LandingPageContent({ lang }: { lang: Lang }) {
               {/* Trust strip — stagger */}
               <RevealStagger
                 as="div"
-                className="hidden sm:grid grid-cols-2 gap-x-8 gap-y-3 max-w-sm mx-auto text-left border-t border-zinc-100 pt-8"
+                className="grid grid-cols-2 gap-x-8 gap-y-3 max-w-sm mx-auto text-left border-t border-zinc-100 pt-8"
                 step={80}
                 initialDelay={400}
               >

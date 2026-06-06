@@ -47,10 +47,10 @@ export default async function PublishedLinksPage() {
                       {product.hostedPage.publicUrl}
                     </Link>
                     <div className="assetGrid">
-                      <Link className="button secondary sm" href={product.hostedPage.publicUrl}>
-                        Preview
+                      <CopyButton value={product.hostedPage.publicUrl} className="button accent" label="Copy link" />
+                      <Link className="button ghost" href={product.hostedPage.publicUrl} target="_blank" rel="noopener">
+                        Preview ↗
                       </Link>
-                      <CopyButton value={product.hostedPage.publicUrl} />
                     </div>
                   </>
                 ) : (

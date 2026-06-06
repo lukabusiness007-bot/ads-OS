@@ -28,7 +28,7 @@ import type {
   StartGenerationResponse
 } from "@/lib/types";
 
-const categories: ProductCategory[] = ["chair", "table", "sofa", "lamp", "shelf", "small_decor"];
+const categories: ProductCategory[] = ["furniture", "vehicle", "electronics", "clothing", "home_decor", "other"];
 type UploadPhase = "idle" | "preparing" | "ready" | "uploading" | "starting" | "queued";
 
 export default function CreateProductPage() {
@@ -209,7 +209,7 @@ export default function CreateProductPage() {
           </div>
           <div className="field">
             <label htmlFor="category">Product category</label>
-            <select id="category" name="category" defaultValue="chair">
+            <select id="category" name="category" defaultValue="furniture">
               {categories.map((category) => (
                 <option key={category} value={category}>
                   {category.replace("_", " ")}
@@ -250,8 +250,10 @@ export default function CreateProductPage() {
               name="customerUrl"
               type="url"
               placeholder="https://yourstore.com/products/product-name"
-              required
             />
+            <span className="muted" style={{ fontSize: 13 }}>
+              This becomes the "View on store" button on your AR page — add your product's checkout URL so shoppers can buy directly.
+            </span>
           </div>
           <div className="field">
             <label htmlFor="price">Display price optional</label>
@@ -438,7 +440,7 @@ async function createGenerationUploads(
     },
     body: JSON.stringify({
       productName: getFormString(formData, "productName") || "product",
-      category: getFormString(formData, "category") || "small_decor",
+      category: getFormString(formData, "category") || "other",
       description: getFormString(formData, "description"),
       customerUrl: getFormString(formData, "customerUrl"),
       price: getFormString(formData, "price"),
@@ -637,7 +639,7 @@ function createStoredProduct(
   photoCount: number
 ): StoredGeneratedProduct {
   const name = getFormString(formData, "productName") || "Generated product";
-  const category = (getFormString(formData, "category") || "small_decor") as ProductCategory;
+  const category = (getFormString(formData, "category") || "other") as ProductCategory;
 
   return {
     productId,

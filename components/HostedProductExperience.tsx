@@ -57,7 +57,7 @@ export function HostedProductExperience({ merchantSlug, productSlug, product }: 
           />
           <div className="viewerMeta">
             <span className={product.modelAsset ? "badge success" : "badge neutral"}>
-              {product.modelAsset ? "3D preview generated and verified" : "3D model not uploaded yet"}
+              {product.modelAsset ? "3D preview · Augmenta-verified" : "3D model not uploaded yet"}
             </span>
             <span className="muted">
               {product.modelAsset
@@ -98,37 +98,43 @@ export function HostedProductExperience({ merchantSlug, productSlug, product }: 
             </div>
           </dl>
 
+          {product.modelAsset && (
+            <div className="trustBadgeRow">
+              <span className="badge success">Human-reviewed</span>
+              <span className="badge success">True-to-scale</span>
+              <span className="badge success">Mobile AR ready</span>
+            </div>
+          )}
+
+          {product.price && (
+            <p className="publicPrice">{product.price}</p>
+          )}
+
           <div className="publicActions">
-            <a className="button" href={product.customerUrl} onClick={trackCtaClick}>
+            <a className="button accent" href={product.customerUrl} onClick={trackCtaClick}>
               {product.hostedPage?.ctaLabel ?? "View on store"}
             </a>
           </div>
 
-          <p className="muted">
-            {!product.modelAsset
-              ? "AR is hidden until a model package is available."
-              : arSupported
-                ? "Use the View in AR control inside the 3D viewer on this device."
-                : "AR is not supported in this browser, but the interactive 3D preview remains available."}
-          </p>
+          {product.modelAsset && (
+            <p className="arHint">
+              {arSupported
+                ? "📱 Tap “View in AR” inside the 3D viewer to place it in your room."
+                : "Rotate and zoom the 3D preview above — AR is available on mobile devices."}
+            </p>
+          )}
         </article>
       </section>
 
       <section className="publicBand" aria-label="Preview details">
         <div>
-          <h2>Verified product preview</h2>
+          <h2>Augmenta-verified preview</h2>
           <p className="muted">
-            This hosted page is approved for customer viewing. It is intended for visual shopping confidence, not exact
-            CAD or manufacturing precision.
+            This page was reviewed by Augmenta for visual accuracy, true-to-scale proportions, and AR readiness before
+            publishing. It is designed for shopping confidence, not CAD or manufacturing precision.
           </p>
         </div>
-        {product.modelAsset ? (
-          <div className="assetGrid">
-            <span className="badge neutral">True-to-scale preview</span>
-            <span className="badge neutral">Human-reviewed</span>
-            <span className="badge neutral">Mobile AR ready</span>
-          </div>
-        ) : (
+        {!product.modelAsset && (
           <span className="badge neutral">Waiting for model asset</span>
         )}
       </section>
