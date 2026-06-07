@@ -97,7 +97,7 @@ function validateStartPayload(productId: string, photos: GenerationUploadPhoto[]
   }
 
   if (photos.length < MIN_GENERATION_PHOTOS || photos.length > MAX_GENERATION_PHOTOS) {
-    return `Upload between ${MIN_GENERATION_PHOTOS} and ${MAX_GENERATION_PHOTOS} product photos before starting generation.`;
+    return `Upload exactly ${MAX_GENERATION_PHOTOS} product photos before starting generation.`;
   }
 
   const invalidPhoto = photos.find((photo) => !isGenerationPhoto(objectOwnerId, productId, photo));

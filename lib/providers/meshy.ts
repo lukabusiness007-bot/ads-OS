@@ -68,7 +68,7 @@ export async function createMeshyMultiImageTask(
   if (imageUrls.length < MIN_GENERATION_PHOTOS || imageUrls.length > MAX_GENERATION_PHOTOS) {
     throw new MeshyRequestError(
       400,
-      `Meshy generation requires ${MIN_GENERATION_PHOTOS}–${MAX_GENERATION_PHOTOS} images.`
+      `Meshy generation requires exactly ${MAX_GENERATION_PHOTOS} images.`
     );
   }
 
@@ -84,7 +84,10 @@ export async function createMeshyMultiImageTask(
       image_urls: imageUrls,
       ai_model: "latest",
       should_texture: true,
-      enable_pbr: true,
+      // PBR bakes product color into a metal/roughness material that the web/AR
+      // viewer (no HDR environment) renders washed-out white. Baked albedo shows
+      // true color under any lighting.
+      enable_pbr: false,
       texture_image_url: primaryTextureReference,
       target_formats: ["glb", "usdz"],
       image_enhancement: options.imageEnhancement ?? false,

@@ -131,7 +131,7 @@ async function createProductRecord(
 
 function validateUploadPhotos(photos: GenerationUploadPhotoInput[]) {
   if (photos.length < MIN_GENERATION_PHOTOS || photos.length > MAX_GENERATION_PHOTOS) {
-    return `Upload ${MIN_GENERATION_PHOTOS}–${MAX_GENERATION_PHOTOS} product photos before starting generation.`;
+    return `Upload exactly ${MAX_GENERATION_PHOTOS} product photos before starting generation.`;
   }
 
   const invalidPhoto = photos.find((photo) => !isUploadPhotoInput(photo));

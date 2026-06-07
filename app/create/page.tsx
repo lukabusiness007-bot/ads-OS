@@ -434,7 +434,7 @@ export default function CreateProductPage() {
           </h1>
           {uploadPhase === "idle" && (
             <p className="muted">
-              {MIN_GENERATION_PHOTOS}–{MAX_GENERATION_PHOTOS} photos · JPG or PNG · auto-optimized
+              {MAX_GENERATION_PHOTOS} photos · JPG or PNG · auto-optimized
               in browser · secure upload
             </p>
           )}
@@ -494,7 +494,7 @@ export default function CreateProductPage() {
               </div>
               <div>
                 <p style={{ fontSize: 22, fontWeight: 700, margin: "0 0 6px", color: "var(--ink)" }}>
-                  Drop {MIN_GENERATION_PHOTOS}–{MAX_GENERATION_PHOTOS} photos of your product
+                  Drop {MAX_GENERATION_PHOTOS} photos of your product
                 </p>
                 <p className="muted" style={{ margin: 0 }}>
                   JPG or PNG · we optimize automatically · no account needed to start
@@ -530,7 +530,7 @@ export default function CreateProductPage() {
                   <h2 style={{ marginBottom: 4 }}>Your photos</h2>
                   <p className="muted" style={{ margin: 0, fontSize: 13 }}>
                     {preparedPhotos.length} / {photos.length} ready · click any photo to enlarge ·{" "}
-                    {MIN_GENERATION_PHOTOS}–{MAX_GENERATION_PHOTOS} required
+                    {MAX_GENERATION_PHOTOS} required
                   </p>
                 </div>
                 <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
@@ -1143,7 +1143,7 @@ export default function CreateProductPage() {
 
 function validatePhotoSelection(files: File[]) {
   if (files.length < MIN_GENERATION_PHOTOS || files.length > MAX_GENERATION_PHOTOS) {
-    return `Upload ${MIN_GENERATION_PHOTOS}–${MAX_GENERATION_PHOTOS} product photos (JPG or PNG).`
+    return `Upload exactly ${MAX_GENERATION_PHOTOS} product photos (JPG or PNG).`
   }
   if (files.some((f) => !isSupportedPhoto(f))) {
     return "Use JPG or PNG photos only."
