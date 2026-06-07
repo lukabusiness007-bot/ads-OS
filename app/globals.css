@@ -2358,3 +2358,594 @@ h3 {
 .glow-blob--amber {
   background: rgba(138, 90, 37, 0.13);
 }
+
+/* ─── Photo lightbox ─────────────────────────────────────────────────────── */
+
+.photoLightboxBackdrop {
+  align-items: center;
+  background: rgba(0, 0, 0, 0.76);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  display: flex;
+  inset: 0;
+  justify-content: center;
+  padding: 16px;
+  position: fixed;
+  z-index: 70;
+  animation: lightboxFadeIn 0.18s ease;
+}
+
+@keyframes lightboxFadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+.photoLightboxPanel {
+  background: #17201a;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 14px;
+  box-shadow: 0 32px 80px rgba(0, 0, 0, 0.55);
+  display: flex;
+  flex-direction: column;
+  max-height: calc(100dvh - 32px);
+  max-width: min(900px, 100%);
+  overflow: hidden;
+  width: 100%;
+  animation: lightboxScaleIn 0.22s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes lightboxScaleIn {
+  from { opacity: 0; transform: scale(0.96); }
+  to   { opacity: 1; transform: scale(1); }
+}
+
+.photoLightboxHeader {
+  align-items: center;
+  background: rgba(255, 255, 255, 0.04);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+  display: flex;
+  gap: 12px;
+  justify-content: space-between;
+  padding: 11px 16px;
+  flex-shrink: 0;
+}
+
+.photoLightboxCaption {
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 13px;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.photoLightboxClose {
+  align-items: center;
+  background: rgba(255, 255, 255, 0.1);
+  border: 0;
+  border-radius: 999px;
+  color: #fff;
+  cursor: pointer;
+  display: inline-flex;
+  flex-shrink: 0;
+  height: 32px;
+  justify-content: center;
+  padding: 0;
+  transition: background 0.15s;
+  width: 32px;
+}
+
+.photoLightboxClose:hover {
+  background: rgba(255, 255, 255, 0.22);
+}
+
+.photoLightboxImageWrap {
+  align-items: center;
+  display: flex;
+  flex: 1;
+  justify-content: center;
+  min-height: 0;
+  overflow: hidden;
+  padding: 20px 52px;
+  position: relative;
+}
+
+.photoLightboxImage {
+  border-radius: 8px;
+  box-shadow: 0 0 0 1px rgba(16, 185, 129, 0.28), 0 0 40px rgba(16, 185, 129, 0.12);
+  max-height: calc(100dvh - 168px);
+  max-width: 100%;
+  object-fit: contain;
+  animation: lightboxScaleIn 0.18s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.photoLightboxNav {
+  align-items: center;
+  background: rgba(255, 255, 255, 0.1);
+  border: 0;
+  border-radius: 999px;
+  color: #fff;
+  cursor: pointer;
+  display: inline-flex;
+  height: 44px;
+  justify-content: center;
+  padding: 0;
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  transition: background 0.15s;
+  width: 44px;
+  z-index: 2;
+  flex-shrink: 0;
+}
+
+.photoLightboxNav:hover {
+  background: rgba(255, 255, 255, 0.22);
+}
+
+.photoLightboxNavLeft  { left: 8px; }
+.photoLightboxNavRight { right: 8px; }
+
+.photoLightboxDots {
+  display: flex;
+  flex-shrink: 0;
+  gap: 6px;
+  justify-content: center;
+  padding: 12px 16px;
+}
+
+.photoLightboxDot {
+  background: rgba(255, 255, 255, 0.28);
+  border: 0;
+  border-radius: 999px;
+  cursor: pointer;
+  height: 8px;
+  padding: 0;
+  transition: background 0.15s, width 0.2s;
+  width: 8px;
+}
+
+.photoLightboxDot.active {
+  background: #10b981;
+  width: 22px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .photoLightboxBackdrop,
+  .photoLightboxPanel,
+  .photoLightboxImage {
+    animation: none;
+  }
+}
+
+/* ─── Create page: dropzone + photo grid ─────────────────────────────────── */
+
+.createSurface {
+  background: var(--surface);
+  border-radius: 16px;
+  min-height: 52vh;
+  overflow: hidden;
+  padding: 32px;
+  position: relative;
+}
+
+.dropzone {
+  align-items: center;
+  border: 2px dashed var(--line);
+  border-radius: 14px;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  padding: 54px 28px;
+  position: relative;
+  text-align: center;
+  transition: border-color 0.2s, background 0.2s;
+  z-index: 1;
+}
+
+.dropzone:hover,
+.dropzone.dragOver {
+  background: rgba(16, 185, 129, 0.04);
+  border-color: #10b981;
+}
+
+.dropzoneIcon {
+  align-items: center;
+  background: rgba(16, 185, 129, 0.1);
+  border-radius: 999px;
+  color: #059669;
+  display: inline-flex;
+  height: 64px;
+  justify-content: center;
+  width: 64px;
+}
+
+.angleHints {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  justify-content: center;
+}
+
+.angleHint {
+  background: rgba(16, 185, 129, 0.08);
+  border: 1px solid rgba(16, 185, 129, 0.22);
+  border-radius: 999px;
+  color: #3E6B57;
+  font-size: 12px;
+  font-weight: 700;
+  padding: 4px 11px;
+}
+
+.photoGrid {
+  display: grid;
+  gap: 10px;
+  grid-template-columns: repeat(auto-fill, minmax(138px, 1fr));
+}
+
+.photoTile {
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  cursor: pointer;
+  overflow: hidden;
+  position: relative;
+  transition: border-color 0.2s, box-shadow 0.2s, transform 0.2s;
+}
+
+.photoTile:hover {
+  border-color: #10b981;
+  box-shadow: 0 4px 18px rgba(16, 185, 129, 0.18);
+  transform: translateY(-2px);
+}
+
+.photoTileImage {
+  aspect-ratio: 1;
+  display: block;
+  object-fit: cover;
+  width: 100%;
+}
+
+.photoTileOverlay {
+  background: linear-gradient(to top, rgba(23, 32, 26, 0.62) 0%, transparent 55%);
+  bottom: 0;
+  left: 0;
+  padding: 6px 8px;
+  position: absolute;
+  right: 0;
+}
+
+.photoTileStatus {
+  display: block;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.photoTileStatus.ready    { color: #6ee7b7; }
+.photoTileStatus.preparing { color: #fbbf24; }
+
+.photoTileRemove {
+  align-items: center;
+  background: rgba(23, 32, 26, 0.65);
+  border: 0;
+  border-radius: 999px;
+  color: #fff;
+  cursor: pointer;
+  display: inline-flex;
+  height: 26px;
+  justify-content: center;
+  padding: 0;
+  position: absolute;
+  right: 6px;
+  top: 6px;
+  transition: background 0.15s;
+  width: 26px;
+  z-index: 2;
+}
+
+.photoTileRemove:hover {
+  background: rgba(164, 63, 53, 0.88);
+}
+
+.photoTileAdd {
+  align-items: center;
+  aspect-ratio: 1;
+  border: 2px dashed var(--line);
+  border-radius: 10px;
+  color: var(--muted);
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  font-size: 12px;
+  font-weight: 700;
+  gap: 5px;
+  justify-content: center;
+  min-height: 60px;
+  text-align: center;
+  transition: border-color 0.2s, color 0.2s;
+}
+
+.photoTileAdd:hover {
+  border-color: #10b981;
+  color: #059669;
+}
+
+.filmstrip {
+  display: flex;
+  gap: 6px;
+  overflow-x: auto;
+  padding-bottom: 2px;
+}
+
+.filmstripThumb {
+  border-radius: 6px;
+  flex-shrink: 0;
+  height: 52px;
+  object-fit: cover;
+  opacity: 0.72;
+  width: 52px;
+}
+
+/* ─── Create page: generating / timeline ────────────────────────────────── */
+
+.timelineStep {
+  align-items: flex-start;
+  display: flex;
+  gap: 12px;
+  padding: 10px 0;
+  position: relative;
+}
+
+.timelineStep:not(:last-child)::after {
+  background: var(--line);
+  content: "";
+  height: calc(100% - 26px);
+  left: 12px;
+  position: absolute;
+  top: 28px;
+  width: 2px;
+}
+
+.timelineStepDot {
+  align-items: center;
+  background: var(--surface-2);
+  border: 2px solid var(--line);
+  border-radius: 999px;
+  display: inline-flex;
+  flex-shrink: 0;
+  height: 26px;
+  justify-content: center;
+  margin-top: 1px;
+  width: 26px;
+  z-index: 1;
+  position: relative;
+}
+
+.timelineStepDot.done {
+  background: #dcfce7;
+  border-color: var(--success);
+  color: var(--success);
+}
+
+.timelineStepDot.active {
+  background: rgba(16, 185, 129, 0.1);
+  border-color: #10b981;
+  color: #10b981;
+  animation: stepPulse 1.6s ease-in-out infinite;
+}
+
+.timelineStepDot.pending {
+  opacity: 0.45;
+}
+
+.timelineStepDot.failed {
+  background: #ffe7e2;
+  border-color: var(--danger);
+  color: var(--danger);
+}
+
+@keyframes stepPulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.32); }
+  50%       { box-shadow: 0 0 0 6px rgba(16, 185, 129, 0); }
+}
+
+@keyframes skeletonPulse {
+  0%, 100% { opacity: 0.6; transform: scale(0.97); }
+  50%       { opacity: 1;   transform: scale(1.02); }
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+
+/* ─── Dashboard: hero band + metric cards ───────────────────────────────── */
+
+.dashHero {
+  background: #17201a;
+  border-radius: 14px;
+  overflow: hidden;
+  padding: 30px 32px;
+  position: relative;
+}
+
+.metricCard {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  box-shadow: var(--shadow);
+  display: grid;
+  gap: 6px;
+  padding: 20px;
+  transition: border-color 0.25s, box-shadow 0.25s, transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.metricCard:hover {
+  border-color: #059669;
+  box-shadow: 0 6px 22px rgba(16, 185, 129, 0.14);
+  transform: translateY(-3px);
+}
+
+.metricCard strong {
+  color: #10b981;
+  font-size: 34px;
+  line-height: 1;
+}
+
+.metricCard .sectionLabel {
+  margin-bottom: 2px;
+}
+
+/* ─── Dashboard: product asset cards ────────────────────────────────────── */
+
+.productCardGrid {
+  display: grid;
+  gap: 14px;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+}
+
+.productCard {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  box-shadow: var(--shadow);
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  overflow: hidden;
+  transition: border-color 0.25s, box-shadow 0.25s, transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.productCard:hover {
+  border-color: #059669;
+  box-shadow: 0 8px 32px rgba(16, 185, 129, 0.14);
+  transform: translateY(-4px);
+}
+
+.productCardPoster {
+  aspect-ratio: 16 / 10;
+  background: linear-gradient(135deg, rgba(31, 111, 91, 0.14), rgba(138, 90, 37, 0.1)), #edf2ef;
+  overflow: hidden;
+  position: relative;
+}
+
+.productCardPosterImg {
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+  width: 100%;
+}
+
+.productCard:hover .productCardPosterImg {
+  transform: scale(1.04);
+}
+
+.productCardPosterPlaceholder {
+  align-items: center;
+  color: rgba(31, 111, 91, 0.35);
+  display: flex;
+  height: 100%;
+  justify-content: center;
+  width: 100%;
+}
+
+.productCardStatusPin {
+  bottom: 8px;
+  left: 8px;
+  position: absolute;
+}
+
+.productCardBody {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 12px;
+  padding: 14px 16px 16px;
+}
+
+.productCardName {
+  font-size: 15px;
+  font-weight: 700;
+  margin: 0 0 2px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.productCardCategory {
+  color: var(--muted);
+  font-size: 12px;
+  margin: 0;
+}
+
+.productCardStats {
+  display: flex;
+  gap: 16px;
+}
+
+.productCardStat dt {
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 800;
+  margin-bottom: 2px;
+  text-transform: uppercase;
+}
+
+.productCardStat dd {
+  color: #10b981;
+  font-size: 20px;
+  font-weight: 800;
+  line-height: 1;
+  margin: 0;
+}
+
+.productCardActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: auto;
+}
+
+/* ─── Responsive: new components ────────────────────────────────────────── */
+
+@media (max-width: 900px) {
+  .createTwoCol {
+    grid-template-columns: 1fr !important;
+  }
+
+  .revealedTwoCol {
+    grid-template-columns: 1fr !important;
+  }
+
+  .productCardGrid {
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  }
+
+  .photoLightboxImageWrap {
+    padding: 16px 44px;
+  }
+}
+
+@media (max-width: 520px) {
+  .createSurface {
+    padding: 20px;
+  }
+
+  .dropzone {
+    padding: 36px 18px;
+  }
+
+  .dashHero {
+    padding: 22px 20px;
+  }
+
+  .productCardGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .photoLightboxImageWrap {
+    padding: 12px 38px;
+  }
+}

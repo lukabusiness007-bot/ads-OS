@@ -1,5 +1,7 @@
-export const MAX_GENERATION_PHOTOS = 4;
-export const REQUIRED_GENERATION_PHOTOS = 4;
+export const MIN_GENERATION_PHOTOS = 3;
+export const MAX_GENERATION_PHOTOS = 6;
+// backward-compat alias: resolves to the minimum acceptable count
+export const REQUIRED_GENERATION_PHOTOS = MIN_GENERATION_PHOTOS;
 export const MAX_GENERATION_PHOTO_SIZE_BYTES = 20 * 1024 * 1024;
 export const TARGET_GENERATION_PHOTO_SIZE_BYTES = 8 * 1024 * 1024;
 export const MAX_GENERATION_PHOTO_BYTES_TOTAL =

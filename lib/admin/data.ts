@@ -422,16 +422,14 @@ export async function getProductForReview(
 
   const modelAsset = asset as AdminModelAsset | null;
 
-  // Generate presigned URLs for photos
-  const photoPresignedUrls: string[] = [];
-  for (const photo of photos ?? []) {
-    try {
-      const url = await createPresignedR2GetUrl((photo as Record<string, unknown>).r2_key as string);
-      photoPresignedUrls.push(url);
-    } catch {
-      // Skip photos that can't be signed
-    }
-  }
+  // Generate presigned URLs for photos in parallel; skip any that fail.
+  const photoPresignedUrls = (
+    await Promise.all(
+      (photos ?? []).map((photo) =>
+        createPresignedR2GetUrl((photo as Record<string, unknown>).r2_key as string).catch(() => null)
+      )
+    )
+  ).filter((url): url is string => url !== null);
 
   // Derive viewer-ready URLs from R2 keys (falling back to stored public URLs)
   const modelAssetForViewer = modelAsset

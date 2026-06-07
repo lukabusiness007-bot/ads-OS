@@ -57,7 +57,15 @@ export function ModelViewer({ asset, alt, onInteract, onArClick }: ModelViewerPr
 
     ;(async () => {
       try {
-        const res = await fetch(glbUrl, { signal: controller.signal })
+        // Request only the first 4 bytes — enough to verify the glTF magic.
+        // Buffering the whole GLB here would download the model a second time
+        // in parallel with <model-viewer>, competing for bandwidth and roughly
+        // halving load speed. The stream is also cancelled after the first read
+        // in case the server ignores the Range header and replies with 200.
+        const res = await fetch(glbUrl, {
+          signal: controller.signal,
+          headers: { Range: "bytes=0-3" }
+        })
         if (cancelled) return
         if (!res.ok) {
           setLoadError({
@@ -66,7 +74,17 @@ export function ModelViewer({ asset, alt, onInteract, onArClick }: ModelViewerPr
           })
           return
         }
-        const head = new Uint8Array(await res.clone().arrayBuffer().catch(() => new ArrayBuffer(0))).slice(0, 4)
+        let head = new Uint8Array()
+        const reader = res.body?.getReader()
+        if (reader) {
+          try {
+            const { value } = await reader.read()
+            if (value) head = value.slice(0, 4)
+          } finally {
+            reader.cancel().catch(() => {})
+          }
+        }
+        if (cancelled) return
         const magic = String.fromCharCode(...head)
         if (head.length >= 4 && magic !== "glTF") {
           const contentType = res.headers.get("content-type") ?? "unknown"
