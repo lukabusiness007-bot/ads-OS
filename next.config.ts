@@ -19,8 +19,9 @@ const CSP = [
   "img-src 'self' data: blob: https:",
   "media-src 'self' blob: https:",
   // https://*.r2.dev  — public R2 bucket for GLB/USDZ/poster assets
+  // https://*.r2.cloudflarestorage.com — R2 S3 API endpoint for presigned uploads
   // wss://*.supabase.co — Supabase Realtime WebSocket
-  "connect-src 'self' https://*.supabase.co https://*.supabase.in https://accounts.google.com https://*.r2.dev wss://*.supabase.co",
+  "connect-src 'self' https://*.supabase.co https://*.supabase.in https://accounts.google.com https://*.r2.dev https://*.r2.cloudflarestorage.com wss://*.supabase.co",
   "frame-src 'self' https://accounts.google.com",
   // fonts.gstatic.com is loaded by model-viewer's AR UI
   "font-src 'self' data: https://fonts.gstatic.com",
