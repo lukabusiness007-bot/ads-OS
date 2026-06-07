@@ -28,7 +28,7 @@ import type {
   StartGenerationResponse
 } from "@/lib/types";
 
-const categories: ProductCategory[] = ["furniture", "vehicle", "electronics", "clothing", "home_decor", "other"];
+const categories: ProductCategory[] = ["chair", "table", "sofa", "lamp", "shelf", "small_decor"];
 type UploadPhase = "idle" | "preparing" | "ready" | "uploading" | "starting" | "queued";
 
 export default function CreateProductPage() {
@@ -209,7 +209,7 @@ export default function CreateProductPage() {
           </div>
           <div className="field">
             <label htmlFor="category">Product category</label>
-            <select id="category" name="category" defaultValue="furniture">
+            <select id="category" name="category" defaultValue="chair">
               {categories.map((category) => (
                 <option key={category} value={category}>
                   {category.replace("_", " ")}
@@ -440,7 +440,7 @@ async function createGenerationUploads(
     },
     body: JSON.stringify({
       productName: getFormString(formData, "productName") || "product",
-      category: getFormString(formData, "category") || "other",
+      category: getFormString(formData, "category") || "chair",
       description: getFormString(formData, "description"),
       customerUrl: getFormString(formData, "customerUrl"),
       price: getFormString(formData, "price"),
@@ -639,7 +639,7 @@ function createStoredProduct(
   photoCount: number
 ): StoredGeneratedProduct {
   const name = getFormString(formData, "productName") || "Generated product";
-  const category = (getFormString(formData, "category") || "other") as ProductCategory;
+  const category = (getFormString(formData, "category") || "chair") as ProductCategory;
 
   return {
     productId,
