@@ -1,3 +1,4 @@
+import { MAX_GENERATION_PHOTOS, MIN_GENERATION_PHOTOS } from "@/lib/generation-upload";
 import type { GenerationClientStatus } from "@/lib/types";
 
 const MESHY_BASE_URL = "https://api.meshy.ai/openapi/v1";
@@ -64,8 +65,11 @@ export async function createMeshyMultiImageTask(
   imageUrls: string[],
   options: CreateMeshyMultiImageTaskOptions = {}
 ) {
-  if (imageUrls.length !== 4) {
-    throw new MeshyRequestError(400, "Meshy generation requires exactly 4 images.");
+  if (imageUrls.length < MIN_GENERATION_PHOTOS || imageUrls.length > MAX_GENERATION_PHOTOS) {
+    throw new MeshyRequestError(
+      400,
+      `Meshy generation requires ${MIN_GENERATION_PHOTOS}–${MAX_GENERATION_PHOTOS} images.`
+    );
   }
 
   const primaryTextureReference = imageUrls[0];

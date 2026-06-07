@@ -1,3 +1,4 @@
+import { MAX_GENERATION_PHOTOS, MIN_GENERATION_PHOTOS } from "./generation-upload";
 import type {
   ModelAsset,
   ModelPackageCheck,
@@ -50,8 +51,11 @@ export function runPhotoPreflight(photoSet: PhotoSet): PreflightCheck[] {
     {
       id: "photo-count",
       label: "Photo count",
-      status: photoSet.photos.length === 4 ? "pass" : "fail",
-      detail: `${photoSet.photos.length} photos uploaded; the current HD Meshy flow requires exactly 4.`
+      status:
+        photoSet.photos.length >= MIN_GENERATION_PHOTOS && photoSet.photos.length <= MAX_GENERATION_PHOTOS
+          ? "pass"
+          : "fail",
+      detail: `${photoSet.photos.length} photos uploaded; the HD Meshy flow needs ${MIN_GENERATION_PHOTOS}–${MAX_GENERATION_PHOTOS}.`
     },
     {
       id: "file-types",

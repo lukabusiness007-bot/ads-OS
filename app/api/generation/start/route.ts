@@ -2,7 +2,8 @@ import { NextResponse } from "next/server";
 import {
   MAX_GENERATION_PHOTO_BYTES_TOTAL,
   MAX_GENERATION_PHOTO_SIZE_BYTES,
-  REQUIRED_GENERATION_PHOTOS,
+  MAX_GENERATION_PHOTOS,
+  MIN_GENERATION_PHOTOS,
   SUPPORTED_GENERATION_IMAGE_TYPES,
   formatMegabytes
 } from "@/lib/generation-upload";
@@ -95,8 +96,8 @@ function validateStartPayload(productId: string, photos: GenerationUploadPhoto[]
     return "Generation is missing a valid product upload id. Please prepare the photos again.";
   }
 
-  if (photos.length !== REQUIRED_GENERATION_PHOTOS) {
-    return "Upload exactly 4 product photos before starting generation.";
+  if (photos.length < MIN_GENERATION_PHOTOS || photos.length > MAX_GENERATION_PHOTOS) {
+    return `Upload between ${MIN_GENERATION_PHOTOS} and ${MAX_GENERATION_PHOTOS} product photos before starting generation.`;
   }
 
   const invalidPhoto = photos.find((photo) => !isGenerationPhoto(objectOwnerId, productId, photo));
