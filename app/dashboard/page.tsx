@@ -147,7 +147,7 @@ export default async function DashboardPage() {
                 }}
               >
                 <p style={{ color: "var(--muted)", maxWidth: 380, margin: 0 }}>
-                  Upload 3–6 product photos and we&apos;ll generate a rotating 3D model
+                  Upload 4 product photos and we&apos;ll generate a rotating 3D model
                   with an AR viewer for your store.
                 </p>
                 <Link className="button accent" href="/create">
@@ -166,7 +166,7 @@ export default async function DashboardPage() {
                 <ul className="actionList">
                   <li>
                     <strong>1. Upload product photos</strong>
-                    <span>Drop 3–6 JPG or PNG photos — front, side, back, and detail views work best.</span>
+                    <span>Drop 4 JPG or PNG photos — front, side, back, and detail views work best.</span>
                   </li>
                   <li>
                     <strong>2. Review the 3D model</strong>
