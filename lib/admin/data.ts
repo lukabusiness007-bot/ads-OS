@@ -327,16 +327,22 @@ export async function getOrganizationDetail(
 
 export async function getReviewQueue(
   admin: User,
-  { statusFilter = "awaiting_review" }: { statusFilter?: string } = {}
+  { statusFilter = "awaiting_review", search = "" }: { statusFilter?: string; search?: string } = {}
 ): Promise<AdminReviewQueueItem[]> {
   assertAdmin(admin);
   const supabase = db();
 
-  const { data: products, error } = await supabase
+  let query = supabase
     .from("products")
     .select("*, organizations!inner(id, name)")
     .eq("status", statusFilter)
     .order("updated_at", { ascending: true });
+
+  if (search.trim()) {
+    query = query.ilike("name", `%${search.trim()}%`);
+  }
+
+  const { data: products, error } = await query;
 
   if (error) throw error;
   if (!products?.length) return [];
