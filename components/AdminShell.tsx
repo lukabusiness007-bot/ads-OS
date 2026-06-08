@@ -7,7 +7,7 @@ import { LayoutGrid, CheckSquare, Users, Building2, ScrollText, LogOut, Menu, X 
 import { isSupabaseConfigured } from "@/lib/supabase/config"
 import { createBrowserSupabaseClient } from "@/lib/supabase/client"
 import { NotificationBell } from "@/components/NotificationBell"
-import { LogoMark } from "@/components/Logo"
+import { Logo } from "@/components/Logo"
 import { ToastProvider } from "@/components/admin/ToastProvider"
 import { CommandPalette } from "@/components/admin/CommandPalette"
 
@@ -54,12 +54,9 @@ export function AdminShell({
       )}
       <div className="appShell">
         <header className="mobileAppBar">
-          <Link href="/admin" className="mobileBrand" aria-label="Augmenta admin">
-            <LogoMark theme="dark" className="brandMark" />
-            <span>
-              <strong>Augmenta</strong>
-              <small>Admin</small>
-            </span>
+          <Link href="/admin" className="mobileBrand" aria-label="augmenta3D admin">
+            <Logo theme="dark" markClassName="brandMark" />
+            <small>Admin</small>
           </Link>
           <button
             className="mobileNavButton"
@@ -85,8 +82,7 @@ export function AdminShell({
         <aside className={mobileNavOpen ? "sidebar sidebarOpen" : "sidebar"} id="admin-sidebar">
           <div className="brand">
             <div className="brandLeft">
-              <LogoMark theme="dark" className="brandMark" />
-              <strong>Augmenta</strong>
+              <Logo theme="dark" markClassName="brandMark" />
               <span>Admin</span>
               <span className="badge danger" style={{ alignSelf: "flex-start", marginTop: 2 }}>
                 Internal
