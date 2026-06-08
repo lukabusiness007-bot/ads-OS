@@ -227,12 +227,17 @@ export const SignInPage: React.FC<SignInPageProps> = ({
         </div>
       </section>
 
-      {/* Right column: white — gem floats directly on white */}
-      <section className="hidden md:flex flex-1 relative p-4">
-        <div className="animate-slide-right animate-delay-300 absolute inset-4 rounded-3xl overflow-hidden bg-white flex flex-col">
-          {/* Gem fills available space */}
-          <div className="flex-1 relative z-10">
-            <HeroGem />
+      {/* Right column: white floating window */}
+      <section className="hidden md:flex flex-1 relative p-4 bg-zinc-100">
+        <div
+          className="animate-slide-right animate-delay-300 absolute inset-4 rounded-3xl overflow-hidden bg-white flex flex-col"
+          style={{ boxShadow: "0 8px 48px rgba(0,0,0,0.12)" }}
+        >
+          {/* Gem — centred at 70% of available height */}
+          <div className="flex-1 flex items-center justify-center relative z-10">
+            <div className="w-full" style={{ height: "70%" }}>
+              <HeroGem />
+            </div>
           </div>
 
           {/* Testimonials — dark cards on white */}
