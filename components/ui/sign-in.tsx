@@ -229,28 +229,17 @@ export const SignInPage: React.FC<SignInPageProps> = ({
 
       {/* Right column: emerald brand panel */}
       <section className="hidden md:flex flex-1 relative p-4">
-        <div className="animate-slide-right animate-delay-300 absolute inset-4 rounded-3xl overflow-hidden bg-emerald-950 flex flex-col">
+        <div className="animate-slide-right animate-delay-300 absolute inset-4 rounded-3xl overflow-hidden bg-emerald-800 flex flex-col">
           {/* Glow accents */}
-          <div className="glow-blob glow-blob--emerald w-[420px] h-64 -top-16 left-1/2 -translate-x-1/2 opacity-70" />
-          <div className="glow-blob glow-blob--emerald w-56 h-40 bottom-32 -right-16 opacity-40" />
+          <div className="glow-blob glow-blob--emerald w-[480px] h-72 -top-20 left-1/2 -translate-x-1/2 opacity-60" />
+          <div className="glow-blob glow-blob--emerald w-64 h-48 bottom-24 -right-20 opacity-30" />
 
           {/* Dot grid */}
-          <div className="absolute inset-0 bg-dotgrid opacity-50 pointer-events-none" />
+          <div className="absolute inset-0 bg-dotgrid opacity-30 pointer-events-none" />
 
-          {/* Center: gem + tagline */}
-          <div className="flex-1 flex flex-col items-center justify-center gap-5 relative z-10 px-10 text-center">
-            <div className="w-44 h-44">
-              <HeroGem />
-            </div>
-            <div>
-              <p className="text-xs font-bold uppercase tracking-widest text-emerald-400 mb-2">Augmenta</p>
-              <h2 className="text-2xl font-semibold text-white leading-snug">
-                Turn photos into AR<br />product pages
-              </h2>
-              <p className="mt-2 text-sm text-emerald-200/60 leading-relaxed">
-                Verified 3D/AR experiences your shoppers can trust.
-              </p>
-            </div>
+          {/* Gem — fills available space */}
+          <div className="flex-1 relative z-10">
+            <HeroGem />
           </div>
 
           {/* Testimonials marquee */}
