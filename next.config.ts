@@ -4,6 +4,9 @@ const isDev = process.env.NODE_ENV === "development";
 
 const connectSrc = [
   "'self'",
+  // three.js GLTFLoader fetches embedded GLB textures via blob: object URLs.
+  // Without blob: here, those fetches are blocked and the mesh renders untextured.
+  "blob:",
   "https://*.supabase.co",
   "https://*.supabase.in",
   "https://accounts.google.com",
