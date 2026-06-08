@@ -1,15 +1,38 @@
-"use client"
+"use client";
 
 import { Suspense, useState } from "react";
-import Link from "next/link";
-import { Logo } from "@/components/Logo";
 import { useSearchParams } from "next/navigation";
+import { SignInPage, type Testimonial } from "@/components/ui/sign-in";
 import { createBrowserSupabaseClient } from "@/lib/supabase/client";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
 
+const HERO_IMAGE =
+  "https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=2160&q=80";
+
+const TESTIMONIALS: Testimonial[] = [
+  {
+    avatarSrc: "https://randomuser.me/api/portraits/women/57.jpg",
+    name: "Sarah Chen",
+    handle: "@northlinehome",
+    text: "Shoppers can finally see our pieces at true scale in their room. Returns dropped almost overnight.",
+  },
+  {
+    avatarSrc: "https://randomuser.me/api/portraits/men/64.jpg",
+    name: "Marcus Johnson",
+    handle: "@marcusmakes",
+    text: "Four photos in, a verified 3D/AR product page out. The whole catalogue went live in a weekend.",
+  },
+  {
+    avatarSrc: "https://randomuser.me/api/portraits/men/32.jpg",
+    name: "David Martinez",
+    handle: "@davidcreates",
+    text: "The AR view does the selling for us. Confident buyers, fewer questions, cleaner checkout.",
+  },
+];
+
 export default function LoginPage() {
   return (
-    <Suspense fallback={<LoginShell message="Loading login..." />}>
+    <Suspense fallback={null}>
       <LoginPageContent />
     </Suspense>
   );
@@ -19,7 +42,9 @@ function isEmailAddress(value: string) {
   return value.includes("@");
 }
 
-async function resolveIdentifier(identifier: string): Promise<{ email: string | null; error?: string }> {
+async function resolveIdentifier(
+  identifier: string
+): Promise<{ email: string | null; error?: string }> {
   if (isEmailAddress(identifier)) {
     return { email: identifier };
   }
@@ -29,7 +54,7 @@ async function resolveIdentifier(identifier: string): Promise<{ email: string | 
     const res = await fetch("/api/auth/resolve-username", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ username: identifier })
+      body: JSON.stringify({ username: identifier }),
     });
     if (!res.ok) {
       return { email: null, error: "Invalid username or password." };
@@ -44,169 +69,150 @@ async function resolveIdentifier(identifier: string): Promise<{ email: string | 
 function LoginPageContent() {
   const searchParams = useSearchParams();
   const next = searchParams.get("next") || "/dashboard";
-  const intent = searchParams.get("intent");
-  const [identifier, setIdentifier] = useState("");
-  const [password, setPassword] = useState("");
-  const [message, setMessage] = useState("");
+
+  const [view, setView] = useState<"signin" | "register">("signin");
+  const [error, setError] = useState<React.ReactNode>("");
+  const [loading, setLoading] = useState(false);
   const configured = isSupabaseConfigured();
 
-  async function signInWithPassword() {
-    setMessage("");
+  async function handleSignIn(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    setError("");
 
-    const { email, error: resolveError } = await resolveIdentifier(identifier.trim());
+    const formData = new FormData(event.currentTarget);
+    const identifier = String(formData.get("identifier") ?? "").trim();
+    const password = String(formData.get("password") ?? "");
+
+    if (!configured) {
+      setError("Pilot account access is not enabled in this environment yet.");
+      return;
+    }
+    if (!identifier || !password) {
+      setError("Please enter your email/username and password.");
+      return;
+    }
+
+    setLoading(true);
+
+    if (view === "register") {
+      const supabase = createBrowserSupabaseClient();
+      const { error: signUpError } = await supabase.auth.signUp({
+        email: identifier,
+        password,
+        options: {
+          emailRedirectTo: `${window.location.origin}/auth/callback?next=${encodeURIComponent(next)}`,
+        },
+      });
+      setLoading(false);
+      setError(
+        signUpError ? signUpError.message : "Check your email to confirm the account."
+      );
+      return;
+    }
+
+    const { email, error: resolveError } = await resolveIdentifier(identifier);
     if (!email) {
-      setMessage(resolveError ?? "Invalid username or password.");
+      setLoading(false);
+      setError(resolveError ?? "Invalid username or password.");
       return;
     }
 
     const supabase = createBrowserSupabaseClient();
-    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+    const { data, error: signInError } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    });
 
-    if (error) {
-      setMessage(error.message);
+    if (signInError) {
+      setLoading(false);
+      setError(signInError.message);
       return;
     }
 
-    // Check is_platform_admin via profile (client reads its own row; RLS permits this)
     const { data: profile } = await supabase
       .from("profiles")
       .select("is_platform_admin")
       .eq("id", data.user.id)
       .single();
 
-    if (profile?.is_platform_admin) {
-      window.location.href = "/admin";
-    } else {
-      window.location.href = next;
+    window.location.href = profile?.is_platform_admin ? "/admin" : next;
+  }
+
+  async function handleGoogleSignIn() {
+    setError("");
+    if (!configured) {
+      setError("Google sign-in is not enabled in this environment yet.");
+      return;
     }
-  }
-
-  async function signUpWithPassword() {
-    setMessage("");
     const supabase = createBrowserSupabaseClient();
-    const { error } = await supabase.auth.signUp({
-      email: identifier.trim(),
-      password,
-      options: {
-        emailRedirectTo: `${window.location.origin}/auth/callback?next=${encodeURIComponent(next)}`
-      }
-    });
-
-    setMessage(error ? error.message : "Check your email to confirm the account.");
-  }
-
-  async function signInWithGoogle() {
-    setMessage("");
-    const supabase = createBrowserSupabaseClient();
-    const { error } = await supabase.auth.signInWithOAuth({
+    const { error: oauthError } = await supabase.auth.signInWithOAuth({
       provider: "google",
       options: {
-        redirectTo: `${window.location.origin}/auth/callback?next=${encodeURIComponent(next)}`
-      }
+        redirectTo: `${window.location.origin}/auth/callback?next=${encodeURIComponent(next)}`,
+      },
     });
-
-    if (error) {
-      setMessage(error.message);
+    if (oauthError) {
+      setError(oauthError.message);
     }
   }
 
-  const isUsername = identifier.trim() && !isEmailAddress(identifier.trim());
+  function handleResetPassword() {
+    setError("Enter your email above, then contact support to reset your password.");
+  }
+
+  const isRegister = view === "register";
 
   return (
-    <LoginShell>
-      <>
-        <p className="eyebrow">Merchant login</p>
-        <h1>Sign in to Augmenta</h1>
-        <p className="muted">
-          {intent
-            ? `Continue with the ${formatIntent(intent)} pilot plan, then create your first AR product.`
-            : "Access your products, generation progress, billing, published pages, and analytics."}
-        </p>
-
-        {!configured ? (
-          <>
-            <div className="assumptionNote">
-              Pilot account access is not enabled in this environment yet. Book a demo to review the workflow and
-              connect a production workspace.
-            </div>
-            <div className="assetGrid">
-              <Link className="button accent" href={`/contact/demo${intent ? `?plan=${encodeURIComponent(intent)}` : ""}`}>
-                Book a pilot demo
-              </Link>
-              <Link className="button secondary" href="/p/northline-home/arc-oak-dining-chair">
-                View sample page
-              </Link>
-            </div>
-          </>
-        ) : (
-          <>
-            <div className="field">
-              <label htmlFor="identifier">Email or username</label>
-              <input
-                id="identifier"
-                type={isUsername ? "text" : "email"}
-                value={identifier}
-                autoComplete="username email"
-                onChange={(event) => setIdentifier(event.target.value)}
-                onKeyDown={(e) => e.key === "Enter" && signInWithPassword()}
-              />
-            </div>
-            <div className="field">
-              <label htmlFor="password">Password</label>
-              <input
-                id="password"
-                type="password"
-                value={password}
-                autoComplete="current-password"
-                onChange={(event) => setPassword(event.target.value)}
-                onKeyDown={(e) => e.key === "Enter" && signInWithPassword()}
-              />
-            </div>
-            {message && <div className="assumptionNote">{message}</div>}
-            <div className="assetGrid">
-              <button className="button accent" type="button" onClick={signInWithPassword}>
+    <div className="bg-background text-foreground">
+      <SignInPage
+        title={
+          <span className="font-light tracking-tighter">
+            {isRegister ? "Create your" : "Welcome to"}{" "}
+            <span className="font-semibold text-primary">Augmenta</span>
+          </span>
+        }
+        description={
+          isRegister
+            ? "Start turning a few product photos into verified 3D/AR pages your shoppers can trust."
+            : "Access your products, generation progress, billing, published pages, and analytics."
+        }
+        heroImageSrc={HERO_IMAGE}
+        testimonials={TESTIMONIALS}
+        error={error || undefined}
+        loading={loading}
+        submitLabel={isRegister ? "Create Account" : "Sign In"}
+        identifierLabel={isRegister ? "Email Address" : "Email or username"}
+        identifierPlaceholder={
+          isRegister ? "Enter your email address" : "Enter your email or username"
+        }
+        identifierType={isRegister ? "email" : "text"}
+        showOptions={!isRegister}
+        onSignIn={handleSignIn}
+        onGoogleSignIn={handleGoogleSignIn}
+        onResetPassword={handleResetPassword}
+        onCreateAccount={() => {
+          setError("");
+          setView("register");
+        }}
+        footer={
+          isRegister ? (
+            <>
+              Already have an account?{" "}
+              <a
+                href="#"
+                onClick={(e) => {
+                  e.preventDefault();
+                  setError("");
+                  setView("signin");
+                }}
+                className="text-primary hover:underline transition-colors"
+              >
                 Sign in
-              </button>
-              {!isUsername && (
-                <button className="button secondary" type="button" onClick={signUpWithPassword}>
-                  Create account
-                </button>
-              )}
-              <button className="button ghost" type="button" onClick={signInWithGoogle}>
-                Continue with Google
-              </button>
-            </div>
-          </>
-        )}
-
-        <Link className="textLink" href="/">
-          Back to site
-        </Link>
-      </>
-    </LoginShell>
-  );
-}
-
-function formatIntent(intent: string) {
-  return intent
-    .replace(/[-_]+/g, " ")
-    .replace(/\b\w/g, (letter) => letter.toUpperCase());
-}
-
-function LoginShell({ children, message }: { children?: React.ReactNode; message?: string }) {
-  return (
-    <main className="authPage">
-      <section className="panel form authPanel">
-        <Link href="/" aria-label="augmenta3D home" style={{ display: "inline-block", marginBottom: "24px" }}>
-          <Logo theme="light" markClassName="h-8 w-auto" />
-        </Link>
-        {children ?? (
-          <>
-            <p className="eyebrow">Merchant login</p>
-            <h1>{message}</h1>
-          </>
-        )}
-      </section>
-    </main>
+              </a>
+            </>
+          ) : undefined
+        }
+      />
+    </div>
   );
 }
