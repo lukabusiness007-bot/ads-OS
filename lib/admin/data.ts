@@ -764,6 +764,8 @@ export async function recordAuditEvent(
   });
 }
 
+export type AdminAuditEntryWithTarget = AdminAuditEntry & { target_name: string | null };
+
 export async function listAuditLog(
   admin: User,
   {
@@ -771,6 +773,8 @@ export async function listAuditLog(
     targetType,
     targetId,
     actorId,
+    dateFrom,
+    dateTo,
     page = 1,
     pageSize = 50
   }: {
@@ -778,10 +782,12 @@ export async function listAuditLog(
     targetType?: string;
     targetId?: string;
     actorId?: string;
+    dateFrom?: string;
+    dateTo?: string;
     page?: number;
     pageSize?: number;
   } = {}
-): Promise<{ rows: AdminAuditEntry[]; total: number }> {
+): Promise<{ rows: AdminAuditEntryWithTarget[]; total: number }> {
   assertAdmin(admin);
   const supabase = db();
 
@@ -795,11 +801,73 @@ export async function listAuditLog(
   if (targetType) query = query.eq("target_type", targetType);
   if (targetId) query = query.eq("target_id", targetId);
   if (actorId) query = query.eq("actor_id", actorId);
+  if (dateFrom) query = query.gte("created_at", `${dateFrom}T00:00:00.000Z`);
+  if (dateTo) query = query.lte("created_at", `${dateTo}T23:59:59.999Z`);
 
   const { data, count, error } = await query;
   if (error) throw error;
 
-  return { rows: (data ?? []) as AdminAuditEntry[], total: count ?? 0 };
+  const rows = (data ?? []) as AdminAuditEntry[];
+  const targetNames = await resolveAuditTargetNames(supabase, rows);
+
+  return {
+    rows: rows.map((row) => ({ ...row, target_name: row.target_id ? targetNames.get(row.target_id) ?? null : null })),
+    total: count ?? 0
+  };
+}
+
+/** Batches one capped lookup per target type so the audit list can read as sentences (e.g. "approved product Chair") without N+1 queries. */
+async function resolveAuditTargetNames(
+  supabase: ReturnType<typeof db>,
+  rows: AdminAuditEntry[]
+): Promise<Map<string, string>> {
+  const idsByType = new Map<string, Set<string>>();
+  for (const row of rows) {
+    if (!row.target_id) continue;
+    const set = idsByType.get(row.target_type) ?? new Set<string>();
+    set.add(row.target_id);
+    idsByType.set(row.target_type, set);
+  }
+
+  const names = new Map<string, string>();
+
+  const productIds = [...(idsByType.get("product") ?? [])];
+  const userIds = [...(idsByType.get("user") ?? [])];
+  const orgIds = [...(idsByType.get("organization") ?? [])];
+
+  const [productRows, userRows, orgRows] = await Promise.all([
+    productIds.length ? supabase.from("products").select("id, name").in("id", productIds) : null,
+    userIds.length ? supabase.from("profiles").select("id, full_name, email, username").in("id", userIds) : null,
+    orgIds.length ? supabase.from("organizations").select("id, name").in("id", orgIds) : null
+  ]);
+
+  for (const product of (productRows?.data ?? []) as Array<{ id: string; name: string }>) {
+    names.set(product.id, product.name);
+  }
+  for (const org of (orgRows?.data ?? []) as Array<{ id: string; name: string }>) {
+    names.set(org.id, org.name);
+  }
+  for (const user of (userRows?.data ?? []) as Array<Pick<AdminProfile, "id" | "full_name" | "email" | "username">>) {
+    names.set(user.id, user.full_name ?? user.username ?? user.email ?? user.id);
+  }
+
+  return names;
+}
+
+/** Capped roster of platform admins for the audit log's actor filter — small, fixed set, no pagination needed. */
+export async function listAuditActors(admin: User): Promise<Array<Pick<AdminProfile, "id" | "full_name" | "email" | "username">>> {
+  assertAdmin(admin);
+  const supabase = db();
+
+  const { data, error } = await supabase
+    .from("profiles")
+    .select("id, full_name, email, username")
+    .eq("is_platform_admin", true)
+    .order("full_name", { ascending: true })
+    .limit(100);
+
+  if (error) throw error;
+  return (data ?? []) as Array<Pick<AdminProfile, "id" | "full_name" | "email" | "username">>;
 }
 
 // ─── Notifications ────────────────────────────────────────────────────────────
