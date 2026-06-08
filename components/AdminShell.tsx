@@ -9,6 +9,7 @@ import { createBrowserSupabaseClient } from "@/lib/supabase/client"
 import { NotificationBell } from "@/components/NotificationBell"
 import { LogoMark } from "@/components/Logo"
 import { ToastProvider } from "@/components/admin/ToastProvider"
+import { CommandPalette } from "@/components/admin/CommandPalette"
 
 const navItems = [
   { href: "/admin",        label: "Overview",     icon: LayoutGrid  },
@@ -123,7 +124,10 @@ export function AdminShell({
           <p className="sidebarFooter">Platform admin — internal only</p>
         </aside>
         <main className="main">
-          <ToastProvider>{children}</ToastProvider>
+          <ToastProvider>
+            {children}
+            <CommandPalette />
+          </ToastProvider>
         </main>
       </div>
     </>

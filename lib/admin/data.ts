@@ -481,6 +481,36 @@ export async function getProductForReview(
   };
 }
 
+export type AdminProductSearchResult = Pick<AdminProduct, "id" | "name" | "status"> & { org_name: string | null };
+
+export async function searchProducts(
+  admin: User,
+  query: string,
+  limit = 5
+): Promise<AdminProductSearchResult[]> {
+  assertAdmin(admin);
+  const supabase = db();
+
+  const trimmed = query.trim();
+  if (!trimmed) return [];
+
+  const { data, error } = await supabase
+    .from("products")
+    .select("id, name, status, organizations!inner(name)")
+    .ilike("name", `%${trimmed}%`)
+    .order("updated_at", { ascending: false })
+    .limit(limit);
+
+  if (error) throw error;
+
+  return (data ?? []).map((p: Record<string, unknown>) => ({
+    id: p.id as string,
+    name: p.name as string,
+    status: p.status as AdminProduct["status"],
+    org_name: (p.organizations as Record<string, unknown> | null)?.name as string | null ?? null
+  }));
+}
+
 // ─── Review decisions ─────────────────────────────────────────────────────────
 
 export async function decideReview(
