@@ -1,10 +1,10 @@
 export type ProductCategory =
-  | "furniture"
-  | "vehicle"
-  | "electronics"
-  | "clothing"
-  | "home_decor"
-  | "other";
+  | "chair"
+  | "table"
+  | "sofa"
+  | "lamp"
+  | "shelf"
+  | "small_decor";
 
 export type ProductStatus =
   | "draft"
