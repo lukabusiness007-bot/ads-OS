@@ -1,8 +1,13 @@
 import Link from "next/link";
 import { requirePlatformAdmin } from "@/lib/supabase/auth-guard";
-import { listAuditLog } from "@/lib/admin/data";
+import { listAuditActors, listAuditLog, type AdminAuditEntryWithTarget } from "@/lib/admin/data";
+import { PageHeader } from "@/components/admin/PageHeader";
+import { AuditFilters, type AuditFilterOption } from "@/components/admin/AuditFilters";
+import { DataTable, type DataTableColumn } from "@/components/admin/DataTable";
 
-const ACTION_OPTIONS = [
+const PAGE_SIZE = 50;
+
+const ACTION_OPTIONS: AuditFilterOption[] = [
   { value: "",            label: "All actions" },
   { value: "approve",     label: "Approve" },
   { value: "reject",      label: "Reject" },
@@ -15,34 +20,73 @@ const ACTION_OPTIONS = [
   { value: "edit_plan",         label: "Edit plan" },
 ];
 
-const TARGET_OPTIONS = [
+const TARGET_OPTIONS: AuditFilterOption[] = [
   { value: "",             label: "All targets" },
   { value: "product",      label: "Products" },
   { value: "user",         label: "Users" },
   { value: "organization", label: "Organizations" },
 ];
 
+const ACTION_VERBS: Record<string, string> = {
+  approve: "approved",
+  reject: "rejected",
+  regenerate: "requested a regeneration of",
+  suspend: "suspended",
+  unsuspend: "unsuspended",
+  impersonate_start: "started impersonating",
+  impersonate_stop: "stopped impersonating",
+  edit_product: "edited",
+  edit_plan: "changed the plan for",
+};
+
+const TARGET_NOUNS: Record<string, string> = {
+  product: "product",
+  user: "user",
+  organization: "organization",
+};
+
+const ACTION_BADGE: Record<string, "danger" | "success" | "neutral"> = {
+  reject: "danger",
+  suspend: "danger",
+  impersonate_start: "danger",
+  approve: "success",
+  unsuspend: "success",
+};
+
 export default async function AdminAuditPage({
   searchParams
 }: {
-  searchParams: Promise<{ action?: string; targetType?: string; page?: string }>
+  searchParams: Promise<{ action?: string; targetType?: string; actor?: string; from?: string; to?: string; page?: string }>
 }) {
   const admin = await requirePlatformAdmin("/admin/audit");
   if (!admin) return null;
 
-  const { action = "", targetType = "", page = "1" } = await searchParams;
+  const { action = "", targetType = "", actor = "", from = "", to = "", page = "1" } = await searchParams;
   const currentPage = Math.max(1, parseInt(page, 10) || 1);
 
-  const { rows, total } = await listAuditLog(admin, {
-    action: action || undefined,
-    targetType: targetType || undefined,
-    page: currentPage,
-    pageSize: 50
-  });
+  const [{ rows, total }, actors] = await Promise.all([
+    listAuditLog(admin, {
+      action: action || undefined,
+      targetType: targetType || undefined,
+      actorId: actor || undefined,
+      dateFrom: from || undefined,
+      dateTo: to || undefined,
+      page: currentPage,
+      pageSize: PAGE_SIZE
+    }),
+    listAuditActors(admin)
+  ]);
 
-  const totalPages = Math.ceil(total / 50);
+  const totalPages = Math.ceil(total / PAGE_SIZE);
 
-  function targetLink(entry: (typeof rows)[number]) {
+  const actorOptions: AuditFilterOption[] = [
+    { value: "", label: "All actors" },
+    ...actors.map((a) => ({ value: a.id, label: a.full_name ?? a.username ?? a.email ?? a.id }))
+  ];
+
+  const hasFilters = Boolean(action || targetType || actor || from || to);
+
+  function targetLink(entry: AdminAuditEntryWithTarget) {
     if (!entry.target_id) return null;
     if (entry.target_type === "product") return `/admin/review/${entry.target_id}`;
     if (entry.target_type === "user") return `/admin/users/${entry.target_id}`;
@@ -50,107 +94,94 @@ export default async function AdminAuditPage({
     return null;
   }
 
-  function actionBadge(action: string) {
-    const danger = ["reject", "suspend", "impersonate_start"];
-    const success = ["approve", "unsuspend"];
-    if (danger.includes(action)) return "danger";
-    if (success.includes(action)) return "success";
-    return "neutral";
+  function pageHref(targetPage: number) {
+    const params = new URLSearchParams();
+    if (action) params.set("action", action);
+    if (targetType) params.set("targetType", targetType);
+    if (actor) params.set("actor", actor);
+    if (from) params.set("from", from);
+    if (to) params.set("to", to);
+    params.set("page", String(targetPage));
+    return `/admin/audit?${params.toString()}`;
   }
+
+  const COLUMNS: DataTableColumn<AdminAuditEntryWithTarget>[] = [
+    {
+      key: "entry",
+      header: "Entry",
+      cell: (entry) => (
+        <div className="stack" style={{ gap: 4 }}>
+          <p style={{ margin: 0 }}>
+            <strong>{actorLabel(entry)}</strong>{" "}
+            {ACTION_VERBS[entry.action] ?? entry.action}{" "}
+            {entry.target_type && (
+              <>
+                {TARGET_NOUNS[entry.target_type] ?? entry.target_type}{" "}
+                {entry.target_name ? (
+                  targetLink(entry) ? (
+                    <Link href={targetLink(entry)!} className="textLink">
+                      <strong>{entry.target_name}</strong>
+                    </Link>
+                  ) : (
+                    <strong>{entry.target_name}</strong>
+                  )
+                ) : entry.target_id ? (
+                  <span className="muted">{entry.target_id.slice(0, 8)}…</span>
+                ) : null}
+              </>
+            )}
+            <span className="muted"> · {formatRelativeTime(entry.created_at)}</span>
+          </p>
+          <p className="muted" style={{ margin: 0, fontSize: 12 }} title={new Date(entry.created_at).toLocaleString()}>
+            <span className={`badge ${ACTION_BADGE[entry.action] ?? "neutral"}`}>{entry.action}</span>
+            {" "}
+            {new Date(entry.created_at).toLocaleString()}
+          </p>
+          {Object.keys(entry.metadata ?? {}).length > 0 && (
+            <details>
+              <summary className="textLink" style={{ cursor: "pointer", fontSize: 12 }}>Details</summary>
+              <ul style={{ margin: "6px 0 0", paddingLeft: 18, fontSize: 12 }} className="muted">
+                {Object.entries(entry.metadata)
+                  .filter(([key]) => key !== "token")
+                  .map(([key, value]) => (
+                    <li key={key}>
+                      <strong>{key}:</strong> {String(value)}
+                    </li>
+                  ))}
+              </ul>
+            </details>
+          )}
+        </div>
+      )
+    }
+  ];
+
+  const emptyState = hasFilters ? (
+    <>
+      <strong>No entries match these filters</strong>
+      <p className="muted">Try widening the date range or clearing a filter.</p>
+    </>
+  ) : (
+    <>
+      <strong>No audit entries yet</strong>
+      <p className="muted">Admin actions — approvals, suspensions, plan changes — will show up here.</p>
+    </>
+  );
 
   return (
     <>
-      <header>
-        <p className="eyebrow">Admin</p>
-        <h1>Audit Log</h1>
-        <p className="muted">{total.toLocaleString()} total entries</p>
-      </header>
+      <PageHeader eyebrow="Admin" title="Audit log" subtitle={`${total.toLocaleString()} total entries`} />
 
-      {/* Filters */}
-      <div className="row" style={{ gap: 8, marginBottom: 16, flexWrap: "wrap" }}>
-        {ACTION_OPTIONS.map((opt) => (
-          <Link
-            key={opt.value}
-            href={`/admin/audit?action=${opt.value}&targetType=${targetType}&page=1`}
-            className={`button ${action === opt.value ? "accent" : "secondary"} sm`}
-          >
-            {opt.label}
-          </Link>
-        ))}
-      </div>
-      <div className="row" style={{ gap: 8, marginBottom: 20, flexWrap: "wrap" }}>
-        {TARGET_OPTIONS.map((opt) => (
-          <Link
-            key={opt.value}
-            href={`/admin/audit?action=${action}&targetType=${opt.value}&page=1`}
-            className={`button ${targetType === opt.value ? "accent" : "secondary"} sm`}
-          >
-            {opt.label}
-          </Link>
-        ))}
-      </div>
+      <AuditFilters actionOptions={ACTION_OPTIONS} targetOptions={TARGET_OPTIONS} actorOptions={actorOptions} />
 
-      {rows.length === 0 ? (
-        <div className="panel" style={{ padding: 32, textAlign: "center" }}>
-          <p className="muted">No audit entries found.</p>
-        </div>
-      ) : (
-        <div className="panel" style={{ padding: 0, overflow: "hidden" }}>
-          <table className="adminTable">
-            <thead>
-              <tr>
-                <th>When</th>
-                <th>Actor</th>
-                <th>Action</th>
-                <th>Target</th>
-                <th>Notes</th>
-              </tr>
-            </thead>
-            <tbody>
-              {rows.map((entry) => {
-                const link = targetLink(entry);
-                return (
-                  <tr key={entry.id}>
-                    <td className="muted" style={{ fontSize: 12, whiteSpace: "nowrap" }}>
-                      {new Date(entry.created_at).toLocaleString()}
-                    </td>
-                    <td style={{ fontSize: 13 }}>
-                      {entry.actor?.full_name ?? entry.actor?.username ?? entry.actor?.email ?? entry.actor_id ?? "system"}
-                    </td>
-                    <td>
-                      <span className={`badge ${actionBadge(entry.action)}`}>{entry.action}</span>
-                    </td>
-                    <td style={{ fontSize: 12 }}>
-                      {link ? (
-                        <Link href={link} className="textLink">
-                          {entry.target_type}/{entry.target_id?.slice(0, 8)}…
-                        </Link>
-                      ) : (
-                        <span className="muted">{entry.target_type ?? "—"}</span>
-                      )}
-                    </td>
-                    <td className="muted" style={{ fontSize: 12 }}>
-                      {entry.metadata?.notes
-                        ? String(entry.metadata.notes)
-                        : entry.metadata && Object.keys(entry.metadata).length > 0
-                        ? Object.entries(entry.metadata)
-                            .filter(([k]) => k !== "token")
-                            .map(([k, v]) => `${k}: ${v}`)
-                            .join(", ")
-                        : "—"}
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
-        </div>
-      )}
+      <div className="panel" style={{ padding: 0, overflow: "hidden" }}>
+        <DataTable rows={rows} columns={COLUMNS} getRowKey={(entry) => entry.id} empty={emptyState} />
+      </div>
 
       {totalPages > 1 && (
         <div className="row" style={{ gap: 8, marginTop: 16, justifyContent: "center" }}>
           {currentPage > 1 && (
-            <Link href={`/admin/audit?action=${action}&targetType=${targetType}&page=${currentPage - 1}`} className="button secondary sm">
+            <Link href={pageHref(currentPage - 1)} className="button secondary sm">
               ← Prev
             </Link>
           )}
@@ -158,7 +189,7 @@ export default async function AdminAuditPage({
             Page {currentPage} of {totalPages}
           </span>
           {currentPage < totalPages && (
-            <Link href={`/admin/audit?action=${action}&targetType=${targetType}&page=${currentPage + 1}`} className="button secondary sm">
+            <Link href={pageHref(currentPage + 1)} className="button secondary sm">
               Next →
             </Link>
           )}
@@ -166,4 +197,30 @@ export default async function AdminAuditPage({
       )}
     </>
   );
+}
+
+function actorLabel(entry: AdminAuditEntryWithTarget): string {
+  return entry.actor?.full_name ?? entry.actor?.username ?? entry.actor?.email ?? entry.actor_id ?? "System";
+}
+
+function formatRelativeTime(isoDate: string): string {
+  const diffMs = Date.now() - new Date(isoDate).getTime();
+  const diffSeconds = Math.round(diffMs / 1000);
+
+  if (diffSeconds < 60) return "just now";
+
+  const diffMinutes = Math.round(diffSeconds / 60);
+  if (diffMinutes < 60) return `${diffMinutes}m ago`;
+
+  const diffHours = Math.round(diffMinutes / 60);
+  if (diffHours < 24) return `${diffHours}h ago`;
+
+  const diffDays = Math.round(diffHours / 24);
+  if (diffDays < 30) return `${diffDays}d ago`;
+
+  const diffMonths = Math.round(diffDays / 30);
+  if (diffMonths < 12) return `${diffMonths}mo ago`;
+
+  const diffYears = Math.round(diffDays / 365);
+  return `${diffYears}y ago`;
 }

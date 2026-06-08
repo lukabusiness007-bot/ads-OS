@@ -1,12 +1,15 @@
 "use client"
 
+import { useState } from "react"
 import Link from "next/link"
 import { usePathname, useRouter } from "next/navigation"
-import { LayoutGrid, CheckSquare, Users, Building2, ScrollText, LogOut, Bell } from "lucide-react"
+import { LayoutGrid, CheckSquare, Users, Building2, ScrollText, LogOut, Menu, X } from "lucide-react"
 import { isSupabaseConfigured } from "@/lib/supabase/config"
 import { createBrowserSupabaseClient } from "@/lib/supabase/client"
 import { NotificationBell } from "@/components/NotificationBell"
 import { LogoMark } from "@/components/Logo"
+import { ToastProvider } from "@/components/admin/ToastProvider"
+import { CommandPalette } from "@/components/admin/CommandPalette"
 
 const navItems = [
   { href: "/admin",        label: "Overview",     icon: LayoutGrid  },
@@ -27,6 +30,7 @@ export function AdminShell({
 }) {
   const pathname = usePathname()
   const router = useRouter()
+  const [mobileNavOpen, setMobileNavOpen] = useState(false)
 
   async function handleLogout() {
     if (isSupabaseConfigured()) {
@@ -49,7 +53,36 @@ export function AdminShell({
         </div>
       )}
       <div className="appShell">
-        <aside className="sidebar">
+        <header className="mobileAppBar">
+          <Link href="/admin" className="mobileBrand" aria-label="Augmenta admin">
+            <LogoMark theme="dark" className="brandMark" />
+            <span>
+              <strong>Augmenta</strong>
+              <small>Admin</small>
+            </span>
+          </Link>
+          <button
+            className="mobileNavButton"
+            type="button"
+            onClick={() => setMobileNavOpen((open) => !open)}
+            aria-expanded={mobileNavOpen}
+            aria-controls="admin-sidebar"
+            aria-label={mobileNavOpen ? "Close navigation" : "Open navigation"}
+          >
+            {mobileNavOpen ? <X size={20} strokeWidth={2} /> : <Menu size={20} strokeWidth={2} />}
+          </button>
+        </header>
+
+        {mobileNavOpen && (
+          <button
+            className="sidebarBackdrop"
+            type="button"
+            onClick={() => setMobileNavOpen(false)}
+            aria-label="Close navigation"
+          />
+        )}
+
+        <aside className={mobileNavOpen ? "sidebar sidebarOpen" : "sidebar"} id="admin-sidebar">
           <div className="brand">
             <div className="brandLeft">
               <LogoMark theme="dark" className="brandMark" />
@@ -74,6 +107,7 @@ export function AdminShell({
                   key={href}
                   className={isActive ? "navActive" : undefined}
                   aria-current={isActive ? "page" : undefined}
+                  onClick={() => setMobileNavOpen(false)}
                 >
                   <Icon size={15} strokeWidth={2} aria-hidden />
                   {label}
@@ -89,7 +123,12 @@ export function AdminShell({
 
           <p className="sidebarFooter">Platform admin — internal only</p>
         </aside>
-        <main className="main">{children}</main>
+        <main className="main">
+          <ToastProvider>
+            {children}
+            <CommandPalette />
+          </ToastProvider>
+        </main>
       </div>
     </>
   )

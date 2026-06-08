@@ -9,7 +9,9 @@
 import { createServiceRoleSupabaseClient } from "@/lib/supabase/server";
 import { createPresignedR2GetUrl, publicUrlForKey } from "@/lib/storage/r2";
 import { runModelPackageChecks } from "@/lib/generation-pipeline";
+import { evaluateArGate } from "@/lib/admin/ar-gate";
 import type {
+  AdminOverviewRange,
   AdminOverviewStats,
   AdminUserRow,
   AdminProfile,
@@ -39,12 +41,18 @@ function assertAdmin(user: User | null) {
 
 // ─── Overview ────────────────────────────────────────────────────────────────
 
-export async function getAdminOverviewStats(admin: User): Promise<AdminOverviewStats> {
+const OVERVIEW_RANGE_DAYS: Record<AdminOverviewRange, number> = { "7d": 7, "30d": 30, "90d": 90 };
+
+export async function getAdminOverviewStats(
+  admin: User,
+  { range = "7d" }: { range?: AdminOverviewRange } = {}
+): Promise<AdminOverviewStats> {
   assertAdmin(admin);
   const supabase = db();
   const now = new Date();
-  const ago7d = new Date(now.getTime() - 7 * 86400_000).toISOString();
-  const ago30d = new Date(now.getTime() - 30 * 86400_000).toISOString();
+  const days = OVERVIEW_RANGE_DAYS[range];
+  const rangeStart = new Date(now.getTime() - days * 86400_000).toISOString();
+  const prevRangeStart = new Date(now.getTime() - days * 2 * 86400_000).toISOString();
 
   const [
     { count: awaiting_review },
@@ -52,8 +60,8 @@ export async function getAdminOverviewStats(admin: User): Promise<AdminOverviewS
     { count: generation_failed },
     { count: published },
     { count: total_merchants },
-    { count: new_signups_7d },
-    { count: new_signups_30d },
+    { count: new_signups_in_range },
+    { count: new_signups_prev_range },
     { data: attentionProducts }
   ] = await Promise.all([
     supabase.from("products").select("*", { count: "exact", head: true }).eq("status", "awaiting_review"),
@@ -61,8 +69,8 @@ export async function getAdminOverviewStats(admin: User): Promise<AdminOverviewS
     supabase.from("products").select("*", { count: "exact", head: true }).eq("status", "generation_failed"),
     supabase.from("products").select("*", { count: "exact", head: true }).eq("status", "published"),
     supabase.from("profiles").select("*", { count: "exact", head: true }).eq("is_platform_admin", false),
-    supabase.from("profiles").select("*", { count: "exact", head: true }).gte("created_at", ago7d).eq("is_platform_admin", false),
-    supabase.from("profiles").select("*", { count: "exact", head: true }).gte("created_at", ago30d).eq("is_platform_admin", false),
+    supabase.from("profiles").select("*", { count: "exact", head: true }).gte("created_at", rangeStart).eq("is_platform_admin", false),
+    supabase.from("profiles").select("*", { count: "exact", head: true }).gte("created_at", prevRangeStart).lt("created_at", rangeStart).eq("is_platform_admin", false),
     supabase
       .from("products")
       .select("id, name, status, updated_at, organizations!inner(name)")
@@ -85,8 +93,9 @@ export async function getAdminOverviewStats(admin: User): Promise<AdminOverviewS
     generation_failed: generation_failed ?? 0,
     published: published ?? 0,
     total_merchants: total_merchants ?? 0,
-    new_signups_7d: new_signups_7d ?? 0,
-    new_signups_30d: new_signups_30d ?? 0,
+    range,
+    new_signups_in_range: new_signups_in_range ?? 0,
+    new_signups_prev_range: new_signups_prev_range ?? 0,
     needs_attention
   };
 }
@@ -319,16 +328,22 @@ export async function getOrganizationDetail(
 
 export async function getReviewQueue(
   admin: User,
-  { statusFilter = "awaiting_review" }: { statusFilter?: string } = {}
+  { statusFilter = "awaiting_review", search = "" }: { statusFilter?: string; search?: string } = {}
 ): Promise<AdminReviewQueueItem[]> {
   assertAdmin(admin);
   const supabase = db();
 
-  const { data: products, error } = await supabase
+  let query = supabase
     .from("products")
     .select("*, organizations!inner(id, name)")
     .eq("status", statusFilter)
     .order("updated_at", { ascending: true });
+
+  if (search.trim()) {
+    query = query.ilike("name", `%${search.trim()}%`);
+  }
+
+  const { data: products, error } = await query;
 
   if (error) throw error;
   if (!products?.length) return [];
@@ -464,6 +479,36 @@ export async function getProductForReview(
   };
 }
 
+export type AdminProductSearchResult = Pick<AdminProduct, "id" | "name" | "status"> & { org_name: string | null };
+
+export async function searchProducts(
+  admin: User,
+  query: string,
+  limit = 5
+): Promise<AdminProductSearchResult[]> {
+  assertAdmin(admin);
+  const supabase = db();
+
+  const trimmed = query.trim();
+  if (!trimmed) return [];
+
+  const { data, error } = await supabase
+    .from("products")
+    .select("id, name, status, organizations!inner(name)")
+    .ilike("name", `%${trimmed}%`)
+    .order("updated_at", { ascending: false })
+    .limit(limit);
+
+  if (error) throw error;
+
+  return (data ?? []).map((p: Record<string, unknown>) => ({
+    id: p.id as string,
+    name: p.name as string,
+    status: p.status as AdminProduct["status"],
+    org_name: (p.organizations as Record<string, unknown> | null)?.name as string | null ?? null
+  }));
+}
+
 // ─── Review decisions ─────────────────────────────────────────────────────────
 
 export async function decideReview(
@@ -582,11 +627,9 @@ export async function evaluateModelForAutoApproval(
     dimensionsPresent: (asset as AdminModelAsset).dimensions_present
   });
 
-  const hasFail = checks.some((c) => c.status === "fail");
-  if (hasFail) return "reject";
-
-  const hasWarning = checks.some((c) => c.status === "warning");
-  if (hasWarning) return "needs_human";
+  const gate = evaluateArGate(checks);
+  if (gate.status === "blocked") return "reject";
+  if (gate.status === "needs_reason") return "needs_human";
 
   return "approve";
 }
@@ -749,6 +792,8 @@ export async function recordAuditEvent(
   });
 }
 
+export type AdminAuditEntryWithTarget = AdminAuditEntry & { target_name: string | null };
+
 export async function listAuditLog(
   admin: User,
   {
@@ -756,6 +801,8 @@ export async function listAuditLog(
     targetType,
     targetId,
     actorId,
+    dateFrom,
+    dateTo,
     page = 1,
     pageSize = 50
   }: {
@@ -763,10 +810,12 @@ export async function listAuditLog(
     targetType?: string;
     targetId?: string;
     actorId?: string;
+    dateFrom?: string;
+    dateTo?: string;
     page?: number;
     pageSize?: number;
   } = {}
-): Promise<{ rows: AdminAuditEntry[]; total: number }> {
+): Promise<{ rows: AdminAuditEntryWithTarget[]; total: number }> {
   assertAdmin(admin);
   const supabase = db();
 
@@ -780,11 +829,73 @@ export async function listAuditLog(
   if (targetType) query = query.eq("target_type", targetType);
   if (targetId) query = query.eq("target_id", targetId);
   if (actorId) query = query.eq("actor_id", actorId);
+  if (dateFrom) query = query.gte("created_at", `${dateFrom}T00:00:00.000Z`);
+  if (dateTo) query = query.lte("created_at", `${dateTo}T23:59:59.999Z`);
 
   const { data, count, error } = await query;
   if (error) throw error;
 
-  return { rows: (data ?? []) as AdminAuditEntry[], total: count ?? 0 };
+  const rows = (data ?? []) as AdminAuditEntry[];
+  const targetNames = await resolveAuditTargetNames(supabase, rows);
+
+  return {
+    rows: rows.map((row) => ({ ...row, target_name: row.target_id ? targetNames.get(row.target_id) ?? null : null })),
+    total: count ?? 0
+  };
+}
+
+/** Batches one capped lookup per target type so the audit list can read as sentences (e.g. "approved product Chair") without N+1 queries. */
+async function resolveAuditTargetNames(
+  supabase: ReturnType<typeof db>,
+  rows: AdminAuditEntry[]
+): Promise<Map<string, string>> {
+  const idsByType = new Map<string, Set<string>>();
+  for (const row of rows) {
+    if (!row.target_id) continue;
+    const set = idsByType.get(row.target_type) ?? new Set<string>();
+    set.add(row.target_id);
+    idsByType.set(row.target_type, set);
+  }
+
+  const names = new Map<string, string>();
+
+  const productIds = [...(idsByType.get("product") ?? [])];
+  const userIds = [...(idsByType.get("user") ?? [])];
+  const orgIds = [...(idsByType.get("organization") ?? [])];
+
+  const [productRows, userRows, orgRows] = await Promise.all([
+    productIds.length ? supabase.from("products").select("id, name").in("id", productIds) : null,
+    userIds.length ? supabase.from("profiles").select("id, full_name, email, username").in("id", userIds) : null,
+    orgIds.length ? supabase.from("organizations").select("id, name").in("id", orgIds) : null
+  ]);
+
+  for (const product of (productRows?.data ?? []) as Array<{ id: string; name: string }>) {
+    names.set(product.id, product.name);
+  }
+  for (const org of (orgRows?.data ?? []) as Array<{ id: string; name: string }>) {
+    names.set(org.id, org.name);
+  }
+  for (const user of (userRows?.data ?? []) as Array<Pick<AdminProfile, "id" | "full_name" | "email" | "username">>) {
+    names.set(user.id, user.full_name ?? user.username ?? user.email ?? user.id);
+  }
+
+  return names;
+}
+
+/** Capped roster of platform admins for the audit log's actor filter — small, fixed set, no pagination needed. */
+export async function listAuditActors(admin: User): Promise<Array<Pick<AdminProfile, "id" | "full_name" | "email" | "username">>> {
+  assertAdmin(admin);
+  const supabase = db();
+
+  const { data, error } = await supabase
+    .from("profiles")
+    .select("id, full_name, email, username")
+    .eq("is_platform_admin", true)
+    .order("full_name", { ascending: true })
+    .limit(100);
+
+  if (error) throw error;
+  return (data ?? []) as Array<Pick<AdminProfile, "id" | "full_name" | "email" | "username">>;
 }
 
 // ─── Notifications ────────────────────────────────────────────────────────────

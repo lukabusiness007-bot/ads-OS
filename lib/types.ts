@@ -1,10 +1,10 @@
 export type ProductCategory =
-  | "chair"
-  | "table"
-  | "sofa"
-  | "lamp"
-  | "shelf"
-  | "small_decor";
+  | "furniture"
+  | "vehicle"
+  | "electronics"
+  | "clothing"
+  | "home_decor"
+  | "other";
 
 export type ProductStatus =
   | "draft"
@@ -497,14 +497,17 @@ export type AdminNotification = {
   product?: Pick<AdminProduct, "id" | "name" | "status"> | null;
 };
 
+export type AdminOverviewRange = "7d" | "30d" | "90d";
+
 export type AdminOverviewStats = {
   awaiting_review: number;
   generating: number;
   generation_failed: number;
   published: number;
   total_merchants: number;
-  new_signups_7d: number;
-  new_signups_30d: number;
+  range: AdminOverviewRange;
+  new_signups_in_range: number;
+  new_signups_prev_range: number;
   needs_attention: Array<{
     id: string;
     name: string;
