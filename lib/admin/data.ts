@@ -10,6 +10,7 @@ import { createServiceRoleSupabaseClient } from "@/lib/supabase/server";
 import { createPresignedR2GetUrl, publicUrlForKey } from "@/lib/storage/r2";
 import { runModelPackageChecks } from "@/lib/generation-pipeline";
 import type {
+  AdminOverviewRange,
   AdminOverviewStats,
   AdminUserRow,
   AdminProfile,
@@ -39,12 +40,18 @@ function assertAdmin(user: User | null) {
 
 // ─── Overview ────────────────────────────────────────────────────────────────
 
-export async function getAdminOverviewStats(admin: User): Promise<AdminOverviewStats> {
+const OVERVIEW_RANGE_DAYS: Record<AdminOverviewRange, number> = { "7d": 7, "30d": 30, "90d": 90 };
+
+export async function getAdminOverviewStats(
+  admin: User,
+  { range = "7d" }: { range?: AdminOverviewRange } = {}
+): Promise<AdminOverviewStats> {
   assertAdmin(admin);
   const supabase = db();
   const now = new Date();
-  const ago7d = new Date(now.getTime() - 7 * 86400_000).toISOString();
-  const ago30d = new Date(now.getTime() - 30 * 86400_000).toISOString();
+  const days = OVERVIEW_RANGE_DAYS[range];
+  const rangeStart = new Date(now.getTime() - days * 86400_000).toISOString();
+  const prevRangeStart = new Date(now.getTime() - days * 2 * 86400_000).toISOString();
 
   const [
     { count: awaiting_review },
@@ -52,8 +59,8 @@ export async function getAdminOverviewStats(admin: User): Promise<AdminOverviewS
     { count: generation_failed },
     { count: published },
     { count: total_merchants },
-    { count: new_signups_7d },
-    { count: new_signups_30d },
+    { count: new_signups_in_range },
+    { count: new_signups_prev_range },
     { data: attentionProducts }
   ] = await Promise.all([
     supabase.from("products").select("*", { count: "exact", head: true }).eq("status", "awaiting_review"),
@@ -61,8 +68,8 @@ export async function getAdminOverviewStats(admin: User): Promise<AdminOverviewS
     supabase.from("products").select("*", { count: "exact", head: true }).eq("status", "generation_failed"),
     supabase.from("products").select("*", { count: "exact", head: true }).eq("status", "published"),
     supabase.from("profiles").select("*", { count: "exact", head: true }).eq("is_platform_admin", false),
-    supabase.from("profiles").select("*", { count: "exact", head: true }).gte("created_at", ago7d).eq("is_platform_admin", false),
-    supabase.from("profiles").select("*", { count: "exact", head: true }).gte("created_at", ago30d).eq("is_platform_admin", false),
+    supabase.from("profiles").select("*", { count: "exact", head: true }).gte("created_at", rangeStart).eq("is_platform_admin", false),
+    supabase.from("profiles").select("*", { count: "exact", head: true }).gte("created_at", prevRangeStart).lt("created_at", rangeStart).eq("is_platform_admin", false),
     supabase
       .from("products")
       .select("id, name, status, updated_at, organizations!inner(name)")
@@ -85,8 +92,9 @@ export async function getAdminOverviewStats(admin: User): Promise<AdminOverviewS
     generation_failed: generation_failed ?? 0,
     published: published ?? 0,
     total_merchants: total_merchants ?? 0,
-    new_signups_7d: new_signups_7d ?? 0,
-    new_signups_30d: new_signups_30d ?? 0,
+    range,
+    new_signups_in_range: new_signups_in_range ?? 0,
+    new_signups_prev_range: new_signups_prev_range ?? 0,
     needs_attention
   };
 }
