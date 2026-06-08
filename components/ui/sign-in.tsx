@@ -227,19 +227,26 @@ export const SignInPage: React.FC<SignInPageProps> = ({
         </div>
       </section>
 
-      {/* Right column: emerald brand panel */}
+      {/* Right column: premium green panel */}
       <section className="hidden md:flex flex-1 relative p-4">
-        <div className="animate-slide-right animate-delay-300 absolute inset-4 rounded-3xl overflow-hidden bg-emerald-800 flex flex-col">
-          {/* Glow accents */}
-          <div className="glow-blob glow-blob--emerald w-[480px] h-72 -top-20 left-1/2 -translate-x-1/2 opacity-60" />
-          <div className="glow-blob glow-blob--emerald w-64 h-48 bottom-24 -right-20 opacity-30" />
+        <div
+          className="animate-slide-right animate-delay-300 absolute inset-4 rounded-3xl overflow-hidden flex flex-col"
+          style={{ background: "linear-gradient(150deg, #0e2d1c 0%, #071510 100%)" }}
+        >
+          {/* Subtle glow */}
+          <div className="glow-blob glow-blob--emerald w-[440px] h-56 -top-16 left-1/2 -translate-x-1/2 opacity-20" />
 
           {/* Dot grid */}
-          <div className="absolute inset-0 bg-dotgrid opacity-30 pointer-events-none" />
+          <div className="absolute inset-0 bg-dotgrid opacity-15 pointer-events-none" />
 
-          {/* Gem — fills available space */}
-          <div className="flex-1 relative z-10">
-            <HeroGem />
+          {/* Gem on white card — 70% of available height */}
+          <div className="flex-1 flex items-center justify-center p-8 relative z-10">
+            <div
+              className="bg-white rounded-[2rem] shadow-2xl w-full overflow-hidden"
+              style={{ height: "72%" }}
+            >
+              <HeroGem />
+            </div>
           </div>
 
           {/* Testimonials marquee */}
