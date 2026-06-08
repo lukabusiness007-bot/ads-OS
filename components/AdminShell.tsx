@@ -55,7 +55,11 @@ export function AdminShell({
       <div className="appShell">
         <header className="mobileAppBar">
           <Link href="/admin" className="mobileBrand" aria-label="augmenta3D admin">
-            <Logo theme="dark" markClassName="brandMark" />
+            <Logo
+              theme="dark"
+              markClassName="brandMark brandMarkLg"
+              wordmarkClassName="text-2xl font-semibold leading-none tracking-tight"
+            />
             <small>Admin</small>
           </Link>
           <button
@@ -82,7 +86,11 @@ export function AdminShell({
         <aside className={mobileNavOpen ? "sidebar sidebarOpen" : "sidebar"} id="admin-sidebar">
           <div className="brand">
             <div className="brandLeft">
-              <Logo theme="dark" markClassName="brandMark" />
+              <Logo
+              theme="dark"
+              markClassName="brandMark brandMarkLg"
+              wordmarkClassName="text-2xl font-semibold leading-none tracking-tight"
+            />
               <span>Admin</span>
               <span className="badge danger" style={{ alignSelf: "flex-start", marginTop: 2 }}>
                 Internal

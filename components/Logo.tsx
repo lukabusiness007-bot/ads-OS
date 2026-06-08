@@ -68,6 +68,8 @@ type LogoProps = LogoMarkProps & {
   variant?: "mark" | "lockup"
   /** Extra classes for the cube mark inside a lockup. */
   markClassName?: string
+  /** Extra classes for the "augmenta3D" wordmark inside a lockup (controls its size). */
+  wordmarkClassName?: string
 }
 
 /**
@@ -80,6 +82,7 @@ export function Logo({
   brackets = true,
   className,
   markClassName = "h-9 w-auto",
+  wordmarkClassName = "text-[1.35rem] font-semibold leading-none tracking-tight",
   title = "Augmenta3D",
 }: LogoProps) {
   if (variant === "mark") {
@@ -90,10 +93,7 @@ export function Logo({
   return (
     <span className={`inline-flex items-center gap-2.5 ${className ?? ""}`}>
       <LogoMark theme={theme} brackets={brackets} className={markClassName} title="" />
-      <span
-        className="text-[1.35rem] font-semibold leading-none tracking-tight"
-        style={{ color: wordInk }}
-      >
+      <span className={wordmarkClassName} style={{ color: wordInk }}>
         augmenta<span style={{ color: ACCENT }}>3D</span>
       </span>
     </span>
