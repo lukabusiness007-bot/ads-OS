@@ -136,6 +136,16 @@ export async function GET(request: Request) {
       return createPackagingFailureResponse(error);
     }
 
+    console.info("Generated model packaged for preview", {
+      productId,
+      taskId,
+      provider: "meshy",
+      generationType: "multi-image-to-3d",
+      meshyGlbUrl: task.model_urls?.glb ?? null,
+      storedGlbUrl: asset.glbUrl,
+      renderedSource: asset.glbUrl
+    });
+
     if (writeClient && organization) {
       await persistCompletedGeneration(writeClient, organization.id, productId, taskId, asset, task);
     }

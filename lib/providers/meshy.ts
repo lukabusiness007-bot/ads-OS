@@ -3,6 +3,72 @@ import type { GenerationClientStatus } from "@/lib/types";
 
 const MESHY_BASE_URL = "https://api.meshy.ai/openapi/v1";
 
+const MAX_FETCH_ATTEMPTS = 3;
+const RETRY_BASE_DELAY_MS = 500;
+const RETRY_MAX_DELAY_MS = 5000;
+
+type MeshyFetchRetryOptions = {
+  // GET status is idempotent, so transient 5xx responses can be safely retried.
+  // POST create is NOT idempotent: a 5xx may mean the task was created but the
+  // response was lost, so retrying could double-charge credits. For create, only
+  // network errors (request never reached Meshy) and 429 (throttled before
+  // processing) are retried.
+  retryOn5xx: boolean;
+};
+
+function delay(ms: number) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+function getRetryDelayMs(attempt: number, response?: Response) {
+  const retryAfter = response?.headers.get("retry-after");
+  if (retryAfter) {
+    const seconds = Number(retryAfter);
+    if (Number.isFinite(seconds) && seconds >= 0) {
+      return Math.min(seconds * 1000, RETRY_MAX_DELAY_MS);
+    }
+  }
+
+  const backoff = RETRY_BASE_DELAY_MS * 2 ** (attempt - 1);
+  const jitter = Math.random() * RETRY_BASE_DELAY_MS;
+  return Math.min(backoff + jitter, RETRY_MAX_DELAY_MS);
+}
+
+async function fetchMeshyWithRetry(
+  url: string,
+  init: RequestInit,
+  options: MeshyFetchRetryOptions
+): Promise<Response> {
+  let lastNetworkError: unknown;
+
+  for (let attempt = 1; attempt <= MAX_FETCH_ATTEMPTS; attempt++) {
+    try {
+      const response = await fetch(url, init);
+
+      const isRetryableStatus =
+        response.status === 429 || (options.retryOn5xx && response.status >= 500);
+
+      if (response.ok || !isRetryableStatus || attempt === MAX_FETCH_ATTEMPTS) {
+        return response;
+      }
+
+      await delay(getRetryDelayMs(attempt, response));
+    } catch (error) {
+      // Network/DNS/timeout failures: the request did not get a response, so it
+      // is safe to retry for both GET and POST.
+      lastNetworkError = error;
+
+      if (attempt === MAX_FETCH_ATTEMPTS) {
+        throw error;
+      }
+
+      await delay(getRetryDelayMs(attempt));
+    }
+  }
+
+  throw lastNetworkError ?? new Error("Meshy request failed after retries.");
+}
+
 export type MeshyTaskStatus = "PENDING" | "IN_PROGRESS" | "SUCCEEDED" | "FAILED" | "CANCELED";
 
 export type MeshyTask = {
@@ -74,7 +140,7 @@ export async function createMeshyMultiImageTask(
 
   const primaryTextureReference = imageUrls[0];
 
-  const response = await fetch(`${MESHY_BASE_URL}/multi-image-to-3d`, {
+  const response = await fetchMeshyWithRetry(`${MESHY_BASE_URL}/multi-image-to-3d`, {
     method: "POST",
     headers: {
       Authorization: `Bearer ${getMeshyApiKey()}`,
@@ -84,17 +150,22 @@ export async function createMeshyMultiImageTask(
       image_urls: imageUrls,
       ai_model: "latest",
       should_texture: true,
-      // PBR bakes product color into a metal/roughness material that the web/AR
-      // viewer (no HDR environment) renders washed-out white. Baked albedo shows
-      // true color under any lighting.
-      enable_pbr: false,
+      // PBR + HD textures produce metal/roughness materials that need image-based
+      // lighting to render correctly. The web/AR viewer now supplies a neutral IBL
+      // environment (see ModelViewer.tsx `environment-image`), so these materials
+      // light properly instead of washing out to white. remove_lighting strips
+      // baked shadows so the viewer's lighting is the only light source (no
+      // double-lighting).
+      enable_pbr: true,
+      hd_texture: true,
+      remove_lighting: true,
       texture_image_url: primaryTextureReference,
       target_formats: ["glb", "usdz"],
       image_enhancement: options.imageEnhancement ?? false,
       auto_size: true,
       origin_at: "bottom"
     })
-  });
+  }, { retryOn5xx: false });
 
   if (!response.ok) {
     throw await createMeshyRequestError(response);
@@ -110,12 +181,12 @@ export async function createMeshyMultiImageTask(
 }
 
 export async function getMeshyMultiImageTask(taskId: string): Promise<MeshyTask> {
-  const response = await fetch(`${MESHY_BASE_URL}/multi-image-to-3d/${encodeURIComponent(taskId)}`, {
+  const response = await fetchMeshyWithRetry(`${MESHY_BASE_URL}/multi-image-to-3d/${encodeURIComponent(taskId)}`, {
     headers: {
       Authorization: `Bearer ${getMeshyApiKey()}`
     },
     cache: "no-store"
-  });
+  }, { retryOn5xx: true });
 
   if (!response.ok) {
     throw await createMeshyRequestError(response);

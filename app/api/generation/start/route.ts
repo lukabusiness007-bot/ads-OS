@@ -29,6 +29,14 @@ export const dynamic = "force-dynamic";
 
 const GENERATION_INPUT_URL_EXPIRES_IN_SECONDS = 6 * 60 * 60;
 
+// DB-backed rate limit (serverless-safe — no in-memory state). Counts how many
+// generation jobs an organization started inside the rolling window.
+const RATE_LIMIT_WINDOW_MINUTES = 60;
+const RATE_LIMIT_MAX_JOBS_PER_WINDOW = 15;
+
+const MAX_PRODUCT_ID_LENGTH = 64;
+const MAX_PHOTO_FILE_NAME_LENGTH = 255;
+
 export async function POST(request: Request) {
   try {
     const payload = (await request.json()) as Partial<StartGenerationRequest>;
@@ -55,6 +63,18 @@ export async function POST(request: Request) {
     }
 
     if (organization) {
+      const rateLimited = await isOrganizationRateLimited(adminClient ?? supabase!, organization.id);
+
+      if (rateLimited) {
+        return NextResponse.json(
+          {
+            errorMessage: `You have started too many generations recently. Wait a few minutes — up to ${RATE_LIMIT_MAX_JOBS_PER_WINDOW} generations are allowed per ${RATE_LIMIT_WINDOW_MINUTES} minutes.`,
+            failureCode: "rate_limited"
+          },
+          { status: 429 }
+        );
+      }
+
       await persistUploadedPhotos(adminClient ?? supabase!, organization.id, productId, photos);
     }
 
@@ -91,13 +111,41 @@ export async function POST(request: Request) {
   }
 }
 
+async function isOrganizationRateLimited(
+  supabase: Awaited<ReturnType<typeof createServerSupabaseClient>> | ReturnType<typeof createServiceRoleSupabaseClient>,
+  organizationId: string
+) {
+  const windowStart = new Date(Date.now() - RATE_LIMIT_WINDOW_MINUTES * 60 * 1000).toISOString();
+
+  const { count, error } = await supabase
+    .from("generation_jobs")
+    .select("id", { count: "exact", head: true })
+    .eq("organization_id", organizationId)
+    .gte("started_at", windowStart);
+
+  if (error) {
+    // Fail open: never block a legitimate generation because the limiter query
+    // failed. The error is logged for visibility.
+    console.error("Generation rate-limit check failed", { message: error.message });
+    return false;
+  }
+
+  return (count ?? 0) >= RATE_LIMIT_MAX_JOBS_PER_WINDOW;
+}
+
 function validateStartPayload(productId: string, photos: GenerationUploadPhoto[], objectOwnerId: string) {
-  if (!productId || !/^[a-z0-9-]+$/.test(productId)) {
+  if (!productId || productId.length > MAX_PRODUCT_ID_LENGTH || !/^[a-z0-9-]+$/.test(productId)) {
     return "Generation is missing a valid product upload id. Please prepare the photos again.";
   }
 
   if (photos.length < MIN_GENERATION_PHOTOS || photos.length > MAX_GENERATION_PHOTOS) {
     return `Upload exactly ${MAX_GENERATION_PHOTOS} product photos before starting generation.`;
+  }
+
+  const uniqueKeys = new Set(photos.map((photo) => photo.key));
+
+  if (uniqueKeys.size !== photos.length) {
+    return "The uploaded photo set contains duplicates. Please prepare the photos again.";
   }
 
   const invalidPhoto = photos.find((photo) => !isGenerationPhoto(objectOwnerId, productId, photo));
@@ -214,6 +262,7 @@ function isGenerationPhoto(objectOwnerId: string, productId: string, photo: Gene
     photo.key.startsWith(`product-photos/${objectOwnerId}/${productId}/`) &&
     typeof photo.fileName === "string" &&
     photo.fileName.trim().length > 0 &&
+    photo.fileName.length <= MAX_PHOTO_FILE_NAME_LENGTH &&
     isSupportedPhotoType(photo.contentType) &&
     Number.isFinite(photo.size) &&
     photo.size > 0

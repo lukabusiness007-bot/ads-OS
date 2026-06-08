@@ -14,6 +14,7 @@ type ModelViewerProps = {
 type LoadError = { message: string; detail?: string }
 
 const MODEL_VIEWER_SRC_VERSION = "decoder-v2"
+const STUDIO_ENVIRONMENT_URL = "/vendor/model-viewer/env/studio.hdr"
 
 function versionModelViewerUrl(url: string) {
   const hashIndex = url.indexOf("#")
@@ -28,6 +29,8 @@ export function ModelViewer({ asset, alt, onInteract, onArClick }: ModelViewerPr
   const [loadError, setLoadError] = React.useState<LoadError | null>(null)
   const [isFullscreen, setIsFullscreen] = React.useState(false)
   const [hasInteracted, setHasInteracted] = React.useState(false)
+  const [loadProgress, setLoadProgress] = React.useState(0)
+  const [isLoaded, setIsLoaded] = React.useState(false)
   const viewerRef = React.useRef<HTMLElement | null>(null)
   const wrapperRef = React.useRef<HTMLDivElement | null>(null)
 
@@ -57,6 +60,32 @@ export function ModelViewer({ asset, alt, onInteract, onArClick }: ModelViewerPr
 
     el.addEventListener("error", onError)
     return () => el.removeEventListener("error", onError)
+  }, [asset?.glbUrl])
+
+  // Track model-viewer download/parse progress for the loading indicator.
+  React.useEffect(() => {
+    const el = viewerRef.current
+    if (!el) return
+
+    setLoadProgress(0)
+    setIsLoaded(false)
+
+    function onProgress(e: Event) {
+      const total = (e as CustomEvent<{ totalProgress: number }>).detail?.totalProgress ?? 0
+      setLoadProgress(total)
+      if (total >= 1) setIsLoaded(true)
+    }
+    function onLoad() {
+      setLoadProgress(1)
+      setIsLoaded(true)
+    }
+
+    el.addEventListener("progress", onProgress)
+    el.addEventListener("load", onLoad)
+    return () => {
+      el.removeEventListener("progress", onProgress)
+      el.removeEventListener("load", onLoad)
+    }
   }, [asset?.glbUrl])
 
   // Sync fullscreen state with native fullscreen API events
@@ -138,6 +167,11 @@ export function ModelViewer({ asset, alt, onInteract, onArClick }: ModelViewerPr
     reveal: "auto",
     loading: "lazy",
     "tone-mapping": "commerce",
+    // PBR/HD-texture models from Meshy carry metal-roughness materials that need
+    // image-based lighting to show color. This bundled neutral studio HDR (no
+    // skybox shown) gives even lighting plus soft key/fill highlights, so PBR
+    // surfaces render with their texture instead of washing out to white.
+    "environment-image": STUDIO_ENVIRONMENT_URL,
     "shadow-intensity": "1",
     "shadow-softness": "1",
     // Light-gray fabrics washed out to white at 1.1; 0.9 keeps texture detail.
@@ -163,6 +197,15 @@ export function ModelViewer({ asset, alt, onInteract, onArClick }: ModelViewerPr
           </svg>
           View in AR
         </button>
+      )}
+
+      {!isLoaded && (
+        <div className="modelLoadingOverlay" role="status" aria-live="polite">
+          <div className="modelLoadingBar">
+            <div className="modelLoadingFill" style={{ width: `${Math.round(loadProgress * 100)}%` }} />
+          </div>
+          <span>Loading model… {Math.round(loadProgress * 100)}%</span>
+        </div>
       )}
 
       {!hasInteracted && (
