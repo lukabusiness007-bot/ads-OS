@@ -150,15 +150,11 @@ export async function createMeshyMultiImageTask(
       image_urls: imageUrls,
       ai_model: "latest",
       should_texture: true,
-      // PBR + HD textures produce metal/roughness materials that need image-based
-      // lighting to render correctly. The web/AR viewer now supplies a neutral IBL
-      // environment (see ModelViewer.tsx `environment-image`), so these materials
-      // light properly instead of washing out to white. remove_lighting strips
-      // baked shadows so the viewer's lighting is the only light source (no
-      // double-lighting).
-      enable_pbr: true,
-      hd_texture: true,
-      remove_lighting: true,
+      // PBR is intentionally off: Meshy auto-assigns metalness to non-metal
+      // surfaces (fabric, plastic), which mirror environment light and wash the
+      // model out to white. should_texture alone bakes a full-color albedo that
+      // renders correctly under the viewer's neutral lighting.
+      enable_pbr: false,
       texture_image_url: primaryTextureReference,
       target_formats: ["glb", "usdz"],
       image_enhancement: options.imageEnhancement ?? false,

@@ -14,7 +14,6 @@ type ModelViewerProps = {
 type LoadError = { message: string; detail?: string }
 
 const MODEL_VIEWER_SRC_VERSION = "decoder-v2"
-const STUDIO_ENVIRONMENT_URL = "/vendor/model-viewer/env/studio.hdr"
 
 function versionModelViewerUrl(url: string) {
   const hashIndex = url.indexOf("#")
@@ -167,14 +166,11 @@ export function ModelViewer({ asset, alt, onInteract, onArClick }: ModelViewerPr
     reveal: "auto",
     loading: "lazy",
     "tone-mapping": "commerce",
-    // PBR/HD-texture models from Meshy carry metal-roughness materials that need
-    // image-based lighting to show color. This bundled neutral studio HDR (no
-    // skybox shown) gives even lighting plus soft key/fill highlights, so PBR
-    // surfaces render with their texture instead of washing out to white.
-    "environment-image": STUDIO_ENVIRONMENT_URL,
     "shadow-intensity": "1",
     "shadow-softness": "1",
-    // Light-gray fabrics washed out to white at 1.1; 0.9 keeps texture detail.
+    // No environment-image: model-viewer's built-in neutral lighting renders the
+    // albedo texture in true color. A studio HDR here mirror-washed light models
+    // to white. 0.9 keeps texture detail.
     exposure: "0.9",
   } satisfies React.HTMLAttributes<HTMLElement> & Record<string, unknown>
 
