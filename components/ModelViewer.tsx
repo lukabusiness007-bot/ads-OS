@@ -2,16 +2,35 @@
 
 import * as React from "react"
 import { configureModelViewerDecoders } from "@/lib/model-viewer-config"
+import { detectPlatform, type Platform } from "@/lib/device"
 import type { ModelAsset } from "@/lib/types"
+import { QrCode } from "./QrCode"
 
 type ModelViewerProps = {
   asset?: Pick<ModelAsset, "glbUrl" | "usdzUrl" | "posterUrl">
   alt: string
   onInteract?: () => void
   onArClick?: () => void
+  /**
+   * Absolute URL a phone should open to launch AR. Defaults to the current
+   * page URL. The desktop "scan with your phone" QR encodes this with `?ar=1`
+   * so the phone auto-prompts AR on arrival.
+   */
+  arShareUrl?: string
 }
 
 type LoadError = { message: string; detail?: string }
+
+/** Build the phone-facing AR URL: the share target with `ar=1` forced on. */
+function withArParam(rawUrl: string): string {
+  try {
+    const url = new URL(rawUrl)
+    url.searchParams.set("ar", "1")
+    return url.toString()
+  } catch {
+    return rawUrl
+  }
+}
 
 const MODEL_VIEWER_SRC_VERSION = "decoder-v2"
 
@@ -24,14 +43,55 @@ function versionModelViewerUrl(url: string) {
   return `${base}${separator}viewer=${MODEL_VIEWER_SRC_VERSION}${hash}`
 }
 
-export function ModelViewer({ asset, alt, onInteract, onArClick }: ModelViewerProps) {
+export function ModelViewer({ asset, alt, onInteract, onArClick, arShareUrl }: ModelViewerProps) {
   const [loadError, setLoadError] = React.useState<LoadError | null>(null)
   const [isFullscreen, setIsFullscreen] = React.useState(false)
   const [hasInteracted, setHasInteracted] = React.useState(false)
   const [loadProgress, setLoadProgress] = React.useState(0)
   const [isLoaded, setIsLoaded] = React.useState(false)
+  const [platform, setPlatform] = React.useState<Platform | null>(null)
+  const [showQr, setShowQr] = React.useState(false)
+  const [shareUrl, setShareUrl] = React.useState("")
+  const [showArPrompt, setShowArPrompt] = React.useState(false)
+  const [copied, setCopied] = React.useState(false)
   const viewerRef = React.useRef<HTMLElement | null>(null)
   const wrapperRef = React.useRef<HTMLDivElement | null>(null)
+
+  // Resolve device + the URL the QR should point at. Runs only on the client.
+  React.useEffect(() => {
+    setPlatform(detectPlatform())
+    const base = arShareUrl ?? window.location.href
+    setShareUrl(base)
+    // If a phone arrived via the desktop QR (?ar=1), offer a one-tap AR launch.
+    const wantsAr = new URLSearchParams(window.location.search).get("ar") === "1"
+    if (wantsAr && (detectPlatform() === "ios" || detectPlatform() === "android")) {
+      setShowArPrompt(true)
+    }
+  }, [arShareUrl])
+
+  const isDesktop = platform === "web"
+
+  function launchAr() {
+    setShowArPrompt(false)
+    onArClick?.()
+    const el = viewerRef.current as (HTMLElement & { activateAR?: () => void }) | null
+    try {
+      el?.activateAR?.()
+    } catch {
+      // activateAR can throw if AR isn't ready yet; the user can retry via the
+      // model-viewer AR button, which remains available.
+    }
+  }
+
+  async function copyShareLink() {
+    try {
+      await navigator.clipboard.writeText(withArParam(shareUrl))
+      setCopied(true)
+      window.setTimeout(() => setCopied(false), 1600)
+    } catch {
+      setCopied(false)
+    }
+  }
 
   React.useEffect(() => {
     configureModelViewerDecoders()
@@ -105,6 +165,16 @@ export function ModelViewer({ asset, alt, onInteract, onArClick }: ModelViewerPr
     document.addEventListener("keydown", onKeyDown)
     return () => document.removeEventListener("keydown", onKeyDown)
   }, [isFullscreen])
+
+  // Close the QR modal on Escape
+  React.useEffect(() => {
+    if (!showQr) return
+    function onKeyDown(e: KeyboardEvent) {
+      if (e.key === "Escape") setShowQr(false)
+    }
+    document.addEventListener("keydown", onKeyDown)
+    return () => document.removeEventListener("keydown", onKeyDown)
+  }, [showQr])
 
 
   function toggleFullscreen() {
@@ -192,6 +262,74 @@ export function ModelViewer({ asset, alt, onInteract, onArClick }: ModelViewerPr
             <path d="M9 9l3-3 3 3M12 6v8" />
           </svg>
           View in AR
+        </button>
+      )}
+
+      {/* Desktop has no native AR — offer a phone hand-off via QR instead. */}
+      {isDesktop && (
+        <button
+          className="modelArButton"
+          type="button"
+          onClick={() => setShowQr(true)}
+          aria-haspopup="dialog"
+          aria-label="View in AR on your phone — show QR code"
+        >
+          <svg aria-hidden="true" focusable="false" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+            <rect x="3" y="3" width="7" height="7" rx="1" />
+            <rect x="14" y="3" width="7" height="7" rx="1" />
+            <rect x="3" y="14" width="7" height="7" rx="1" />
+            <path d="M14 14h3v3M21 14v.01M21 21v-4M17 21h4" />
+          </svg>
+          View in AR
+        </button>
+      )}
+
+      {isDesktop && showQr && (
+        <div
+          className="qrArOverlay"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="qrArTitle"
+          onClick={() => setShowQr(false)}
+        >
+          <div className="qrArCard" onClick={(e) => e.stopPropagation()}>
+            <button
+              className="qrArClose"
+              type="button"
+              onClick={() => setShowQr(false)}
+              aria-label="Close"
+            >
+              ✕
+            </button>
+            <h3 id="qrArTitle" className="qrArTitle">View in your space</h3>
+            <p className="qrArLead">Scan this QR code with your phone camera to launch augmented reality.</p>
+            <div className="qrArCodeFrame">
+              <QrCode value={withArParam(shareUrl)} size={208} ecl="M" />
+            </div>
+            <ol className="qrArSteps">
+              <li>Open the Camera app on your phone</li>
+              <li>Point it at the code above</li>
+              <li>Tap the link, then tap “View in AR”</li>
+            </ol>
+            <button className="qrArCopy" type="button" onClick={copyShareLink}>
+              {copied ? "Link copied" : "Copy link instead"}
+            </button>
+          </div>
+        </div>
+      )}
+
+      {showArPrompt && (
+        <button
+          className="arLaunchPrompt"
+          type="button"
+          onClick={launchAr}
+          aria-label="Tap to view this product in augmented reality"
+        >
+          <svg aria-hidden="true" focusable="false" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+            <rect x="5" y="2" width="14" height="20" rx="2" />
+            <path d="M9 9l3-3 3 3M12 6v8" />
+          </svg>
+          Tap to view in AR
         </button>
       )}
 
