@@ -1,11 +1,84 @@
 import Link from "next/link";
 import { requirePlatformAdmin } from "@/lib/supabase/auth-guard";
 import { listUsers } from "@/lib/admin/data";
+import { PageHeader } from "@/components/admin/PageHeader";
+import { FilterControls, type FilterTab } from "@/components/admin/FilterControls";
+import { DataTable, type DataTableColumn } from "@/components/admin/DataTable";
 
-const STATUS_OPTIONS = [
+type UserRow = Awaited<ReturnType<typeof listUsers>>["rows"][number];
+
+const STATUS_TABS: FilterTab[] = [
   { value: "all",       label: "All users" },
   { value: "active",    label: "Active" },
   { value: "suspended", label: "Suspended" },
+];
+
+const COLUMNS: DataTableColumn<UserRow>[] = [
+  {
+    key: "name",
+    header: "Name",
+    cell: (user) => <span style={{ fontWeight: 600 }}>{user.full_name ?? "—"}</span>
+  },
+  {
+    key: "contact",
+    header: "Email / Username",
+    cell: (user) => (
+      <div className="muted" style={{ fontSize: 12 }}>
+        <div>{user.email ?? "—"}</div>
+        {user.username && <div style={{ color: "var(--accent)" }}>@{user.username}</div>}
+      </div>
+    )
+  },
+  {
+    key: "org",
+    header: "Org",
+    cell: (user) =>
+      user.org_id ? (
+        <Link href={`/admin/orgs/${user.org_id}`} className="textLink">
+          {user.org_name ?? user.org_id}
+        </Link>
+      ) : (
+        <span className="muted">—</span>
+      )
+  },
+  {
+    key: "plan",
+    header: "Plan",
+    cell: (user) => (
+      <>
+        {user.plan_key ? <span className="badge neutral">{user.plan_key}</span> : <span className="muted">—</span>}
+        {user.subscription_status && (
+          <span
+            className={`badge ${user.subscription_status === "active" ? "success" : "warning"}`}
+            style={{ marginLeft: 4 }}
+          >
+            {user.subscription_status}
+          </span>
+        )}
+      </>
+    )
+  },
+  {
+    key: "status",
+    header: "Status",
+    cell: (user) =>
+      user.suspended_at ? <span className="badge danger">Suspended</span> : <span className="badge success">Active</span>
+  },
+  {
+    key: "signed_up",
+    header: "Signed up",
+    cell: (user) => <span className="muted" style={{ fontSize: 12 }}>{new Date(user.created_at).toLocaleDateString()}</span>
+  },
+  {
+    key: "actions",
+    header: "",
+    align: "end",
+    cell: (user) => (
+      <Link href={`/admin/users/${user.id}`} className="button secondary sm">
+        View →
+      </Link>
+    )
+  }
 ];
 
 export default async function AdminUsersPage({
@@ -28,111 +101,34 @@ export default async function AdminUsersPage({
 
   const totalPages = Math.ceil(total / 25);
 
+  const emptyState = search.trim() ? (
+    <>
+      <strong>No matches for &ldquo;{search}&rdquo;</strong>
+      <p className="muted">Try a different name, email, or username, or clear the search.</p>
+    </>
+  ) : (
+    <>
+      <strong>No users in this view</strong>
+      <p className="muted">Merchants will appear here as soon as they sign up.</p>
+    </>
+  );
+
   return (
     <>
-      <header>
-        <p className="eyebrow">Admin</p>
-        <h1>Users</h1>
-        <p className="muted">{total.toLocaleString()} total merchants</p>
-      </header>
+      <PageHeader eyebrow="Admin" title="Users" subtitle={`${total.toLocaleString()} total merchants`} />
 
-      {/* Filters */}
-      <div className="row" style={{ gap: 8, marginBottom: 16, flexWrap: "wrap" }}>
-        <form method="GET" style={{ display: "flex", gap: 8, flex: 1, minWidth: 240 }}>
-          <input
-            name="search"
-            defaultValue={search}
-            placeholder="Search name, email, username…"
-            className="field"
-            style={{ flex: 1, margin: 0 }}
-          />
-          {status !== "all" && <input type="hidden" name="status" value={status} />}
-          <button className="button secondary sm" type="submit">Search</button>
-        </form>
-        {STATUS_OPTIONS.map((opt) => (
-          <Link
-            key={opt.value}
-            href={`/admin/users?status=${opt.value}${search ? `&search=${encodeURIComponent(search)}` : ""}`}
-            className={`button ${status === opt.value ? "accent" : "secondary"} sm`}
-          >
-            {opt.label}
-          </Link>
-        ))}
+      <FilterControls
+        tabs={STATUS_TABS}
+        tabParam="status"
+        search
+        searchParam="search"
+        searchPlaceholder="Search name, email, username…"
+      />
+
+      <div className="panel" style={{ padding: 0, overflow: "hidden" }}>
+        <DataTable rows={rows} columns={COLUMNS} getRowKey={(user) => user.id} empty={emptyState} />
       </div>
 
-      {rows.length === 0 ? (
-        <div className="panel" style={{ padding: 32, textAlign: "center" }}>
-          <p className="muted">No users found.</p>
-        </div>
-      ) : (
-        <div className="panel" style={{ padding: 0, overflow: "hidden" }}>
-          <table className="adminTable">
-            <thead>
-              <tr>
-                <th>Name</th>
-                <th>Email / Username</th>
-                <th>Org</th>
-                <th>Plan</th>
-                <th>Status</th>
-                <th>Signed up</th>
-                <th></th>
-              </tr>
-            </thead>
-            <tbody>
-              {rows.map((user) => (
-                <tr key={user.id}>
-                  <td style={{ fontWeight: 600 }}>{user.full_name ?? "—"}</td>
-                  <td className="muted" style={{ fontSize: 12 }}>
-                    <div>{user.email ?? "—"}</div>
-                    {user.username && <div style={{ color: "var(--accent)" }}>@{user.username}</div>}
-                  </td>
-                  <td>
-                    {user.org_id ? (
-                      <Link href={`/admin/orgs/${user.org_id}`} className="textLink">
-                        {user.org_name ?? user.org_id}
-                      </Link>
-                    ) : (
-                      <span className="muted">—</span>
-                    )}
-                  </td>
-                  <td>
-                    {user.plan_key ? (
-                      <span className="badge neutral">{user.plan_key}</span>
-                    ) : (
-                      <span className="muted">—</span>
-                    )}
-                    {user.subscription_status && (
-                      <span
-                        className={`badge ${user.subscription_status === "active" ? "success" : "warning"}`}
-                        style={{ marginLeft: 4 }}
-                      >
-                        {user.subscription_status}
-                      </span>
-                    )}
-                  </td>
-                  <td>
-                    {user.suspended_at ? (
-                      <span className="badge danger">Suspended</span>
-                    ) : (
-                      <span className="badge success">Active</span>
-                    )}
-                  </td>
-                  <td className="muted" style={{ fontSize: 12 }}>
-                    {new Date(user.created_at).toLocaleDateString()}
-                  </td>
-                  <td>
-                    <Link href={`/admin/users/${user.id}`} className="button secondary sm">
-                      View →
-                    </Link>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      )}
-
-      {/* Pagination */}
       {totalPages > 1 && (
         <div className="row" style={{ gap: 8, marginTop: 16, justifyContent: "center" }}>
           {currentPage > 1 && (
