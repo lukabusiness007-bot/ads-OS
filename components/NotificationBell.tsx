@@ -1,6 +1,7 @@
 "use client"
 
 import * as React from "react"
+import { createPortal } from "react-dom"
 import Link from "next/link"
 import { Bell } from "lucide-react"
 import { createBrowserSupabaseClient } from "@/lib/supabase/client"
@@ -19,9 +20,36 @@ export function NotificationBell() {
   const [open, setOpen] = React.useState(false)
   const [notifications, setNotifications] = React.useState<NotifRow[]>([])
   const [loading, setLoading] = React.useState(true)
+  const [menuPos, setMenuPos] = React.useState<{ top: number; left: number } | null>(null)
+  const [mounted, setMounted] = React.useState(false)
   const ref = React.useRef<HTMLDivElement>(null)
+  const buttonRef = React.useRef<HTMLButtonElement>(null)
+  const menuRef = React.useRef<HTMLDivElement>(null)
 
   const unread = notifications.filter((n) => !n.read).length
+
+  React.useEffect(() => {
+    setMounted(true)
+  }, [])
+
+  // Position the dropdown relative to the bell button so it isn't clipped by the sidebar
+  React.useEffect(() => {
+    if (!open) return
+
+    function updatePosition() {
+      const rect = buttonRef.current?.getBoundingClientRect()
+      if (!rect) return
+      setMenuPos({ top: rect.bottom + 8, left: rect.left })
+    }
+
+    updatePosition()
+    window.addEventListener("resize", updatePosition)
+    window.addEventListener("scroll", updatePosition, true)
+    return () => {
+      window.removeEventListener("resize", updatePosition)
+      window.removeEventListener("scroll", updatePosition, true)
+    }
+  }, [open])
 
   // Load initial notifications
   React.useEffect(() => {
@@ -65,12 +93,13 @@ export function NotificationBell() {
     }
   }, [])
 
-  // Close on outside click
+  // Close on outside click (the dropdown is portaled, so check both the trigger and the menu)
   React.useEffect(() => {
     function onClickOutside(e: MouseEvent) {
-      if (ref.current && !ref.current.contains(e.target as Node)) {
-        setOpen(false)
-      }
+      const target = e.target as Node
+      if (ref.current?.contains(target)) return
+      if (menuRef.current?.contains(target)) return
+      setOpen(false)
     }
     document.addEventListener("mousedown", onClickOutside)
     return () => document.removeEventListener("mousedown", onClickOutside)
@@ -94,6 +123,7 @@ export function NotificationBell() {
   return (
     <div ref={ref} style={{ position: "relative" }}>
       <button
+        ref={buttonRef}
         type="button"
         className="button ghost sm"
         aria-label={`Notifications${unread ? ` (${unread} unread)` : ""}`}
@@ -125,21 +155,23 @@ export function NotificationBell() {
         )}
       </button>
 
-      {open && (
-        <div
-          style={{
-            position: "absolute",
-            top: "calc(100% + 8px)",
-            left: 0,
-            width: 320,
-            background: "var(--surface)",
-            border: "1px solid var(--line)",
-            borderRadius: 8,
-            boxShadow: "0 4px 16px rgba(0,0,0,.12)",
-            zIndex: 200,
-            overflow: "hidden"
-          }}
-        >
+      {open && mounted && menuPos &&
+        createPortal(
+          <div
+            ref={menuRef}
+            style={{
+              position: "fixed",
+              top: menuPos.top,
+              left: menuPos.left,
+              width: 320,
+              background: "var(--surface)",
+              border: "1px solid var(--line)",
+              borderRadius: 8,
+              boxShadow: "0 4px 16px rgba(0,0,0,.12)",
+              zIndex: 1000,
+              overflow: "hidden"
+            }}
+          >
           <div
             style={{
               display: "flex",
@@ -201,8 +233,9 @@ export function NotificationBell() {
               </Link>
             ))}
           </div>
-        </div>
-      )}
+          </div>,
+          document.body
+        )}
     </div>
   )
 }
