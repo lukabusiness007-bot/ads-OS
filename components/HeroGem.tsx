@@ -1,9 +1,11 @@
 "use client"
 
 import * as React from "react"
+import { configureModelViewerDecoders } from "@/lib/model-viewer-config"
 
 export function HeroGem() {
   React.useEffect(() => {
+    configureModelViewerDecoders()
     import("@google/model-viewer").catch(() => {})
   }, [])
 

@@ -1,6 +1,7 @@
 "use client"
 
 import * as React from "react"
+import { configureModelViewerDecoders } from "@/lib/model-viewer-config"
 import type { ModelAsset } from "@/lib/types"
 
 type ModelViewerProps = {
@@ -12,6 +13,17 @@ type ModelViewerProps = {
 
 type LoadError = { message: string; detail?: string }
 
+const MODEL_VIEWER_SRC_VERSION = "decoder-v2"
+
+function versionModelViewerUrl(url: string) {
+  const hashIndex = url.indexOf("#")
+  const base = hashIndex === -1 ? url : url.slice(0, hashIndex)
+  const hash = hashIndex === -1 ? "" : url.slice(hashIndex)
+  const separator = base.includes("?") ? "&" : "?"
+
+  return `${base}${separator}viewer=${MODEL_VIEWER_SRC_VERSION}${hash}`
+}
+
 export function ModelViewer({ asset, alt, onInteract, onArClick }: ModelViewerProps) {
   const [loadError, setLoadError] = React.useState<LoadError | null>(null)
   const [isFullscreen, setIsFullscreen] = React.useState(false)
@@ -20,6 +32,7 @@ export function ModelViewer({ asset, alt, onInteract, onArClick }: ModelViewerPr
   const wrapperRef = React.useRef<HTMLDivElement | null>(null)
 
   React.useEffect(() => {
+    configureModelViewerDecoders()
     import("@google/model-viewer").catch((err: unknown) => {
       const message = err instanceof Error ? err.message : String(err)
       setLoadError({ message: "3D viewer script failed to load.", detail: message })
@@ -44,69 +57,6 @@ export function ModelViewer({ asset, alt, onInteract, onArClick }: ModelViewerPr
 
     el.addEventListener("error", onError)
     return () => el.removeEventListener("error", onError)
-  }, [asset?.glbUrl])
-
-  // Pre-validate the GLB URL before model-viewer swallows the real failure.
-  React.useEffect(() => {
-    const glbUrl = asset?.glbUrl
-    if (!glbUrl) return
-
-    let cancelled = false
-    const controller = new AbortController()
-    setLoadError(null)
-
-    ;(async () => {
-      try {
-        // Request only the first 4 bytes — enough to verify the glTF magic.
-        // Buffering the whole GLB here would download the model a second time
-        // in parallel with <model-viewer>, competing for bandwidth and roughly
-        // halving load speed. The stream is also cancelled after the first read
-        // in case the server ignores the Range header and replies with 200.
-        const res = await fetch(glbUrl, {
-          signal: controller.signal,
-          headers: { Range: "bytes=0-3" }
-        })
-        if (cancelled) return
-        if (!res.ok) {
-          setLoadError({
-            message: "Could not load 3D model.",
-            detail: `The model URL returned HTTP ${res.status} ${res.statusText}. URL: ${glbUrl}`
-          })
-          return
-        }
-        let head = new Uint8Array()
-        const reader = res.body?.getReader()
-        if (reader) {
-          try {
-            const { value } = await reader.read()
-            if (value) head = value.slice(0, 4)
-          } finally {
-            reader.cancel().catch(() => {})
-          }
-        }
-        if (cancelled) return
-        const magic = String.fromCharCode(...head)
-        if (head.length >= 4 && magic !== "glTF") {
-          const contentType = res.headers.get("content-type") ?? "unknown"
-          setLoadError({
-            message: "Could not load 3D model.",
-            detail: `The URL did not return a GLB file (content-type: ${contentType}). It may be a 404 page or a broken/expired link. URL: ${glbUrl}`
-          })
-        }
-      } catch (err: unknown) {
-        if (cancelled || (err instanceof DOMException && err.name === "AbortError")) return
-        const message = err instanceof Error ? err.message : String(err)
-        setLoadError({
-          message: "Could not load 3D model.",
-          detail: `Failed to fetch the model URL (${message}). URL: ${glbUrl}`
-        })
-      }
-    })()
-
-    return () => {
-      cancelled = true
-      controller.abort()
-    }
   }, [asset?.glbUrl])
 
   // Sync fullscreen state with native fullscreen API events
@@ -172,7 +122,7 @@ export function ModelViewer({ asset, alt, onInteract, onArClick }: ModelViewerPr
 
   const modelViewerProps = {
     ref: viewerRef,
-    src: asset.glbUrl,
+    src: versionModelViewerUrl(asset.glbUrl),
     "ios-src": asset.usdzUrl,
     poster: asset.posterUrl || undefined,
     alt,

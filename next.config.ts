@@ -2,6 +2,22 @@ import type { NextConfig } from "next";
 
 const isDev = process.env.NODE_ENV === "development";
 
+const connectSrc = [
+  "'self'",
+  "https://*.supabase.co",
+  "https://*.supabase.in",
+  "https://accounts.google.com",
+  // Public R2 bucket domains for GLB/USDZ/poster assets.
+  "https://*.r2.dev",
+  // R2 S3 API endpoint for presigned uploads.
+  "https://*.r2.cloudflarestorage.com",
+  getOrigin(process.env.R2_PUBLIC_BASE_URL),
+  "wss://*.supabase.co",
+]
+  .filter((source): source is string => Boolean(source))
+  .filter((source, index, sources) => sources.indexOf(source) === index)
+  .join(" ");
+
 const CSP = [
   "default-src 'self'",
   // 'wasm-unsafe-eval' is required by @google/model-viewer's WebAssembly engine
@@ -18,10 +34,7 @@ const CSP = [
   "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
   "img-src 'self' data: blob: https:",
   "media-src 'self' blob: https:",
-  // https://*.r2.dev  — public R2 bucket for GLB/USDZ/poster assets
-  // https://*.r2.cloudflarestorage.com — R2 S3 API endpoint for presigned uploads
-  // wss://*.supabase.co — Supabase Realtime WebSocket
-  "connect-src 'self' https://*.supabase.co https://*.supabase.in https://accounts.google.com https://*.r2.dev https://*.r2.cloudflarestorage.com wss://*.supabase.co",
+  `connect-src ${connectSrc}`,
   "frame-src 'self' https://accounts.google.com",
   // fonts.gstatic.com is loaded by model-viewer's AR UI
   "font-src 'self' data: https://fonts.gstatic.com",
@@ -59,5 +72,17 @@ const nextConfig: NextConfig = {
   },
   devIndicators: false,
 };
+
+function getOrigin(value: string | undefined) {
+  if (!value) {
+    return null;
+  }
+
+  try {
+    return new URL(value).origin;
+  } catch {
+    return null;
+  }
+}
 
 export default nextConfig;
