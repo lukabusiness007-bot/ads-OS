@@ -228,7 +228,7 @@ export const SignInPage: React.FC<SignInPageProps> = ({
       </section>
 
       {/* Right column: white floating window */}
-      <section className="hidden md:flex flex-1 relative p-4 bg-zinc-100">
+      <section className="hidden md:flex flex-1 relative p-4" style={{ background: "linear-gradient(150deg, #0e2d1c 0%, #071510 100%)" }}>
         <div
           className="animate-slide-right animate-delay-300 absolute inset-4 rounded-3xl overflow-hidden bg-white flex flex-col"
           style={{ boxShadow: "0 8px 48px rgba(0,0,0,0.12)" }}
