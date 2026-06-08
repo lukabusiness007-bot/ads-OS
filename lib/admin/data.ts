@@ -9,6 +9,7 @@
 import { createServiceRoleSupabaseClient } from "@/lib/supabase/server";
 import { createPresignedR2GetUrl, publicUrlForKey } from "@/lib/storage/r2";
 import { runModelPackageChecks } from "@/lib/generation-pipeline";
+import { evaluateArGate } from "@/lib/admin/ar-gate";
 import type {
   AdminOverviewRange,
   AdminOverviewStats,
@@ -598,11 +599,9 @@ export async function evaluateModelForAutoApproval(
     dimensionsPresent: (asset as AdminModelAsset).dimensions_present
   });
 
-  const hasFail = checks.some((c) => c.status === "fail");
-  if (hasFail) return "reject";
-
-  const hasWarning = checks.some((c) => c.status === "warning");
-  if (hasWarning) return "needs_human";
+  const gate = evaluateArGate(checks);
+  if (gate.status === "blocked") return "reject";
+  if (gate.status === "needs_reason") return "needs_human";
 
   return "approve";
 }

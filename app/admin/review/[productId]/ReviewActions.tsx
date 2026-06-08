@@ -2,46 +2,67 @@
 
 import * as React from "react"
 import { useRouter } from "next/navigation"
-import type { ProductStatus } from "@/lib/types"
+import { useToast } from "@/components/admin/ToastProvider"
+import { evaluateArGate } from "@/lib/admin/ar-gate"
+import type { ModelPackageCheck, ProductStatus } from "@/lib/types"
 
 type Decision = "approved" | "rejected" | "regenerate"
+
+const decisionVerb: Record<Decision, string> = {
+  approved: "approved",
+  rejected: "rejected",
+  regenerate: "sent back for regeneration"
+}
 
 export function ReviewActions({
   productId,
   productName,
   adminId,
-  currentStatus
+  currentStatus,
+  modelChecks
 }: {
   productId: string
   productName: string
   adminId: string
   currentStatus: ProductStatus
+  modelChecks: ModelPackageCheck[]
 }) {
   const router = useRouter()
+  const { toast } = useToast()
   const [pending, setPending] = React.useState<Decision | null>(null)
   const [notes, setNotes] = React.useState("")
-  const [error, setError] = React.useState("")
-  const [done, setDone] = React.useState(false)
+  const [overrideReason, setOverrideReason] = React.useState("")
+
+  const gate = React.useMemo(() => evaluateArGate(modelChecks), [modelChecks])
+  const reasonGiven = overrideReason.trim().length > 0
+  const approveBlocked = gate.status === "blocked" || (gate.status === "needs_reason" && !reasonGiven)
 
   async function decide(decision: Decision) {
-    setError("")
     setPending(decision)
+
+    const combinedNotes = decision === "approved" && reasonGiven
+      ? [notes.trim(), `AR-ready override: ${overrideReason.trim()}`].filter(Boolean).join("\n\n")
+      : notes.trim()
 
     try {
       const res = await fetch(`/api/admin/review/${productId}/decide`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ decision, notes: notes.trim(), reviewerId: adminId })
+        body: JSON.stringify({ decision, notes: combinedNotes, reviewerId: adminId })
       })
 
       if (!res.ok) {
         const data = await res.json().catch(() => ({}))
-        setError(data.error ?? "Request failed. Try again.")
+        toast(data.error ?? "Request failed. Try again.", "danger")
         return
       }
 
-      setDone(true)
+      toast(`${productName} ${decisionVerb[decision]}.`, decision === "rejected" ? "neutral" : "success")
+      setNotes("")
+      setOverrideReason("")
       router.refresh()
+    } catch {
+      toast("Something went wrong — please try again.", "danger")
     } finally {
       setPending(null)
     }
@@ -49,24 +70,47 @@ export function ReviewActions({
 
   const disabled = !!pending
 
-  if (done) {
-    return (
-      <div className="panel stack">
-        <span className="badge success">Decision recorded</span>
-        <p className="muted">The product status has been updated.</p>
-        <button className="button secondary sm" type="button" onClick={() => { setDone(false); setNotes("") }}>
-          Change decision
-        </button>
-      </div>
-    )
-  }
-
   return (
     <div className="panel stack">
       <h2 style={{ margin: 0 }}>Decision</h2>
       <p className="muted" style={{ fontSize: 13 }}>
         Reviewing: <strong>{productName}</strong>
       </p>
+
+      {gate.status === "blocked" && (
+        <div className="arGateNotice arGateNoticeBlocked">
+          <strong>Approve is blocked</strong> until these checks stop failing:
+          <ul style={{ margin: "6px 0 0", paddingLeft: 18 }}>
+            {gate.failing.map((check) => (
+              <li key={check.id}>{check.label} — {check.detail}</li>
+            ))}
+          </ul>
+        </div>
+      )}
+
+      {gate.status === "needs_reason" && (
+        <div className="arGateNotice arGateNoticeWarning stack">
+          <div>
+            <strong>These checks need a closer look:</strong>
+            <ul style={{ margin: "6px 0 0", paddingLeft: 18 }}>
+              {gate.warnings.map((check) => (
+                <li key={check.id}>{check.label} — {check.detail}</li>
+              ))}
+            </ul>
+          </div>
+          <div className="field">
+            <label htmlFor="ar-override-reason">Override reason (required to approve)</label>
+            <input
+              id="ar-override-reason"
+              type="text"
+              value={overrideReason}
+              onChange={(e) => setOverrideReason(e.target.value)}
+              placeholder="Why is this OK to approve despite the warning?"
+              disabled={disabled}
+            />
+          </div>
+        </div>
+      )}
 
       <div className="field">
         <label htmlFor="review-notes">Notes (optional)</label>
@@ -81,13 +125,18 @@ export function ReviewActions({
         />
       </div>
 
-      {error && <div className="assumptionNote">{error}</div>}
-
       <div className="inspectorActions">
         <button
           className="button accent"
           type="button"
-          disabled={disabled || currentStatus === "approved"}
+          disabled={disabled || currentStatus === "approved" || approveBlocked}
+          title={
+            gate.status === "blocked"
+              ? "Resolve the failing checks before approving"
+              : gate.status === "needs_reason" && !reasonGiven
+                ? "Add an override reason before approving"
+                : undefined
+          }
           onClick={() => decide("approved")}
         >
           {pending === "approved" ? "Approving…" : "✓ Approve"}
