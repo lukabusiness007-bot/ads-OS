@@ -61,6 +61,22 @@
 .animate-delay-1200 { animation-delay: 1.2s; }
 .animate-delay-1400 { animation-delay: 1.4s; }
 
+/* Horizontal testimonials marquee */
+@keyframes marquee {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+
+.animate-marquee {
+  animation: marquee 30s linear infinite;
+  width: max-content;
+  will-change: transform;
+}
+
+.animate-marquee:hover {
+  animation-play-state: paused;
+}
+
 /* Brand-green checkbox used in the sign-in form */
 .custom-checkbox {
   appearance: none;

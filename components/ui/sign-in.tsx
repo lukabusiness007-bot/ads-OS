@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import { Eye, EyeOff } from "lucide-react";
+import { HeroGem } from "@/components/HeroGem";
 
 // --- HELPER COMPONENTS (ICONS) ---
 
@@ -56,16 +57,34 @@ const GlassInputWrapper = ({ children }: { children: React.ReactNode }) => (
   </div>
 );
 
-const TestimonialCard = ({ testimonial, delay }: { testimonial: Testimonial; delay: string }) => (
-  <div className={`animate-testimonial ${delay} flex items-start gap-3 rounded-3xl bg-card/60 backdrop-blur-xl border border-white/15 p-5 w-64 shadow-lg`}>
-    <img src={testimonial.avatarSrc} className="h-10 w-10 object-cover rounded-2xl" alt={testimonial.name} />
-    <div className="text-sm leading-snug">
-      <p className="flex items-center gap-1 font-medium text-foreground">{testimonial.name}</p>
-      <p className="text-muted-foreground">{testimonial.handle}</p>
-      <p className="mt-1 text-foreground/80">{testimonial.text}</p>
+const TestimonialMarquee = ({ testimonials }: { testimonials: Testimonial[] }) => {
+  const items = [...testimonials, ...testimonials];
+  return (
+    <div
+      className="relative w-full overflow-hidden"
+      style={{
+        maskImage: "linear-gradient(to right, transparent 0%, black 18%, black 82%, transparent 100%)",
+        WebkitMaskImage: "linear-gradient(to right, transparent 0%, black 18%, black 82%, transparent 100%)",
+      }}
+    >
+      <div className="flex gap-4 animate-marquee py-1">
+        {items.map((t, i) => (
+          <div
+            key={i}
+            className="flex items-start gap-3 rounded-2xl bg-emerald-900/40 border border-emerald-700/40 p-4 w-72 shrink-0"
+          >
+            <img src={t.avatarSrc} className="h-9 w-9 object-cover rounded-xl shrink-0" alt={t.name} />
+            <div className="leading-snug">
+              <p className="text-sm font-semibold text-emerald-100">{t.name}</p>
+              <p className="text-xs text-emerald-400">{t.handle}</p>
+              <p className="mt-1 text-xs text-emerald-200/75 leading-relaxed">{t.text}</p>
+            </div>
+          </div>
+        ))}
+      </div>
     </div>
-  </div>
-);
+  );
+};
 
 // --- MAIN COMPONENT ---
 
@@ -208,30 +227,40 @@ export const SignInPage: React.FC<SignInPageProps> = ({
         </div>
       </section>
 
-      {/* Right column: hero image + testimonials */}
-      {heroImageSrc && (
-        <section className="hidden md:block flex-1 relative p-4">
-          <div
-            className="animate-slide-right animate-delay-300 absolute inset-4 rounded-3xl bg-cover bg-center"
-            style={{ backgroundImage: `url(${heroImageSrc})` }}
-          ></div>
+      {/* Right column: emerald brand panel */}
+      <section className="hidden md:flex flex-1 relative p-4">
+        <div className="animate-slide-right animate-delay-300 absolute inset-4 rounded-3xl overflow-hidden bg-emerald-950 flex flex-col">
+          {/* Glow accents */}
+          <div className="glow-blob glow-blob--emerald w-[420px] h-64 -top-16 left-1/2 -translate-x-1/2 opacity-70" />
+          <div className="glow-blob glow-blob--emerald w-56 h-40 bottom-32 -right-16 opacity-40" />
+
+          {/* Dot grid */}
+          <div className="absolute inset-0 bg-dotgrid opacity-50 pointer-events-none" />
+
+          {/* Center: gem + tagline */}
+          <div className="flex-1 flex flex-col items-center justify-center gap-5 relative z-10 px-10 text-center">
+            <div className="w-44 h-44">
+              <HeroGem />
+            </div>
+            <div>
+              <p className="text-xs font-bold uppercase tracking-widest text-emerald-400 mb-2">Augmenta</p>
+              <h2 className="text-2xl font-semibold text-white leading-snug">
+                Turn photos into AR<br />product pages
+              </h2>
+              <p className="mt-2 text-sm text-emerald-200/60 leading-relaxed">
+                Verified 3D/AR experiences your shoppers can trust.
+              </p>
+            </div>
+          </div>
+
+          {/* Testimonials marquee */}
           {testimonials.length > 0 && (
-            <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex gap-4 px-8 w-full justify-center">
-              <TestimonialCard testimonial={testimonials[0]} delay="animate-delay-1000" />
-              {testimonials[1] && (
-                <div className="hidden xl:flex">
-                  <TestimonialCard testimonial={testimonials[1]} delay="animate-delay-1200" />
-                </div>
-              )}
-              {testimonials[2] && (
-                <div className="hidden 2xl:flex">
-                  <TestimonialCard testimonial={testimonials[2]} delay="animate-delay-1400" />
-                </div>
-              )}
+            <div className="relative z-10 pb-8">
+              <TestimonialMarquee testimonials={testimonials} />
             </div>
           )}
-        </section>
-      )}
+        </div>
+      </section>
     </div>
   );
 };
