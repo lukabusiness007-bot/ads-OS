@@ -17,6 +17,7 @@ import {
   createOrganizationModelAssetKey,
   uploadR2Object
 } from "@/lib/storage/r2";
+import { getGlbMetadata, optimizeGlb } from "@/lib/storage/optimize-glb";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
 import { getCurrentOrganization } from "@/lib/supabase/data";
 import { createServerSupabaseClient, createServiceRoleSupabaseClient, isSupabaseServiceRoleConfigured } from "@/lib/supabase/server";
@@ -24,6 +25,7 @@ import type { GenerationStatusResponse, ModelAsset } from "@/lib/types";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
+export const maxDuration = 120;
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
@@ -174,11 +176,27 @@ async function storeMeshyTaskAssets(
   }
 
   const glb = await downloadRemoteAsset(glbUrl, "model/gltf-binary");
+  const optimizedGlb = await optimizeGlb(glb.body);
+  const modelBody = optimizedGlb?.buffer ?? glb.body;
+  const modelMetadata = optimizedGlb ?? await getGlbMetadata(glb.body);
+
   const glbUpload = await uploadR2Object({
     key: createAssetKey(productId, taskId, "model.glb", organizationId),
-    body: glb.body,
+    body: modelBody,
     contentType: "model/gltf-binary"
   });
+
+  if (optimizedGlb) {
+    try {
+      await uploadR2Object({
+        key: createAssetKey(productId, taskId, "model-source.glb", organizationId),
+        body: glb.body,
+        contentType: "model/gltf-binary"
+      });
+    } catch (error) {
+      console.warn("Raw Meshy GLB backup upload failed after optimized model upload", toSafeErrorLog(error));
+    }
+  }
 
   const usdz = task.model_urls?.usdz
     ? await downloadRemoteAsset(task.model_urls.usdz, "model/vnd.usdz+zip")
@@ -206,9 +224,9 @@ async function storeMeshyTaskAssets(
     usdzUrl: usdzUpload?.url,
     posterUrl: posterUpload?.url ?? "",
     thumbnailUrl: posterUpload?.url,
-    fileSizeMb: Number((glb.body.length / 1024 / 1024).toFixed(2)),
-    triangleCount: 0,
-    textureMax: 4096,
+    fileSizeMb: modelMetadata.fileSizeMb,
+    triangleCount: modelMetadata.triangleCount,
+    textureMax: modelMetadata.textureMax,
     dimensionsPresent: true
   };
 }

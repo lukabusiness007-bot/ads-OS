@@ -1,6 +1,12 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "framework": "nextjs",
+  "functions": {
+    "app/api/generation/status/route.ts": {
+      "memory": 2048,
+      "maxDuration": 120
+    }
+  },
   "crons": [
     {
       "path": "/api/generation/cleanup",
