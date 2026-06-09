@@ -58,7 +58,7 @@ export function LandingPageContent({ lang }: { lang: Lang }) {
             {/* Hero visual */}
             <div className="relative mx-auto max-w-md lg:max-w-none">
               <div className="absolute inset-x-1/4 bottom-0 h-32 bg-[#1f6f5b]/12 blur-3xl rounded-full pointer-events-none" />
-              <div style={{ height: 460 }} className="relative">
+              <div style={{ height: 480 }} className="relative">
                 <HeroGem />
               </div>
               <p className="text-center text-xs text-[#697266]/50 -mt-3 pb-6">↻ Drag to rotate</p>
