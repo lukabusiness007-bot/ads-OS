@@ -70,7 +70,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             <Logo
               theme="dark"
               markClassName="brandMark brandMarkLg"
-              wordmarkClassName="text-3xl font-semibold leading-none tracking-tight"
+              wordmarkClassName="!text-4xl font-semibold !leading-none tracking-tight"
             />
           </div>
           <button

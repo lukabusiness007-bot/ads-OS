@@ -23,8 +23,8 @@ export function HeroGem() {
     "shadow-softness": "1",
     exposure: "1.1",
     "tone-mapping": "commerce",
-    "camera-orbit": "0deg 72deg 105%",
-    "field-of-view": "28deg",
+    "camera-orbit": "0deg 72deg 94%",
+    "field-of-view": "30deg",
     style: { width: "100%", height: "100%", background: "transparent" },
   } satisfies React.HTMLAttributes<HTMLElement> & Record<string, unknown>
 
