@@ -12,11 +12,18 @@ type ModelViewerProps = {
   onInteract?: () => void
   onArClick?: () => void
   /**
-   * Absolute URL a phone should open to launch AR. Defaults to the current
-   * page URL. The desktop "scan with your phone" QR encodes this with `?ar=1`
-   * so the phone auto-prompts AR on arrival.
+   * The product's public AR page that a phone should open to launch AR. The
+   * desktop "scan with your phone" QR encodes this with `?ar=1` so the phone
+   * auto-prompts AR on arrival. May be a relative path (e.g.
+   * `/p/merchant/product`) — it is resolved to an absolute URL so phones can
+   * reach it.
+   *
+   * - `undefined` → fall back to the current page URL (correct on the public
+   *   hosted page, which *is* the AR page).
+   * - `null` → the product has no public AR page yet (not published); the QR
+   *   renders a disabled "available after publishing" state.
    */
-  arShareUrl?: string
+  arShareUrl?: string | null
 }
 
 type LoadError = { message: string; detail?: string }
@@ -60,8 +67,22 @@ export function ModelViewer({ asset, alt, onInteract, onArClick, arShareUrl }: M
   // Resolve device + the URL the QR should point at. Runs only on the client.
   React.useEffect(() => {
     setPlatform(detectPlatform())
-    const base = arShareUrl ?? window.location.href
-    setShareUrl(base)
+    if (arShareUrl === null) {
+      // Product has no public AR page yet — leave shareUrl empty so the QR
+      // renders its disabled state.
+      setShareUrl("")
+    } else {
+      const base = arShareUrl ?? window.location.href
+      // Resolve relative public URLs (e.g. "/p/merchant/product") to absolute
+      // so a phone scanning the QR can actually reach the page.
+      let absolute = base
+      try {
+        absolute = new URL(base, window.location.origin).toString()
+      } catch {
+        // Leave `base` as-is if it can't be parsed.
+      }
+      setShareUrl(absolute)
+    }
     // If a phone arrived via the desktop QR (?ar=1), offer a one-tap AR launch.
     const wantsAr = new URLSearchParams(window.location.search).get("ar") === "1"
     if (wantsAr && (detectPlatform() === "ios" || detectPlatform() === "android")) {
@@ -70,6 +91,8 @@ export function ModelViewer({ asset, alt, onInteract, onArClick, arShareUrl }: M
   }, [arShareUrl])
 
   const isDesktop = platform === "web"
+  // The product isn't published yet, so there is no phone-reachable AR page.
+  const arUnavailable = arShareUrl === null
 
   function launchAr() {
     setShowArPrompt(false)
@@ -302,18 +325,32 @@ export function ModelViewer({ asset, alt, onInteract, onArClick, arShareUrl }: M
               ✕
             </button>
             <h3 id="qrArTitle" className="qrArTitle">View in your space</h3>
-            <p className="qrArLead">Scan this QR code with your phone camera to launch augmented reality.</p>
-            <div className="qrArCodeFrame">
-              <QrCode value={withArParam(shareUrl)} size={208} ecl="M" />
-            </div>
-            <ol className="qrArSteps">
-              <li>Open the Camera app on your phone</li>
-              <li>Point it at the code above</li>
-              <li>Tap the link, then tap “View in AR”</li>
-            </ol>
-            <button className="qrArCopy" type="button" onClick={copyShareLink}>
-              {copied ? "Link copied" : "Copy link instead"}
-            </button>
+            {arUnavailable ? (
+              <>
+                <p className="qrArLead">
+                  This product’s AR page isn’t live yet. The QR code becomes available once the model is approved and published.
+                </p>
+                <div className="qrArCodeFrame qrArCodeDisabled" aria-hidden="true">
+                  <QrCode value="https://augmenta.ar" size={208} ecl="M" />
+                </div>
+                <p className="qrArDisabledNote">Available after publishing</p>
+              </>
+            ) : (
+              <>
+                <p className="qrArLead">Scan this QR code with your phone camera to launch augmented reality.</p>
+                <div className="qrArCodeFrame">
+                  <QrCode value={withArParam(shareUrl)} size={208} ecl="M" />
+                </div>
+                <ol className="qrArSteps">
+                  <li>Open the Camera app on your phone</li>
+                  <li>Point it at the code above</li>
+                  <li>Tap the link, then tap “View in AR”</li>
+                </ol>
+                <button className="qrArCopy" type="button" onClick={copyShareLink}>
+                  {copied ? "Link copied" : "Copy link instead"}
+                </button>
+              </>
+            )}
           </div>
         </div>
       )}

@@ -61,7 +61,7 @@ function PreviewPageContent() {
 
       <section className="grid two">
         <div className="panel stack">
-          <ModelViewer asset={asset} alt={`${product?.name ?? "Generated product"} 3D model`} />
+          <ModelViewer asset={asset} alt={`${product?.name ?? "Generated product"} 3D model`} arShareUrl={null} />
           <div className="row">
             <span className={asset?.glbUrl ? "badge success" : "badge neutral"}>GLB {asset?.glbUrl ? "ready" : "missing"}</span>
             <span className={asset?.usdzUrl ? "badge success" : "badge neutral"}>USDZ {asset?.usdzUrl ? "ready" : "missing"}</span>

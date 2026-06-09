@@ -928,6 +928,7 @@ export default function CreateProductPage() {
                 <ModelViewer
                   asset={modelAsset}
                   alt={`${metaName || storedProductData?.name || "Product"} 3D model`}
+                  arShareUrl={null}
                 />
 
                 {assetChecks.length > 0 && (
