@@ -18,10 +18,10 @@ export function LandingPageContent({ lang }: { lang: Lang }) {
 
       <main>
         {/* ─── Hero ──────────────────────────────────────────────────── */}
-        <Reveal className="pt-16 sm:pt-24 bg-white overflow-hidden">
+        <Reveal className="pt-16 sm:pt-24 pb-16 bg-white">
           <div className="mx-auto max-w-5xl px-6">
             {/* Mobile: stacked centered | Desktop: side-by-side */}
-            <div className="lg:flex lg:flex-row lg:items-center lg:gap-8">
+            <div className="lg:flex lg:flex-row lg:items-center lg:gap-24">
 
               {/* Copy block — left on desktop, centered on mobile */}
               <div className="text-center lg:text-left pt-8 pb-6 sm:pt-16 sm:pb-10 lg:flex-1 lg:min-w-0">
@@ -60,12 +60,11 @@ export function LandingPageContent({ lang }: { lang: Lang }) {
               </div>
 
               {/* Hero visual — right on desktop, below on mobile */}
-              <div className="mx-auto max-w-2xl lg:mx-0 lg:flex-1 relative pb-0">
-                <div className="absolute inset-x-1/4 bottom-4 h-28 bg-emerald-500/20 blur-3xl rounded-full pointer-events-none" />
-                <div style={{ height: 480 }} className="relative">
+              <div className="mx-auto max-w-2xl lg:mx-0 lg:flex-1">
+                <div style={{ height: 560 }} className="relative">
                   <HeroGem />
                 </div>
-                <p className="text-center text-xs text-zinc-400 -mt-2 pb-8">↻ Drag to rotate</p>
+                <p className="text-center text-xs text-zinc-400 -mt-6 pb-4">↻ Drag to rotate</p>
               </div>
 
             </div>
