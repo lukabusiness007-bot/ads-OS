@@ -33,10 +33,10 @@ export function MarketingNav({ lang = "en" }: { lang?: Lang }) {
     <header>
       <nav
         data-state={menuOpen ? "active" : undefined}
-        className={`group fixed z-20 w-full border-b border-dashed transition-all duration-300 ${
+        className={`group fixed z-20 w-full border-b transition-all duration-300 ${
           scrolled
-            ? "bg-white/70 backdrop-blur-[20px] shadow-md border-transparent"
-            : "bg-white/90 backdrop-blur"
+            ? "bg-[#fbfaf6]/80 backdrop-blur-[20px] shadow-sm shadow-[#17201a]/6 border-transparent"
+            : "bg-[#fbfaf6]/95 backdrop-blur border-[#dce2d5]"
         }`}
       >
         <div className="m-auto max-w-5xl px-6">
@@ -58,14 +58,14 @@ export function MarketingNav({ lang = "en" }: { lang?: Lang }) {
               </button>
             </div>
 
-            <div className={`group-data-[state=active]:block lg:group-data-[state=active]:flex mb-6 hidden w-full flex-wrap items-center justify-end space-y-8 rounded-3xl border bg-white p-6 shadow-2xl shadow-zinc-300/20 md:flex-nowrap lg:m-0 lg:flex lg:w-fit lg:space-y-0 lg:border-transparent lg:bg-transparent lg:p-0 lg:shadow-none ${lang === "sr" ? "lg:gap-2" : "lg:gap-6"}`}>
+            <div className={`group-data-[state=active]:block lg:group-data-[state=active]:flex mb-6 hidden w-full flex-wrap items-center justify-end space-y-8 rounded-2xl border border-[#dce2d5] bg-[#fbfaf6] p-6 shadow-xl shadow-[#17201a]/8 md:flex-nowrap lg:m-0 lg:flex lg:w-fit lg:space-y-0 lg:border-transparent lg:bg-transparent lg:p-0 lg:shadow-none ${lang === "sr" ? "lg:gap-2" : "lg:gap-6"}`}>
               <div className={lang === "sr" ? "lg:pr-2" : "lg:pr-4"}>
                 <ul className={`space-y-6 text-base lg:flex lg:space-y-0 lg:text-sm ${lang === "sr" ? "lg:gap-2" : "lg:gap-4"}`}>
                   {menuItems.map((item, i) => (
                     <li key={i}>
                       <Link
                         href={item.href}
-                        className="text-zinc-500 hover:text-zinc-900 block duration-150"
+                        className="text-[#697266] hover:text-[#17201a] block duration-150"
                       >
                         {item.name}
                       </Link>
@@ -78,7 +78,7 @@ export function MarketingNav({ lang = "en" }: { lang?: Lang }) {
                 {/* Language switcher — shows only the other language */}
                 <Link
                   href={lang === "sr" ? "/" : "/sr"}
-                  className="px-2.5 py-1.5 border border-zinc-200 rounded-md text-sm font-semibold text-zinc-500 hover:text-zinc-900 transition-colors"
+                  className="px-2.5 py-1.5 border border-[#dce2d5] rounded-md text-sm font-semibold text-[#697266] hover:text-[#17201a] transition-colors"
                 >
                   {lang === "sr" ? "EN" : "SR"}
                 </Link>

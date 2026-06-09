@@ -15,6 +15,24 @@ export default function BillingPage() {
   const usagePct = Math.round((published / 25) * 100);
   const currentTierIndex = TIER_ORDER.indexOf(organization.planTier);
 
+  async function startCheckout(planKey: string) {
+    try {
+      const res = await fetch("/api/billing/checkout", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ planKey })
+      });
+      const data = (await res.json()) as { url?: string; errorMessage?: string };
+      if (data.url) {
+        window.location.href = data.url;
+      } else {
+        alert(data.errorMessage ?? "Could not start checkout.");
+      }
+    } catch {
+      alert("Could not start checkout. Please try again.");
+    }
+  }
+
   function fmtViews(n: number | null) {
     if (!n) return b.custom;
     return n >= 1000 ? `${n / 1000}k` : String(n);
@@ -118,12 +136,12 @@ export default function BillingPage() {
                   </button>
                 )}
                 {isUpgrade && tier.id !== "business" && (
-                  <button className="button accent" style={{ width: "100%" }}>
+                  <button className="button accent" style={{ width: "100%" }} onClick={() => startCheckout(tier.id)}>
                     {b.upgradeTo} {tier.name}
                   </button>
                 )}
                 {isLower && (
-                  <button className="button secondary" style={{ width: "100%" }}>
+                  <button className="button secondary" style={{ width: "100%" }} onClick={() => startCheckout(tier.id)}>
                     {b.downgradeTo} {tier.name}
                   </button>
                 )}

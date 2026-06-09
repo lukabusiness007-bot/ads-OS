@@ -3,6 +3,9 @@
  * Never throws — email failure must never block the caller's operation.
  */
 
+import { getSiteUrl } from "@/lib/email/client";
+import { sendAdminNotificationEmail as sendAdminEmail } from "@/lib/email/send";
+
 type AdminEmailPayload = {
   productId: string;
   productName: string;
@@ -11,43 +14,14 @@ type AdminEmailPayload = {
 };
 
 export async function sendAdminNotificationEmail(payload: AdminEmailPayload): Promise<void> {
-  const apiKey = process.env.RESEND_API_KEY;
   const to = process.env.ADMIN_NOTIFICATION_EMAIL;
+  if (!to) return; // No admin recipient configured — skip silently.
 
-  if (!apiKey || !to) return; // Not configured — skip silently
-
-  const subject =
-    payload.action === "awaiting_review"
-      ? `[Augmenta] Model ready for review: ${payload.productName}`
-      : `[Augmenta] Generation failed: ${payload.productName}`;
-
-  const reviewUrl = `${process.env.NEXT_PUBLIC_SITE_URL ?? "https://veridianar.com"}/admin/review/${payload.productId}`;
-
-  const html = `
-    <h2>${subject}</h2>
-    <p><strong>Product:</strong> ${payload.productName}</p>
-    <p><strong>Merchant:</strong> ${payload.merchantName}</p>
-    <p><strong>Status:</strong> ${payload.action.replaceAll("_", " ")}</p>
-    <p><a href="${reviewUrl}">Open review inspector →</a></p>
-    <hr/>
-    <p style="color:#888;font-size:12px">Augmenta Admin · Internal only</p>
-  `.trim();
-
-  try {
-    await fetch("https://api.resend.com/emails", {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${apiKey}`,
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({
-        from: "Augmenta Admin <noreply@veridianar.com>",
-        to,
-        subject,
-        html
-      })
-    });
-  } catch {
-    // Best-effort: swallow all errors
-  }
+  await sendAdminEmail({
+    to,
+    productName: payload.productName,
+    merchantName: payload.merchantName,
+    action: payload.action,
+    reviewUrl: `${getSiteUrl()}/admin/review/${payload.productId}`
+  });
 }

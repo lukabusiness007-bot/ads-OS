@@ -3,6 +3,20 @@ import "./globals.css";
 import { RuntimeDiagnosticsPopup } from "@/components/RuntimeDiagnosticsPopup";
 import { LanguageProvider } from "@/lib/lang";
 import { jsonLd, organizationJsonLd, siteConfig } from "@/lib/seo";
+import { Fraunces, Inter } from "next/font/google";
+
+const fraunces = Fraunces({
+  subsets: ["latin"],
+  axes: ["SOFT", "opsz"],
+  variable: "--font-display",
+  display: "swap",
+});
+
+const inter = Inter({
+  subsets: ["latin"],
+  variable: "--font-sans",
+  display: "swap",
+});
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteConfig.url),
@@ -37,7 +51,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="en" className={`${fraunces.variable} ${inter.variable}`}>
       <body>
         <script type="application/ld+json" dangerouslySetInnerHTML={jsonLd(organizationJsonLd())} />
         <LanguageProvider>{children}</LanguageProvider>

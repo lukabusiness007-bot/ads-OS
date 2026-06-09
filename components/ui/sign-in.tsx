@@ -46,7 +46,7 @@ interface SignInPageProps {
 // --- SUB-COMPONENTS ---
 
 const DarkInputWrapper = ({ children }: { children: React.ReactNode }) => (
-  <div className="rounded-2xl border border-white/15 bg-white/10 backdrop-blur-sm transition-colors focus-within:border-emerald-400/50 focus-within:bg-white/15">
+  <div className="rounded-2xl border border-white/15 bg-white/10 backdrop-blur-sm transition-colors focus-within:border-[#6ee7b7]/50 focus-within:bg-white/15">
     {children}
   </div>
 );
@@ -66,12 +66,12 @@ const TestimonialMarquee = ({ testimonials }: { testimonials: Testimonial[] }) =
           <div
             key={i}
             className="flex items-start gap-3 rounded-2xl p-4 w-72 shrink-0"
-            style={{ background: "rgba(14,45,28,0.90)", border: "1px solid rgba(52,211,153,0.15)" }}
+            style={{ background: "rgba(23,32,26,0.92)", border: "1px solid rgba(110,231,183,0.18)" }}
           >
             <img src={t.avatarSrc} className="h-9 w-9 object-cover rounded-xl shrink-0" alt={t.name} />
             <div className="leading-snug">
               <p className="text-sm font-semibold text-white">{t.name}</p>
-              <p className="text-xs text-emerald-400">{t.handle}</p>
+              <p className="text-xs text-[#6ee7b7]">{t.handle}</p>
               <p className="mt-1 text-xs text-white/65 leading-relaxed">{t.text}</p>
             </div>
           </div>
@@ -109,7 +109,7 @@ export const SignInPage: React.FC<SignInPageProps> = ({
       {/* Left column: premium dark green */}
       <section
         className="flex-1 flex items-center justify-center p-8"
-        style={{ background: "linear-gradient(150deg, #0e2d1c 0%, #071510 100%)" }}
+        style={{ background: "linear-gradient(150deg, #17201a 0%, #0c1a10 100%)" }}
       >
         {/* Subtle glow */}
         <div className="glow-blob glow-blob--emerald w-[480px] h-64 top-0 left-1/2 -translate-x-1/2 opacity-20 pointer-events-none" />
@@ -171,7 +171,7 @@ export const SignInPage: React.FC<SignInPageProps> = ({
                   <a
                     href="#"
                     onClick={(e) => { e.preventDefault(); onResetPassword?.(); }}
-                    className="hover:underline text-emerald-400 transition-colors"
+                    className="hover:underline text-[#6ee7b7] transition-colors"
                   >
                     Reset password
                   </a>
@@ -216,7 +216,7 @@ export const SignInPage: React.FC<SignInPageProps> = ({
                   <a
                     href="#"
                     onClick={(e) => { e.preventDefault(); onCreateAccount?.(); }}
-                    className="text-emerald-400 hover:underline transition-colors"
+                    className="text-[#6ee7b7] hover:underline transition-colors"
                   >
                     Create Account
                   </a>
@@ -228,7 +228,7 @@ export const SignInPage: React.FC<SignInPageProps> = ({
       </section>
 
       {/* Right column: white floating window */}
-      <section className="hidden md:flex flex-1 relative p-4" style={{ background: "linear-gradient(150deg, #0e2d1c 0%, #071510 100%)" }}>
+      <section className="hidden md:flex flex-1 relative p-4" style={{ background: "linear-gradient(150deg, #17201a 0%, #0c1a10 100%)" }}>
         <div
           className="animate-slide-right animate-delay-300 absolute inset-4 rounded-3xl overflow-hidden bg-white flex flex-col"
           style={{ boxShadow: "0 8px 48px rgba(0,0,0,0.12)" }}

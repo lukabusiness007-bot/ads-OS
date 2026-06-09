@@ -79,6 +79,32 @@ export async function getCurrentOrganization(supabase: SupabaseClient): Promise<
   };
 }
 
+export async function getOrganizationOwnerEmail(
+  client: SupabaseClient | SupabaseAdminClient,
+  organizationId: string
+): Promise<{ email: string; name: string | null } | null> {
+  const { data, error } = await client
+    .from("organization_members")
+    .select("profiles(email, full_name)")
+    .eq("organization_id", organizationId)
+    .eq("role", "owner")
+    .limit(1)
+    .maybeSingle();
+
+  if (error || !data) {
+    return null;
+  }
+
+  const profile = Array.isArray(data.profiles) ? data.profiles[0] : data.profiles;
+  const email = (profile as { email?: string | null } | null)?.email;
+
+  if (!email) {
+    return null;
+  }
+
+  return { email, name: (profile as { full_name?: string | null } | null)?.full_name ?? null };
+}
+
 export async function ensureCurrentOrganization(supabase: SupabaseClient): Promise<EnsureOrganizationResult> {
   const {
     data: { user }

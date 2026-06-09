@@ -18,8 +18,9 @@ import {
   uploadR2Object
 } from "@/lib/storage/r2";
 import { getGlbMetadata, optimizeGlb } from "@/lib/storage/optimize-glb";
+import { sendGenerationFailedEmail, sendGenerationReadyEmail } from "@/lib/email/send";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
-import { getCurrentOrganization } from "@/lib/supabase/data";
+import { getCurrentOrganization, getOrganizationOwnerEmail } from "@/lib/supabase/data";
 import { createServerSupabaseClient, createServiceRoleSupabaseClient, isSupabaseServiceRoleConfigured } from "@/lib/supabase/server";
 import type { GenerationStatusResponse, ModelAsset } from "@/lib/types";
 
@@ -337,15 +338,21 @@ async function persistCompletedGeneration(
     notes: "Generated model is ready for quality review."
   });
 
-  // Best-effort admin email — never blocks the response
+  // Best-effort emails — never block the response
   const { data: productRow } = await supabase.from("products").select("name").eq("id", productId).maybeSingle();
   const { data: orgRow } = await supabase.from("organizations").select("name").eq("id", organizationId).maybeSingle();
+  const productName = (productRow as { name?: string } | null)?.name ?? "Unknown product";
   sendAdminNotificationEmail({
     productId,
-    productName: (productRow as { name?: string } | null)?.name ?? "Unknown product",
+    productName,
     merchantName: (orgRow as { name?: string } | null)?.name ?? "Unknown merchant",
     action: "awaiting_review"
   }).catch(() => undefined);
+
+  // Notify the merchant that their model finished generating.
+  getOrganizationOwnerEmail(supabase, organizationId)
+    .then((owner) => (owner ? sendGenerationReadyEmail(owner.email, productName) : undefined))
+    .catch(() => undefined);
 }
 
 async function downloadRemoteAsset(url: string, fallbackContentType: string) {
@@ -377,15 +384,21 @@ async function markProductGenerationFailed(
     .eq("organization_id", organizationId)
     .eq("id", productId);
 
-  // Best-effort admin email
+  // Best-effort emails
   const { data: productRow } = await supabase.from("products").select("name").eq("id", productId).maybeSingle();
   const { data: orgRow } = await supabase.from("organizations").select("name").eq("id", organizationId).maybeSingle();
+  const productName = (productRow as { name?: string } | null)?.name ?? "Unknown product";
   sendAdminNotificationEmail({
     productId,
-    productName: (productRow as { name?: string } | null)?.name ?? "Unknown product",
+    productName,
     merchantName: (orgRow as { name?: string } | null)?.name ?? "Unknown merchant",
     action: "generation_failed"
   }).catch(() => undefined);
+
+  // Notify the merchant that their generation failed.
+  getOrganizationOwnerEmail(supabase, organizationId)
+    .then((owner) => (owner ? sendGenerationFailedEmail(owner.email, productName) : undefined))
+    .catch(() => undefined);
 }
 
 async function insertGenerationJobEvent(
