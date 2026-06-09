@@ -20,49 +20,54 @@ export function LandingPageContent({ lang }: { lang: Lang }) {
         {/* ─── Hero ──────────────────────────────────────────────────── */}
         <Reveal className="pt-16 sm:pt-24 bg-white overflow-hidden">
           <div className="mx-auto max-w-5xl px-6">
-            {/* Copy block */}
-            <div className="mx-auto max-w-2xl text-center pt-8 pb-6 sm:pt-16 sm:pb-10">
-              <p className="text-xs font-bold uppercase tracking-widest text-emerald-700 mb-4">
-                {t.hero.eyebrow}
-              </p>
-              <h1 className="text-4xl font-semibold md:text-5xl lg:text-6xl text-zinc-900 text-balance leading-tight mb-6">
-                {t.hero.heading}
-              </h1>
-              <p className="text-base sm:text-lg text-zinc-500 max-w-xl mx-auto leading-relaxed mb-6 sm:mb-8">
-                {t.hero.body}
-              </p>
-              <div className="flex flex-wrap gap-3 justify-center mb-6 sm:mb-10">
-                <Button asChild size="lg">
-                  <Link href="/contact/demo?source=hero">{t.hero.cta}</Link>
-                </Button>
-                <Button asChild variant="outline" size="lg">
-                  <Link href="/p/northline-home/arc-oak-dining-chair">{t.hero.ctaSecondary}</Link>
-                </Button>
+            {/* Mobile: stacked centered | Desktop: side-by-side */}
+            <div className="lg:flex lg:flex-row lg:items-center lg:gap-8">
+
+              {/* Copy block — left on desktop, centered on mobile */}
+              <div className="text-center lg:text-left pt-8 pb-6 sm:pt-16 sm:pb-10 lg:flex-1 lg:min-w-0">
+                <p className="text-xs font-bold uppercase tracking-widest text-emerald-700 mb-4">
+                  {t.hero.eyebrow}
+                </p>
+                <h1 className="text-4xl font-semibold md:text-5xl lg:text-6xl text-zinc-900 text-balance leading-tight mb-6">
+                  {t.hero.heading}
+                </h1>
+                <p className="text-base sm:text-lg text-zinc-500 max-w-xl mx-auto lg:mx-0 leading-relaxed mb-6 sm:mb-8">
+                  {t.hero.body}
+                </p>
+                <div className="flex flex-wrap gap-3 justify-center lg:justify-start mb-6 sm:mb-10">
+                  <Button asChild size="lg">
+                    <Link href="/contact/demo?source=hero">{t.hero.cta}</Link>
+                  </Button>
+                  <Button asChild variant="outline" size="lg">
+                    <Link href="/p/northline-home/arc-oak-dining-chair">{t.hero.ctaSecondary}</Link>
+                  </Button>
+                </div>
+
+                {/* Trust strip — stagger */}
+                <RevealStagger
+                  as="div"
+                  className="grid grid-cols-2 gap-x-8 gap-y-3 max-w-sm mx-auto lg:mx-0 text-left border-t border-zinc-100 pt-8"
+                  step={80}
+                  initialDelay={400}
+                >
+                  {t.trustStrip.map((item) => (
+                    <div key={item} className="flex items-center gap-2">
+                      <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600 shrink-0" />
+                      <span className="text-xs font-semibold text-zinc-600">{item}</span>
+                    </div>
+                  ))}
+                </RevealStagger>
               </div>
 
-              {/* Trust strip — stagger */}
-              <RevealStagger
-                as="div"
-                className="grid grid-cols-2 gap-x-8 gap-y-3 max-w-sm mx-auto text-left border-t border-zinc-100 pt-8"
-                step={80}
-                initialDelay={400}
-              >
-                {t.trustStrip.map((item) => (
-                  <div key={item} className="flex items-center gap-2">
-                    <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600 shrink-0" />
-                    <span className="text-xs font-semibold text-zinc-600">{item}</span>
-                  </div>
-                ))}
-              </RevealStagger>
-            </div>
-
-            {/* Hero visual — spinning Augmenta crystal — NOT touched */}
-            <div className="mx-auto max-w-2xl relative pb-0">
-              <div className="absolute inset-x-1/4 bottom-4 h-28 bg-emerald-500/20 blur-3xl rounded-full pointer-events-none" />
-              <div style={{ height: 480 }} className="relative">
-                <HeroGem />
+              {/* Hero visual — right on desktop, below on mobile */}
+              <div className="mx-auto max-w-2xl lg:mx-0 lg:flex-1 relative pb-0">
+                <div className="absolute inset-x-1/4 bottom-4 h-28 bg-emerald-500/20 blur-3xl rounded-full pointer-events-none" />
+                <div style={{ height: 480 }} className="relative">
+                  <HeroGem />
+                </div>
+                <p className="text-center text-xs text-zinc-400 -mt-2 pb-8">↻ Drag to rotate</p>
               </div>
-              <p className="text-center text-xs text-zinc-400 -mt-2 pb-8">↻ Drag to rotate</p>
+
             </div>
           </div>
         </Reveal>

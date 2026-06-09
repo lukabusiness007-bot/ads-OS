@@ -2,7 +2,9 @@
 
 import Link from "next/link";
 import { AppShell } from "@/components/AppShell";
+import { GenerationUsageCard } from "@/components/GenerationUsageCard";
 import { billingTiers, organization, pricingPackages, products } from "@/lib/mock-data";
+import { openBillingPortal, startBillingCheckout } from "@/lib/billing/checkout-client";
 import { useLang } from "@/lib/lang";
 
 const TIER_ORDER = ["starter", "growth", "studio", "business"];
@@ -28,10 +30,17 @@ export default function BillingPage() {
           <h1>{b.heading}</h1>
           <p className="muted">{b.subtitle}</p>
         </div>
-        <Link className="button secondary" href="/analytics">
-          {b.viewAnalytics}
-        </Link>
+        <div style={{ display: "flex", gap: 8 }}>
+          <button className="button secondary" onClick={() => { void openBillingPortal(); }}>
+            Manage billing
+          </button>
+          <Link className="button secondary" href="/analytics">
+            {b.viewAnalytics}
+          </Link>
+        </div>
       </header>
+
+      <GenerationUsageCard />
 
       <section className="panel stack">
         <div className="row">
@@ -118,12 +127,20 @@ export default function BillingPage() {
                   </button>
                 )}
                 {isUpgrade && tier.id !== "business" && (
-                  <button className="button accent" style={{ width: "100%" }}>
+                  <button
+                    className="button accent"
+                    style={{ width: "100%" }}
+                    onClick={() => { void startBillingCheckout({ plan: tier.id, withSetupFee: true }); }}
+                  >
                     {b.upgradeTo} {tier.name}
                   </button>
                 )}
                 {isLower && (
-                  <button className="button secondary" style={{ width: "100%" }}>
+                  <button
+                    className="button secondary"
+                    style={{ width: "100%" }}
+                    onClick={() => { void startBillingCheckout({ plan: tier.id }); }}
+                  >
                     {b.downgradeTo} {tier.name}
                   </button>
                 )}

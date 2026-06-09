@@ -255,12 +255,30 @@ export type MarketReference = {
 export type BillingTier = {
   id: string;
   name: string;
+  /** Monthly recurring price in EUR (null for custom/Business quote). */
   monthlyUsd: number | null;
   publishedSkuLimit: number | null;
+  /** Model generations included each billing period (null = unlimited/custom). */
+  includedGenerations?: number | null;
+  /** One-time onboarding/setup fee in EUR (waived on annual billing). */
+  setupFeeEur?: number | null;
   storageGb: number | null;
   monthlyViewLimit: number | null;
   positioning: string;
   includes: string[];
+  recommended?: boolean;
+};
+
+export type TopUpPack = {
+  id: string;
+  name: string;
+  /** Extra model generations granted by the pack. */
+  generations: number;
+  /** One-time price in EUR. */
+  priceEur: number;
+  /** Effective price per generation, for display. */
+  perModelEur: number;
+  note: string;
   recommended?: boolean;
 };
 
