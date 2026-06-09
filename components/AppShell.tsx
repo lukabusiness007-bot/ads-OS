@@ -105,8 +105,6 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           <LogOut size={15} strokeWidth={2} aria-hidden />
           {n.logout}
         </button>
-
-        <p className="sidebarFooter">{n.footer}</p>
       </aside>
       <main className="main">{children}</main>
     </div>
