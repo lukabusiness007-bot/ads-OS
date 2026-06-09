@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { AppShell } from "@/components/AppShell";
 import { GENERATED_PRODUCT_STORAGE_KEY, type StoredGeneratedProduct } from "@/lib/generated-product-storage";
+import { useLang } from "@/lib/lang";
 import type { GenerationStatusResponse } from "@/lib/types";
 
 export default function StatusPage() {
@@ -17,6 +18,8 @@ export default function StatusPage() {
 
 function StatusPageContent() {
   const searchParams = useSearchParams();
+  const { tr } = useLang();
+  const se = tr.statusExtra;
   const [storedProduct, setStoredProduct] = useState<StoredGeneratedProduct | null>(null);
   const [statusPayload, setStatusPayload] = useState<GenerationStatusResponse | null>(null);
   const [isPolling, setIsPolling] = useState(false);
@@ -105,18 +108,18 @@ function StatusPageContent() {
   const steps = useMemo(
     () => [
       {
-        title: "Photos uploaded",
-        detail: `${storedProduct?.photoCount ?? "4"} product photos were received and stored.`,
+        title: se.stepPhotosTitle,
+        detail: se.stepPhotosDetail(storedProduct?.photoCount ?? 4),
         state: "done"
       },
       {
-        title: "Creating model",
+        title: se.stepModelTitle,
         detail:
           effectiveStatus === "failed"
             ? message
             : effectiveStatus === "queued" || effectiveStatus === "running"
             ? message
-            : "The 3D model was generated.",
+            : se.stepModelReady,
         state:
           effectiveStatus === "failed"
             ? "failed"
@@ -125,38 +128,38 @@ function StatusPageContent() {
             : "done"
       },
       {
-        title: "Packaging AR files",
+        title: se.stepPackagingTitle,
         detail:
           effectiveStatus === "succeeded"
-            ? "GLB, USDZ, and poster files are stored for the viewer."
+            ? se.stepPackagingReady
             : effectiveStatus === "failed"
-            ? "Packaging stopped because this generation run failed."
-            : "The model will be copied into storage as soon as generation finishes.",
+            ? se.stepPackagingFailed
+            : se.stepPackagingPending,
         state: effectiveStatus === "succeeded" ? "done" : effectiveStatus === "failed" ? "pending" : "active"
       },
       {
-        title: "Ready to review",
+        title: se.stepReviewTitle,
         detail:
           effectiveStatus === "succeeded"
-            ? "Open the preview, inspect the model, then send it to quality review."
+            ? se.stepReviewReady
             : effectiveStatus === "failed"
-            ? "Start another generation after fixing the issue above."
-            : "Preview unlocks after packaging finishes.",
+            ? se.stepReviewFailed
+            : se.stepReviewPending,
         state: effectiveStatus === "succeeded" ? "active" : "pending"
       }
     ],
-    [effectiveStatus, message, storedProduct?.photoCount]
+    [effectiveStatus, message, se, storedProduct?.photoCount]
   );
 
   if (!productId || !taskId) {
     return (
       <AppShell>
         <section className="panel stack">
-          <p className="eyebrow">Generation status</p>
-          <h1>No active generation</h1>
-          <p className="muted">Start a product generation first, then this page will show live progress.</p>
+          <p className="eyebrow">{tr.status.eyebrow}</p>
+          <h1>{se.noActiveGeneration}</h1>
+          <p className="muted">{se.noActiveDesc}</p>
           <Link className="button accent" href="/create">
-            Create AR product
+            {se.createBtn}
           </Link>
         </section>
       </AppShell>
@@ -166,9 +169,9 @@ function StatusPageContent() {
   return (
     <AppShell>
       <header>
-        <p className="eyebrow">Generation status</p>
+        <p className="eyebrow">{tr.status.eyebrow}</p>
         <h1>{storedProduct?.name ?? "Generated product"}</h1>
-        <p className="muted">The app is creating the 3D model and packaging it for the web and AR viewer.</p>
+        <p className="muted">{se.processing}</p>
       </header>
 
       <section className="grid two">
@@ -182,16 +185,16 @@ function StatusPageContent() {
         </div>
 
         <aside className="panel stack">
-          <h2>Current status</h2>
+          <h2>{se.currentStatusHeading}</h2>
           <p className="muted">{pollError || message}</p>
           <div className="row">
-            <span className={`badge ${statusTone(effectiveStatus)}`}>{statusLabel(effectiveStatus)}</span>
-            <span className="badge neutral">{Math.max(0, Math.min(100, progress))}% complete</span>
-            {isPolling && <span className="badge neutral">Refreshing</span>}
+            <span className={`badge ${statusTone(effectiveStatus)}`}>{statusLabel(effectiveStatus, se)}</span>
+            <span className="badge neutral">{Math.max(0, Math.min(100, progress))}{se.complete}</span>
+            {isPolling && <span className="badge neutral">{se.refreshing}</span>}
           </div>
           <div className="uploadProgress">
             <div className="uploadProgressHeader">
-              <strong>Generation progress</strong>
+              <strong>{se.genProgress}</strong>
               <span>{Math.max(0, Math.min(100, progress))}%</span>
             </div>
             <div
@@ -209,11 +212,11 @@ function StatusPageContent() {
 
           {effectiveStatus === "succeeded" ? (
             <Link className="button accent" href={previewHref}>
-              Open generated model
+              {se.openModel}
             </Link>
           ) : (
             <Link className="button secondary" href="/create">
-              Start another generation
+              {se.startAnother}
             </Link>
           )}
         </aside>
@@ -223,12 +226,14 @@ function StatusPageContent() {
 }
 
 function StatusFallback() {
+  const { tr } = useLang();
+  const se = tr.statusExtra;
   return (
     <AppShell>
       <section className="panel stack">
-        <p className="eyebrow">Generation status</p>
-        <h1>Loading status</h1>
-        <p className="muted">Preparing the generation timeline.</p>
+        <p className="eyebrow">{tr.status.eyebrow}</p>
+        <h1>{se.loadingHeading}</h1>
+        <p className="muted">{se.loadingDesc}</p>
       </section>
     </AppShell>
   );
@@ -301,18 +306,9 @@ function statusTone(status: string) {
   return "warning";
 }
 
-function statusLabel(status: string) {
-  if (status === "succeeded") {
-    return "Ready to review";
-  }
-
-  if (status === "failed") {
-    return "Needs new photos";
-  }
-
-  if (status === "running") {
-    return "Creating model";
-  }
-
-  return "Queued";
+function statusLabel(status: string, se: { statusReady: string; statusNeedsPhotos: string; statusCreating: string; statusQueued: string }) {
+  if (status === "succeeded") return se.statusReady;
+  if (status === "failed") return se.statusNeedsPhotos;
+  if (status === "running") return se.statusCreating;
+  return se.statusQueued;
 }

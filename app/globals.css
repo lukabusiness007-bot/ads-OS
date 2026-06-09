@@ -475,7 +475,7 @@ textarea {
 }
 
 .brand {
-  align-items: flex-start;
+  align-items: center;
   display: flex;
   gap: 8px;
   justify-content: space-between;
@@ -499,7 +499,6 @@ textarea {
   font-weight: 800;
   justify-content: center;
   letter-spacing: 0.1em;
-  margin-top: 2px;
   min-width: 34px;
   padding: 5px 10px;
   text-transform: uppercase;
@@ -519,7 +518,7 @@ textarea {
 }
 
 .brandMarkLg {
-  height: 48px;
+  height: 54px;
 }
 
 .brand strong {
@@ -3406,6 +3405,51 @@ h3 {
   flex-wrap: wrap;
   gap: 8px;
   margin-top: auto;
+}
+
+.productCardDeleteBtn {
+  align-items: center;
+  background: rgba(220, 38, 38, 0.08);
+  border: 1px solid rgba(220, 38, 38, 0.18);
+  border-radius: 6px;
+  color: #ef4444;
+  cursor: pointer;
+  display: flex;
+  justify-content: center;
+  opacity: 0;
+  padding: 5px;
+  position: absolute;
+  right: 8px;
+  top: 8px;
+  transition: opacity 0.15s, background 0.15s;
+}
+
+.productCard:hover .productCardDeleteBtn {
+  opacity: 1;
+}
+
+.productCardDeleteBtn:hover {
+  background: rgba(220, 38, 38, 0.18);
+}
+
+.productCardConfirm {
+  display: grid;
+  gap: 8px;
+  margin-top: auto;
+}
+
+.productCardConfirmText {
+  color: var(--ink);
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.4;
+  margin: 0;
+}
+
+.productCardConfirmError {
+  color: #ef4444;
+  font-size: 12px;
+  margin: 0;
 }
 
 /* ─── Responsive: new components ────────────────────────────────────────── */

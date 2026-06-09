@@ -547,3 +547,33 @@ function isDbRow(value: unknown): value is DbRow {
 function toNumber(value: unknown) {
   return Number(value ?? 0);
 }
+
+export async function getProductById(productId: string): Promise<Product | null> {
+  if (!isSupabaseConfigured()) return null;
+
+  const supabase = await createServerSupabaseClient();
+  const organizationResult = await ensureCurrentOrganization(supabase);
+
+  if (organizationResult.status !== "ready") return null;
+
+  const { organization } = organizationResult;
+
+  const [{ data: productRow }, { data: analyticsRows }] = await Promise.all([
+    supabase
+      .from("products")
+      .select("*, hosted_pages(*), model_assets(*)")
+      .eq("id", productId)
+      .eq("organization_id", organization.id)
+      .maybeSingle(),
+    supabase
+      .from("analytics_events")
+      .select("product_id, event_type, device_type")
+      .eq("organization_id", organization.id)
+      .eq("product_id", productId)
+  ]);
+
+  if (!productRow) return null;
+
+  const analyticsByProduct = buildAnalyticsByProduct(analyticsRows ?? []);
+  return mapProductRow(productRow, organization, analyticsByProduct[productRow.id]);
+}
