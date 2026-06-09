@@ -3,6 +3,7 @@
 import { Suspense, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { SignInPage, type Testimonial } from "@/components/ui/sign-in";
+import { Logo } from "@/components/Logo";
 import { createBrowserSupabaseClient } from "@/lib/supabase/client";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
 
@@ -165,6 +166,13 @@ function LoginPageContent() {
   return (
     <div className="bg-background text-foreground">
       <SignInPage
+        logo={
+          <Logo
+            theme="dark"
+            markClassName="h-9 w-auto"
+            wordmarkClassName="text-2xl font-semibold leading-none tracking-tight"
+          />
+        }
         title={
           <span className="font-light tracking-tighter">
             {isRegister ? "Create your" : "Welcome to"}{" "}

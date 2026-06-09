@@ -7,7 +7,7 @@ import { LayoutGrid, PlusSquare, Link2, BarChart2, CreditCard, LogOut, Menu, X }
 import { useLang } from "@/lib/lang"
 import { isSupabaseConfigured } from "@/lib/supabase/config"
 import { createBrowserSupabaseClient } from "@/lib/supabase/client"
-import { LogoMark } from "@/components/Logo"
+import { Logo } from "@/components/Logo"
 
 export function AppShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname()
@@ -36,12 +36,12 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   return (
     <div className="appShell">
       <header className="mobileAppBar">
-        <Link href="/dashboard" className="mobileBrand" aria-label="Augmenta dashboard">
-          <LogoMark theme="dark" className="brandMark" />
-          <span>
-            <strong>Augmenta</strong>
-            <small>{n.brand}</small>
-          </span>
+        <Link href="/dashboard" className="mobileBrand" aria-label="augmenta3D dashboard">
+          <Logo
+            theme="dark"
+            markClassName="brandMark"
+            wordmarkClassName="text-xl font-semibold leading-none tracking-tight"
+          />
         </Link>
         <button
           className="mobileNavButton"
@@ -67,9 +67,11 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       <aside className={mobileNavOpen ? "sidebar sidebarOpen" : "sidebar"} id="app-sidebar">
         <div className="brand">
           <div className="brandLeft">
-            <LogoMark theme="dark" className="brandMark" />
-            <strong>Augmenta</strong>
-            <span>{n.brand}</span>
+            <Logo
+              theme="dark"
+              markClassName="brandMark brandMarkLg"
+              wordmarkClassName="text-2xl font-semibold leading-none tracking-tight"
+            />
           </div>
           <button
             className="langPill"

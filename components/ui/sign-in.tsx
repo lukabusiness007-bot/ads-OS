@@ -25,6 +25,7 @@ export interface Testimonial {
 }
 
 interface SignInPageProps {
+  logo?: React.ReactNode;
   title?: React.ReactNode;
   description?: React.ReactNode;
   heroImageSrc?: string;
@@ -84,6 +85,7 @@ const TestimonialMarquee = ({ testimonials }: { testimonials: Testimonial[] }) =
 // --- MAIN COMPONENT ---
 
 export const SignInPage: React.FC<SignInPageProps> = ({
+  logo,
   title = <span className="font-light tracking-tighter text-white">Welcome</span>,
   description = "Access your account and continue your journey with us",
   heroImageSrc,
@@ -116,6 +118,9 @@ export const SignInPage: React.FC<SignInPageProps> = ({
 
         <div className="w-full max-w-md relative z-10">
           <div className="flex flex-col gap-6">
+            {logo && (
+              <div className="animate-element animate-delay-100">{logo}</div>
+            )}
             <h1 className="animate-element animate-delay-100 text-4xl md:text-5xl font-semibold leading-tight text-white">
               {title}
             </h1>
