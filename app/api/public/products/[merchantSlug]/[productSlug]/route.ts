@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { getPublishedProduct } from "@/lib/supabase/data";
+import { checkRateLimit, clientIpFromHeaders } from "@/lib/rate-limit";
 import type { ModelAsset } from "@/lib/types";
 
 export const dynamic = "force-dynamic";
@@ -16,7 +17,13 @@ export function OPTIONS() {
 
 type RouteParams = { params: Promise<{ merchantSlug: string; productSlug: string }> };
 
-export async function GET(_request: Request, { params }: RouteParams) {
+export async function GET(request: Request, { params }: RouteParams) {
+  const ip = clientIpFromHeaders(request.headers);
+  const { allowed } = await checkRateLimit(`public-product:${ip}`, 120, 60);
+  if (!allowed) {
+    return NextResponse.json({ error: "rate_limited" }, { status: 429, headers: CORS });
+  }
+
   const { merchantSlug, productSlug } = await params;
 
   const product = await getPublishedProduct(merchantSlug, productSlug);

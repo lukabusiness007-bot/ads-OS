@@ -195,7 +195,6 @@ export default async function ReviewInspectorPage({
           <ReviewActions
             productId={product.id}
             productName={product.name}
-            adminId={admin.id}
             currentStatus={product.status as ProductStatus}
             modelChecks={modelChecks}
           />

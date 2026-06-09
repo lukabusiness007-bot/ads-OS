@@ -561,7 +561,12 @@ export type AdminReviewQueueItem = {
 export type ReviewDecision = {
   decision: "approved" | "rejected" | "regenerate";
   notes?: string;
-  reviewerId: string;
+  /**
+   * Deprecated as an input: the reviewer is derived from the authenticated admin
+   * session server-side, never trusted from the client. Kept optional so existing
+   * callers that still send it type-check.
+   */
+  reviewerId?: string;
 };
 
 export type AutoReviewVerdict = "approve" | "reject" | "needs_human";

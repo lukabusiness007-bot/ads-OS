@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect, useRef, useState } from "react"
-import { usePathname, useRouter, useSearchParams } from "next/navigation"
+import { useFilterNavigation } from "./useFilterNavigation"
 
 export type FilterTab = { value: string; label: string }
 
@@ -25,9 +25,7 @@ export function FilterControls({
   searchParam?: string
   searchPlaceholder?: string
 }) {
-  const router = useRouter()
-  const pathname = usePathname()
-  const searchParams = useSearchParams()
+  const { navigate, searchParams } = useFilterNavigation()
   const activeTab = searchParams.get(tabParam) ?? tabs?.[0]?.value
   const urlQuery = searchParams.get(searchParam) ?? ""
   const [query, setQuery] = useState(urlQuery)
@@ -42,17 +40,6 @@ export function FilterControls({
   }
 
   useEffect(() => () => clearTimeout(debounceRef.current), [])
-
-  function navigate(updates: Record<string, string | null>, mode: "push" | "replace") {
-    const next = new URLSearchParams(searchParams.toString())
-    for (const [key, value] of Object.entries(updates)) {
-      if (value) next.set(key, value)
-      else next.delete(key)
-    }
-    next.delete("page")
-    const queryString = next.toString()
-    router[mode](queryString ? `${pathname}?${queryString}` : pathname)
-  }
 
   function handleSearchInput(value: string) {
     setQuery(value)

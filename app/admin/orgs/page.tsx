@@ -4,6 +4,7 @@ import { listOrganizations } from "@/lib/admin/data";
 import { PageHeader } from "@/components/admin/PageHeader";
 import { FilterControls } from "@/components/admin/FilterControls";
 import { DataTable, type DataTableColumn } from "@/components/admin/DataTable";
+import { PaginationControls } from "@/components/admin/PaginationControls";
 
 type OrgRow = Awaited<ReturnType<typeof listOrganizations>>["rows"][number];
 
@@ -92,23 +93,11 @@ export default async function AdminOrgsPage({
         <DataTable rows={rows} columns={COLUMNS} getRowKey={(org) => org.id} empty={emptyState} />
       </div>
 
-      {totalPages > 1 && (
-        <div className="row" style={{ gap: 8, marginTop: 16, justifyContent: "center" }}>
-          {currentPage > 1 && (
-            <Link href={`/admin/orgs?page=${currentPage - 1}${search ? `&search=${encodeURIComponent(search)}` : ""}`} className="button secondary sm">
-              ← Prev
-            </Link>
-          )}
-          <span className="muted" style={{ lineHeight: "32px", fontSize: 13 }}>
-            Page {currentPage} of {totalPages}
-          </span>
-          {currentPage < totalPages && (
-            <Link href={`/admin/orgs?page=${currentPage + 1}${search ? `&search=${encodeURIComponent(search)}` : ""}`} className="button secondary sm">
-              Next →
-            </Link>
-          )}
-        </div>
-      )}
+      <PaginationControls
+        currentPage={currentPage}
+        totalPages={totalPages}
+        hrefForPage={(p) => `/admin/orgs?page=${p}${search ? `&search=${encodeURIComponent(search)}` : ""}`}
+      />
     </>
   );
 }

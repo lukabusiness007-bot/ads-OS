@@ -22,6 +22,7 @@ import { sendGenerationFailedEmail, sendGenerationReadyEmail } from "@/lib/email
 import { isSupabaseConfigured } from "@/lib/supabase/config";
 import { getCurrentOrganization, getOrganizationOwnerEmail } from "@/lib/supabase/data";
 import { createServerSupabaseClient, createServiceRoleSupabaseClient, isSupabaseServiceRoleConfigured } from "@/lib/supabase/server";
+import { checkRateLimit } from "@/lib/rate-limit";
 import type { GenerationStatusResponse, ModelAsset } from "@/lib/types";
 
 export const runtime = "nodejs";
@@ -50,6 +51,62 @@ export async function GET(request: Request) {
     const organization = supabase ? await getCurrentOrganization(supabase) : null;
     const adminClient = organization && isSupabaseServiceRoleConfigured() ? createServiceRoleSupabaseClient() : null;
     const writeClient = adminClient ?? supabase;
+
+    // Auth + ownership gate. When Supabase is configured this endpoint is for the
+    // signed-in merchant only: require a session and confirm the caller owns this
+    // generation job BEFORE any provider/storage work. This closes unauthenticated
+    // compute abuse and IDOR via guessed product/task ids. Demo mode (Supabase
+    // unconfigured) keeps working without auth.
+    if (supabase) {
+      if (!organization) {
+        return NextResponse.json(
+          {
+            status: "failed",
+            progress: 0,
+            message: "Sign in to check generation status.",
+            errorMessage: "Sign in to check generation status."
+          } satisfies GenerationStatusResponse,
+          { status: 401 }
+        );
+      }
+
+      // Per-org rate limit. The client polls every ~5s (≈12/min); 120/min leaves
+      // generous headroom while capping abuse.
+      const { allowed } = await checkRateLimit(`generation-status:${organization.id}`, 120, 60);
+      if (!allowed) {
+        return NextResponse.json(
+          {
+            status: "failed",
+            progress: 0,
+            message: "Too many status checks. Please wait a moment.",
+            errorMessage: "Too many status checks. Please wait a moment."
+          } satisfies GenerationStatusResponse,
+          { status: 429 }
+        );
+      }
+
+      const { data: ownedJob } = await (writeClient ?? supabase)
+        .from("generation_jobs")
+        .select("id")
+        .eq("organization_id", organization.id)
+        .eq("product_id", productId)
+        .eq("provider_job_id", taskId)
+        .limit(1)
+        .maybeSingle();
+
+      if (!ownedJob) {
+        return NextResponse.json(
+          {
+            status: "failed",
+            progress: 0,
+            message: "Generation not found.",
+            errorMessage: "Generation not found."
+          } satisfies GenerationStatusResponse,
+          { status: 404 }
+        );
+      }
+    }
+
     const task = await getMeshyMultiImageTask(taskId);
     const status = mapMeshyStatus(task.status);
 

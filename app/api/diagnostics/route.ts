@@ -1,4 +1,6 @@
 import { NextResponse } from "next/server";
+import { verifyAdminRequest } from "@/lib/admin/verify";
+import { checkRateLimit, clientIpFromHeaders } from "@/lib/rate-limit";
 
 type DiagnosticSeverity = "error" | "warning" | "info";
 
@@ -65,7 +67,22 @@ const supabaseEnvChecks: EnvCheck[] = [
   }
 ];
 
-export async function GET() {
+export async function GET(request: Request) {
+  // Rate-limit before any work to blunt anonymous probing of this endpoint.
+  const ip = clientIpFromHeaders(request.headers);
+  const { allowed } = await checkRateLimit(`diagnostics:${ip}`, 20, 60);
+  if (!allowed) {
+    return NextResponse.json({ error: "Too many requests." }, { status: 429 });
+  }
+
+  // Diagnostics expose which integrations are configured and the deployment
+  // environment — internal state that must not reach anonymous callers. Restrict
+  // to platform admins (a logged-in admin operator using ?debug still sees it).
+  const verify = await verifyAdminRequest();
+  if (!verify.ok) {
+    return NextResponse.json({ error: verify.error }, { status: verify.status });
+  }
+
   const issues: DiagnosticIssue[] = [];
 
   for (const check of requiredEnvChecks) {

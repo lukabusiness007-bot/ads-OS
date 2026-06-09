@@ -54,8 +54,6 @@ export async function POST(request: Request) {
     const serviceRoleAvailable = isSupabaseServiceRoleConfigured();
     const adminClient = serviceRoleAvailable ? createServiceRoleSupabaseClient() : null;
 
-    console.log("[uploads] org_id:", organization?.id ?? "none", "| service_role:", serviceRoleAvailable);
-
     const databaseProductId = organization
       ? await createProductRecord(adminClient ?? supabase!, organization.id, payload)
       : productId;
@@ -117,12 +115,9 @@ async function createProductRecord(
     .single();
 
   if (error || !data) {
-    console.error("[uploads] PRODUCT INSERT FAILED >>>", JSON.stringify({
-      code: error?.code,
-      message: error?.message,
-      details: error?.details,
-      hint: error?.hint
-    }));
+    // Log only the coarse error code — message/details/hint can echo row data or
+    // schema internals into logs.
+    console.error("[uploads] product insert failed", { code: error?.code ?? "unknown" });
     throw new Error("Product could not be created.");
   }
 

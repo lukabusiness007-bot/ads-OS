@@ -20,14 +20,13 @@ export type ReviewQueueRow = {
 
 async function postBulkDecision(
   ids: string[],
-  decision: "approved" | "rejected",
-  reviewerId: string
+  decision: "approved" | "rejected"
 ): Promise<BulkActionResult> {
   try {
     const res = await fetch("/api/admin/review/bulk", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ ids, decision, reviewerId })
+      body: JSON.stringify({ ids, decision })
     })
     const data = await res.json().catch(() => ({}))
     if (!res.ok) {
@@ -39,9 +38,8 @@ async function postBulkDecision(
   }
 }
 
-export function ReviewQueueTable({ rows, adminId, emptyState }: {
+export function ReviewQueueTable({ rows, emptyState }: {
   rows: ReviewQueueRow[]
-  adminId: string
   emptyState: ReactNode
 }) {
   const columns: SelectableColumn<ReviewQueueRow>[] = [
@@ -105,8 +103,8 @@ export function ReviewQueueTable({ rows, adminId, emptyState }: {
       rows={rows}
       columns={columns}
       emptyState={emptyState}
-      onBulkApprove={(ids) => postBulkDecision(ids, "approved", adminId)}
-      onBulkReject={(ids) => postBulkDecision(ids, "rejected", adminId)}
+      onBulkApprove={(ids) => postBulkDecision(ids, "approved")}
+      onBulkReject={(ids) => postBulkDecision(ids, "rejected")}
     />
   )
 }

@@ -5,7 +5,6 @@ import { createPortal } from "react-dom"
 import Link from "next/link"
 import { Bell } from "lucide-react"
 import { createBrowserSupabaseClient } from "@/lib/supabase/client"
-import type { AdminNotification } from "@/lib/types"
 
 type NotifRow = {
   id: string
@@ -19,14 +18,20 @@ type NotifRow = {
 export function NotificationBell() {
   const [open, setOpen] = React.useState(false)
   const [notifications, setNotifications] = React.useState<NotifRow[]>([])
-  const [loading, setLoading] = React.useState(true)
+  // Badge-only count used before the full list is loaded
+  const [unreadCount, setUnreadCount] = React.useState(0)
+  const [listLoaded, setListLoaded] = React.useState(false)
+  const [listLoading, setListLoading] = React.useState(false)
   const [menuPos, setMenuPos] = React.useState<{ top: number; left: number } | null>(null)
   const [mounted, setMounted] = React.useState(false)
   const ref = React.useRef<HTMLDivElement>(null)
   const buttonRef = React.useRef<HTMLButtonElement>(null)
   const menuRef = React.useRef<HTMLDivElement>(null)
+  // Ref so the realtime callback always sees the current value without re-subscribing
+  const listLoadedRef = React.useRef(false)
 
-  const unread = notifications.filter((n) => !n.read).length
+  // Derive unread: use the list once loaded, otherwise the count-only value
+  const unread = listLoaded ? notifications.filter((n) => !n.read).length : unreadCount
 
   React.useEffect(() => {
     setMounted(true)
@@ -51,39 +56,38 @@ export function NotificationBell() {
     }
   }, [open])
 
-  // Load initial notifications
+  // On mount: fetch only the unread count (cheap head query) + subscribe to realtime
   React.useEffect(() => {
     const supabase = createBrowserSupabaseClient()
 
-    async function load() {
-      const { data } = await supabase
-        .from("admin_notifications")
-        .select("*, product:product_id(id, name, status)")
-        .order("created_at", { ascending: false })
-        .limit(30)
-      setNotifications((data as NotifRow[]) ?? [])
-      setLoading(false)
-    }
+    supabase
+      .from("admin_notifications")
+      .select("*", { count: "exact", head: true })
+      .eq("read", false)
+      .then(({ count }) => setUnreadCount(count ?? 0))
 
-    load()
-
-    // Realtime subscription to admin_notifications inserts
     const channel = supabase
       .channel("admin-notifications")
       .on(
         "postgres_changes",
         { event: "INSERT", schema: "public", table: "admin_notifications" },
         (payload) => {
-          setNotifications((prev) => [payload.new as NotifRow, ...prev])
+          const newNotif = payload.new as NotifRow
+          if (!newNotif.read) setUnreadCount((prev) => prev + 1)
+          if (listLoadedRef.current) {
+            setNotifications((prev) => [newNotif, ...prev])
+          }
         }
       )
       .on(
         "postgres_changes",
         { event: "UPDATE", schema: "public", table: "admin_notifications" },
         (payload) => {
-          setNotifications((prev) =>
-            prev.map((n) => (n.id === (payload.new as NotifRow).id ? (payload.new as NotifRow) : n))
-          )
+          if (listLoadedRef.current) {
+            setNotifications((prev) =>
+              prev.map((n) => (n.id === (payload.new as NotifRow).id ? (payload.new as NotifRow) : n))
+            )
+          }
         }
       )
       .subscribe()
@@ -92,6 +96,31 @@ export function NotificationBell() {
       supabase.removeChannel(channel)
     }
   }, [])
+
+  // Load the full list on first dropdown open
+  React.useEffect(() => {
+    if (!open || listLoaded) return
+
+    setListLoading(true)
+    const supabase = createBrowserSupabaseClient()
+
+    async function loadList() {
+      try {
+        const { data } = await supabase
+          .from("admin_notifications")
+          .select("*, product:product_id(id, name, status)")
+          .order("created_at", { ascending: false })
+          .limit(30)
+        setNotifications((data as NotifRow[]) ?? [])
+        listLoadedRef.current = true
+        setListLoaded(true)
+      } finally {
+        setListLoading(false)
+      }
+    }
+
+    loadList()
+  }, [open, listLoaded])
 
   // Close on outside click (the dropdown is portaled, so check both the trigger and the menu)
   React.useEffect(() => {
@@ -190,12 +219,12 @@ export function NotificationBell() {
           </div>
 
           <div style={{ maxHeight: 360, overflowY: "auto" }}>
-            {loading && (
+            {listLoading && (
               <p className="muted" style={{ padding: "12px 14px", fontSize: 13 }}>
                 Loading…
               </p>
             )}
-            {!loading && notifications.length === 0 && (
+            {!listLoading && listLoaded && notifications.length === 0 && (
               <p className="muted" style={{ padding: "12px 14px", fontSize: 13 }}>
                 No notifications yet
               </p>

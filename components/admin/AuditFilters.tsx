@@ -1,6 +1,6 @@
 "use client"
 
-import { useRouter, usePathname, useSearchParams } from "next/navigation"
+import { useFilterNavigation } from "./useFilterNavigation"
 
 export type AuditFilterOption = { value: string; label: string }
 
@@ -18,9 +18,7 @@ export function AuditFilters({
   targetOptions: AuditFilterOption[]
   actorOptions: AuditFilterOption[]
 }) {
-  const router = useRouter()
-  const pathname = usePathname()
-  const searchParams = useSearchParams()
+  const { navigate, searchParams, pathname, router } = useFilterNavigation()
 
   const action = searchParams.get("action") ?? ""
   const targetType = searchParams.get("targetType") ?? ""
@@ -29,17 +27,6 @@ export function AuditFilters({
   const to = searchParams.get("to") ?? ""
 
   const hasFilters = Boolean(action || targetType || actor || from || to)
-
-  function navigate(updates: Record<string, string | null>) {
-    const next = new URLSearchParams(searchParams.toString())
-    for (const [key, value] of Object.entries(updates)) {
-      if (value) next.set(key, value)
-      else next.delete(key)
-    }
-    next.delete("page")
-    const queryString = next.toString()
-    router.push(queryString ? `${pathname}?${queryString}` : pathname)
-  }
 
   return (
     <div className="stack" style={{ gap: 12, marginBottom: 20 }}>

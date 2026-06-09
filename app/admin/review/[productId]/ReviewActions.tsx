@@ -17,13 +17,11 @@ const decisionVerb: Record<Decision, string> = {
 export function ReviewActions({
   productId,
   productName,
-  adminId,
   currentStatus,
   modelChecks
 }: {
   productId: string
   productName: string
-  adminId: string
   currentStatus: ProductStatus
   modelChecks: ModelPackageCheck[]
 }) {
@@ -48,7 +46,7 @@ export function ReviewActions({
       const res = await fetch(`/api/admin/review/${productId}/decide`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ decision, notes: combinedNotes, reviewerId: adminId })
+        body: JSON.stringify({ decision, notes: combinedNotes })
       })
 
       if (!res.ok) {

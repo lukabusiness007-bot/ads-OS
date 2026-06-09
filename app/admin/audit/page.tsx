@@ -1,9 +1,10 @@
-import Link from "next/link";
 import { requirePlatformAdmin } from "@/lib/supabase/auth-guard";
 import { listAuditActors, listAuditLog, type AdminAuditEntryWithTarget } from "@/lib/admin/data";
 import { PageHeader } from "@/components/admin/PageHeader";
 import { AuditFilters, type AuditFilterOption } from "@/components/admin/AuditFilters";
 import { DataTable, type DataTableColumn } from "@/components/admin/DataTable";
+import { PaginationControls } from "@/components/admin/PaginationControls";
+import Link from "next/link";
 
 const PAGE_SIZE = 50;
 
@@ -178,23 +179,11 @@ export default async function AdminAuditPage({
         <DataTable rows={rows} columns={COLUMNS} getRowKey={(entry) => entry.id} empty={emptyState} />
       </div>
 
-      {totalPages > 1 && (
-        <div className="row" style={{ gap: 8, marginTop: 16, justifyContent: "center" }}>
-          {currentPage > 1 && (
-            <Link href={pageHref(currentPage - 1)} className="button secondary sm">
-              ← Prev
-            </Link>
-          )}
-          <span className="muted" style={{ lineHeight: "32px", fontSize: 13 }}>
-            Page {currentPage} of {totalPages}
-          </span>
-          {currentPage < totalPages && (
-            <Link href={pageHref(currentPage + 1)} className="button secondary sm">
-              Next →
-            </Link>
-          )}
-        </div>
-      )}
+      <PaginationControls
+        currentPage={currentPage}
+        totalPages={totalPages}
+        hrefForPage={pageHref}
+      />
     </>
   );
 }

@@ -1,8 +1,24 @@
 import { NextResponse } from "next/server";
+import { z } from "zod";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { ensureCurrentOrganization } from "@/lib/supabase/data";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
-import type { ProductCategory, ProductStatus } from "@/lib/types";
+import type { ProductStatus } from "@/lib/types";
+
+const dimensionSchema = z.object({
+  width: z.number().finite().nonnegative(),
+  height: z.number().finite().nonnegative(),
+  depth: z.number().finite().nonnegative()
+});
+
+const updateProductSchema = z.object({
+  name: z.string().trim().max(200).optional(),
+  category: z.string().trim().max(64).optional(),
+  description: z.string().max(5000).optional(),
+  customerUrl: z.string().max(2048).optional(),
+  price: z.string().max(64).optional(),
+  dimensions: dimensionSchema.optional()
+});
 
 const DELETABLE_STATUSES: ProductStatus[] = [
   "draft",
@@ -28,14 +44,11 @@ export async function PATCH(
     return NextResponse.json({ errorMessage: "Unauthorized." }, { status: 401 });
   }
 
-  const body = (await request.json()) as {
-    name?: string;
-    category?: ProductCategory;
-    description?: string;
-    customerUrl?: string;
-    price?: string;
-    dimensions?: { width: number; height: number; depth: number };
-  };
+  const parsed = updateProductSchema.safeParse(await request.json().catch(() => null));
+  if (!parsed.success) {
+    return NextResponse.json({ errorMessage: "Invalid product update." }, { status: 400 });
+  }
+  const body = parsed.data;
 
   const updates: Record<string, unknown> = {
     updated_at: new Date().toISOString()

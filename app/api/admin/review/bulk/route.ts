@@ -1,6 +1,12 @@
 import { NextResponse } from "next/server";
+import { z } from "zod";
 import { verifyAdminRequest } from "@/lib/admin/verify";
 import { decideReview } from "@/lib/admin/data";
+
+const bulkSchema = z.object({
+  ids: z.array(z.string().uuid()).min(1).max(200),
+  decision: z.enum(["approved", "rejected"])
+});
 
 export async function POST(request: Request) {
   const verify = await verifyAdminRequest();
@@ -8,36 +14,25 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: verify.error }, { status: verify.status });
   }
 
-  let body: { ids?: string[]; decision?: string; reviewerId?: string };
-  try {
-    body = await request.json();
-  } catch {
-    return NextResponse.json({ error: "Invalid JSON" }, { status: 400 });
+  const parsed = bulkSchema.safeParse(await request.json().catch(() => null));
+  if (!parsed.success) {
+    return NextResponse.json({ error: "ids and a valid decision are required" }, { status: 400 });
   }
-
-  const { ids, decision, reviewerId } = body;
-
-  if (!Array.isArray(ids) || ids.length === 0) {
-    return NextResponse.json({ error: "ids required" }, { status: 400 });
-  }
-
-  if (decision !== "approved" && decision !== "rejected") {
-    return NextResponse.json({ error: "Invalid decision" }, { status: 400 });
-  }
-
-  if (!reviewerId) {
-    return NextResponse.json({ error: "reviewerId required" }, { status: 400 });
-  }
+  const { ids, decision } = parsed.data;
 
   let succeeded = 0;
   let failed = 0;
 
-  for (const productId of ids) {
-    try {
-      await decideReview(verify.user, productId, { decision, reviewerId }, "human");
-      succeeded += 1;
-    } catch {
-      failed += 1;
+  const CHUNK = 5;
+  for (let i = 0; i < ids.length; i += CHUNK) {
+    const chunk = ids.slice(i, i + CHUNK);
+    // reviewer derived from the authenticated admin session, not the body.
+    const results = await Promise.allSettled(
+      chunk.map((productId) => decideReview(verify.user, productId, { decision }, "human"))
+    );
+    for (const r of results) {
+      if (r.status === "fulfilled") succeeded += 1;
+      else failed += 1;
     }
   }
 

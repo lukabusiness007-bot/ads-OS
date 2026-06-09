@@ -43,30 +43,6 @@ function isEmailAddress(value: string) {
   return value.includes("@");
 }
 
-async function resolveIdentifier(
-  identifier: string
-): Promise<{ email: string | null; error?: string }> {
-  if (isEmailAddress(identifier)) {
-    return { email: identifier };
-  }
-
-  // Username → email lookup via server route (uses service role, never reaches browser)
-  try {
-    const res = await fetch("/api/auth/resolve-username", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ username: identifier }),
-    });
-    if (!res.ok) {
-      return { email: null, error: "Invalid username or password." };
-    }
-    const data = await res.json();
-    return { email: data.email };
-  } catch {
-    return { email: null, error: "Could not resolve username." };
-  }
-}
-
 function LoginPageContent() {
   const searchParams = useSearchParams();
   const next = searchParams.get("next") || "/dashboard";
@@ -111,32 +87,52 @@ function LoginPageContent() {
       return;
     }
 
-    const { email, error: resolveError } = await resolveIdentifier(identifier);
-    if (!email) {
-      setLoading(false);
-      setError(resolveError ?? "Invalid username or password.");
+    // Email login: verify client-side. Username login: verify server-side so the
+    // username → email mapping never reaches the browser.
+    if (isEmailAddress(identifier)) {
+      const supabase = createBrowserSupabaseClient();
+      const { data, error: signInError } = await supabase.auth.signInWithPassword({
+        email: identifier,
+        password,
+      });
+
+      if (signInError) {
+        setLoading(false);
+        setError(signInError.message);
+        return;
+      }
+
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("is_platform_admin")
+        .eq("id", data.user.id)
+        .single();
+
+      window.location.href = profile?.is_platform_admin ? "/admin" : next;
       return;
     }
 
-    const supabase = createBrowserSupabaseClient();
-    const { data, error: signInError } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    });
+    try {
+      const res = await fetch("/api/auth/login-username", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ username: identifier, password }),
+      });
+      const data = (await res.json().catch(() => null)) as
+        | { ok?: boolean; isAdmin?: boolean; error?: string }
+        | null;
 
-    if (signInError) {
+      if (!res.ok || !data?.ok) {
+        setLoading(false);
+        setError(data?.error ?? "Invalid username or password.");
+        return;
+      }
+
+      window.location.href = data.isAdmin ? "/admin" : next;
+    } catch {
       setLoading(false);
-      setError(signInError.message);
-      return;
+      setError("Could not sign in. Please try again.");
     }
-
-    const { data: profile } = await supabase
-      .from("profiles")
-      .select("is_platform_admin")
-      .eq("id", data.user.id)
-      .single();
-
-    window.location.href = profile?.is_platform_admin ? "/admin" : next;
   }
 
   async function handleGoogleSignIn() {

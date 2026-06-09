@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { z } from "zod";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
 import { ensureCurrentOrganization } from "@/lib/supabase/data";
 import {
@@ -19,14 +20,16 @@ import {
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
-type CheckoutBody = {
+// Only the selection keys are accepted from the client; the actual prices/amounts
+// are resolved server-side from these keys (never trusted from the body).
+const checkoutSchema = z.object({
   /** Plan to subscribe to (subscription checkout). */
-  plan?: string;
+  plan: z.string().trim().max(64).optional(),
   /** Top-up pack id, e.g. "topup-25" (one-time payment checkout). */
-  topup?: string;
+  topup: z.string().trim().max(64).optional(),
   /** Include the one-time setup fee on the first invoice (subscription only). */
-  withSetupFee?: boolean;
-};
+  withSetupFee: z.boolean().optional()
+});
 
 export async function POST(request: Request) {
   if (!isStripeConfigured()) {
@@ -53,7 +56,12 @@ export async function POST(request: Request) {
 
   const organization = organizationResult.organization;
   const writeClient = isSupabaseServiceRoleConfigured() ? createServiceRoleSupabaseClient() : supabase;
-  const body = (await request.json().catch(() => ({}))) as CheckoutBody;
+
+  const parsedBody = checkoutSchema.safeParse(await request.json().catch(() => ({})));
+  if (!parsedBody.success) {
+    return NextResponse.json({ errorMessage: "Invalid checkout request." }, { status: 400 });
+  }
+  const body = parsedBody.data;
 
   try {
     const stripe = getStripe();

@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { recordHostedPageEvent } from "@/lib/supabase/data";
+import { checkRateLimit, clientIpFromHeaders } from "@/lib/rate-limit";
 import type { HostedPageAnalyticsEvent } from "@/lib/types";
 
 const allowedEvents = new Set<HostedPageAnalyticsEvent>([
@@ -10,6 +11,12 @@ const allowedEvents = new Set<HostedPageAnalyticsEvent>([
 ]);
 
 export async function POST(request: Request) {
+  const ip = clientIpFromHeaders(request.headers);
+  const { allowed } = await checkRateLimit(`analytics-beacon:${ip}`, 120, 60);
+  if (!allowed) {
+    return NextResponse.json({ ok: false }, { status: 429 });
+  }
+
   const payload = (await request.json().catch(() => null)) as {
     merchantSlug?: string;
     productSlug?: string;

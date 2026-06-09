@@ -161,6 +161,29 @@ export async function recordTopupPurchase(
     return;
   }
 
+  // Idempotency guard: Stripe retries webhook deliveries, so skip if this
+  // checkout session's top-up was already recorded — otherwise the same purchase
+  // double-credits generation credits.
+  const sessionId =
+    typeof (metadata as { sessionId?: unknown }).sessionId === "string"
+      ? (metadata as { sessionId: string }).sessionId
+      : null;
+
+  if (sessionId) {
+    const { data: existing } = await client
+      .from("usage_events")
+      .select("id")
+      .eq("organization_id", organizationId)
+      .eq("event_type", GENERATION_TOPUP_EVENT)
+      .filter("metadata->>sessionId", "eq", sessionId)
+      .limit(1)
+      .maybeSingle();
+
+    if (existing) {
+      return;
+    }
+  }
+
   await client.from("usage_events").insert({
     organization_id: organizationId,
     event_type: GENERATION_TOPUP_EVENT,

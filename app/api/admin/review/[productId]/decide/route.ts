@@ -1,6 +1,12 @@
 import { NextResponse } from "next/server";
+import { z } from "zod";
 import { verifyAdminRequest } from "@/lib/admin/verify";
 import { decideReview } from "@/lib/admin/data";
+
+const decideSchema = z.object({
+  decision: z.enum(["approved", "rejected", "regenerate"]),
+  notes: z.string().max(5000).optional()
+});
 
 export async function POST(
   request: Request,
@@ -13,31 +19,21 @@ export async function POST(
 
   const { productId } = await params;
 
-  let body: { decision?: string; notes?: string; reviewerId?: string };
-  try {
-    body = await request.json();
-  } catch {
-    return NextResponse.json({ error: "Invalid JSON" }, { status: 400 });
-  }
-
-  const { decision, notes, reviewerId } = body;
-
-  if (!["approved", "rejected", "regenerate"].includes(decision ?? "")) {
+  const parsed = decideSchema.safeParse(await request.json().catch(() => null));
+  if (!parsed.success) {
     return NextResponse.json({ error: "Invalid decision" }, { status: 400 });
   }
-
-  if (!reviewerId) {
-    return NextResponse.json({ error: "reviewerId required" }, { status: 400 });
-  }
+  const { decision, notes } = parsed.data;
 
   try {
+    // reviewerId is derived from the authenticated admin session (verify.user),
+    // never trusted from the request body.
     await decideReview(
       verify.user,
       productId,
       {
-        decision: decision as "approved" | "rejected" | "regenerate",
-        notes: notes?.trim(),
-        reviewerId
+        decision,
+        notes: notes?.trim()
       },
       "human"
     );
