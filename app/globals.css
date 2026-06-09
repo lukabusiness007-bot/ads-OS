@@ -580,6 +580,23 @@ textarea {
   color: #e9f2ea;
 }
 
+.sidebarBottom {
+  align-items: center;
+  display: flex;
+  gap: 8px;
+  margin-top: auto;
+}
+
+.sidebarBottom .logoutButton {
+  flex: 1;
+  margin-top: 0;
+  width: auto;
+}
+
+.sidebarBottom .langPill {
+  flex-shrink: 0;
+}
+
 .sidebarFooter {
   margin-top: 8px;
 }

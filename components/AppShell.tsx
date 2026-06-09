@@ -70,17 +70,9 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             <Logo
               theme="dark"
               markClassName="brandMark brandMarkLg"
-              wordmarkClassName="!text-4xl font-semibold !leading-none tracking-tight"
+              wordmarkClassName="!text-2xl font-semibold !leading-none tracking-tight"
             />
           </div>
-          <button
-            className="langPill"
-            type="button"
-            onClick={toggle}
-            aria-label="Promeni jezik / Switch language"
-          >
-            {tr.langToggle}
-          </button>
         </div>
 
         <nav className="nav" aria-label="Primary">
@@ -101,10 +93,20 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           })}
         </nav>
 
-        <button className="logoutButton" type="button" onClick={handleLogout}>
-          <LogOut size={15} strokeWidth={2} aria-hidden />
-          {n.logout}
-        </button>
+        <div className="sidebarBottom">
+          <button className="logoutButton" type="button" onClick={handleLogout}>
+            <LogOut size={15} strokeWidth={2} aria-hidden />
+            {n.logout}
+          </button>
+          <button
+            className="langPill"
+            type="button"
+            onClick={toggle}
+            aria-label="Promeni jezik / Switch language"
+          >
+            {tr.langToggle}
+          </button>
+        </div>
       </aside>
       <main className="main">{children}</main>
     </div>
