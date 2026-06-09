@@ -19,7 +19,7 @@ export function LandingPageContent({ lang }: { lang: Lang }) {
       <main>
         {/* ─── Hero ──────────────────────────────────────────────────── */}
         <Reveal className="overflow-hidden bg-[#fbfaf6]">
-          <div className="mx-auto max-w-7xl px-6 pt-20 sm:pt-28 lg:grid lg:grid-cols-[1fr_720px] lg:gap-10 lg:items-center lg:min-h-[92vh]">
+          <div className="mx-auto max-w-6xl px-6 pt-20 sm:pt-28 pb-12 sm:pb-16 lg:pb-20 lg:grid lg:grid-cols-[1.1fr_0.9fr] lg:gap-12 lg:items-center">
             {/* Copy block */}
             <div className="pb-14 lg:pb-0 text-center lg:text-left">
               <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-[#1f6f5b] mb-5">
@@ -56,9 +56,9 @@ export function LandingPageContent({ lang }: { lang: Lang }) {
             </div>
 
             {/* Hero visual */}
-            <div className="relative mx-auto max-w-2xl lg:max-w-none">
-              <div className="absolute inset-x-1/4 bottom-0 h-56 bg-[#1f6f5b]/12 blur-3xl rounded-full pointer-events-none" />
-              <div className="relative h-[520px] sm:h-[720px] lg:h-[min(900px,88vh)]">
+            <div className="relative mx-auto w-full max-w-xl lg:max-w-none">
+              <div className="absolute inset-x-1/4 bottom-0 h-44 bg-[#1f6f5b]/12 blur-3xl rounded-full pointer-events-none" />
+              <div className="relative w-full h-[440px] sm:h-[520px] lg:h-[640px]">
                 <HeroGem />
               </div>
               <p className="text-center text-xs text-[#697266]/50 -mt-3 pb-6">↻ Drag to rotate</p>
