@@ -2,7 +2,9 @@
 
 import Link from "next/link";
 import { AppShell } from "@/components/AppShell";
+import { GenerationUsageCard } from "@/components/GenerationUsageCard";
 import { billingTiers, organization, pricingPackages, products } from "@/lib/mock-data";
+import { openBillingPortal, startBillingCheckout } from "@/lib/billing/checkout-client";
 import { useLang } from "@/lib/lang";
 
 const TIER_ORDER = ["starter", "growth", "studio", "business"];
@@ -14,24 +16,6 @@ export default function BillingPage() {
   const published = products.filter((p) => p.status === "published").length;
   const usagePct = Math.round((published / 25) * 100);
   const currentTierIndex = TIER_ORDER.indexOf(organization.planTier);
-
-  async function startCheckout(planKey: string) {
-    try {
-      const res = await fetch("/api/billing/checkout", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ planKey })
-      });
-      const data = (await res.json()) as { url?: string; errorMessage?: string };
-      if (data.url) {
-        window.location.href = data.url;
-      } else {
-        alert(data.errorMessage ?? "Could not start checkout.");
-      }
-    } catch {
-      alert("Could not start checkout. Please try again.");
-    }
-  }
 
   function fmtViews(n: number | null) {
     if (!n) return b.custom;
@@ -46,10 +30,17 @@ export default function BillingPage() {
           <h1>{b.heading}</h1>
           <p className="muted">{b.subtitle}</p>
         </div>
-        <Link className="button secondary" href="/analytics">
-          {b.viewAnalytics}
-        </Link>
+        <div style={{ display: "flex", gap: 8 }}>
+          <button className="button secondary" onClick={() => { void openBillingPortal(); }}>
+            Manage billing
+          </button>
+          <Link className="button secondary" href="/analytics">
+            {b.viewAnalytics}
+          </Link>
+        </div>
       </header>
+
+      <GenerationUsageCard />
 
       <section className="panel stack">
         <div className="row">
@@ -136,12 +127,20 @@ export default function BillingPage() {
                   </button>
                 )}
                 {isUpgrade && tier.id !== "business" && (
-                  <button className="button accent" style={{ width: "100%" }} onClick={() => startCheckout(tier.id)}>
+                  <button
+                    className="button accent"
+                    style={{ width: "100%" }}
+                    onClick={() => { void startBillingCheckout({ plan: tier.id, withSetupFee: true }); }}
+                  >
                     {b.upgradeTo} {tier.name}
                   </button>
                 )}
                 {isLower && (
-                  <button className="button secondary" style={{ width: "100%" }} onClick={() => startCheckout(tier.id)}>
+                  <button
+                    className="button secondary"
+                    style={{ width: "100%" }}
+                    onClick={() => { void startBillingCheckout({ plan: tier.id }); }}
+                  >
                     {b.downgradeTo} {tier.name}
                   </button>
                 )}

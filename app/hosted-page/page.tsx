@@ -45,7 +45,11 @@ export default function HostedPageSettingsPage() {
 
         <aside className="panel stack">
           <h2>Public preview</h2>
-          <ModelViewer asset={product.modelAsset} alt={`${product.name} hosted 3D model`} />
+          <ModelViewer
+            asset={product.modelAsset}
+            alt={`${product.name} hosted 3D model`}
+            arShareUrl={hostedPage?.status === "published" ? hostedPage.publicUrl : null}
+          />
           <h3>{product.name}</h3>
           <p className="muted">{product.description}</p>
           <p className="muted">

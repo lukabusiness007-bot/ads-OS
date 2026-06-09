@@ -22,52 +22,60 @@ export const metadata: Metadata = buildSeoMetadata({
   alternates: marketingAlternates("/pricing", "/sr/pricing")
 })
 
+const SETUP_FEE_EUR = 99
+
 const plans = [
   {
     id: "starter",
     name: "Starter",
-    monthlyUsd: 39,
+    monthlyUsd: 29,
     publishedSkuLimit: 5,
+    includedGenerations: 5,
+    setupFeeEur: SETUP_FEE_EUR,
     storageGb: 2,
     monthlyViewLimit: 5000,
-    positioning: "Prva provera za malu Shopify prodavnicu.",
+    positioning: "Prva provera za malu prodavnicu, uživo za par dana.",
     includes: [
+      "5 generisanja modela mesečno",
       "3D preglednik i AR bez aplikacije",
       "Hostovane stranice proizvoda",
       "Osnovna analitika angažovanosti",
-      "Podrška putem emaila",
     ],
     recommended: false,
   },
   {
     id: "growth",
     name: "Growth",
-    monthlyUsd: 89,
+    monthlyUsd: 69,
     publishedSkuLimit: 20,
+    includedGenerations: 20,
+    setupFeeEur: SETUP_FEE_EUR,
     storageGb: 10,
     monthlyViewLimit: 25000,
-    positioning: "Najbolji izbor za pilote sa 10–25 SKU-ova.",
+    positioning: "Najbolji izbor za katalog koji raste, 10–25 proizvoda.",
     includes: [
+      "20 generisanja modela mesečno",
       "Sve iz Starter plana",
-      "Vodič za Shopify integraciju",
-      "Prioritetna lista za pregled modela",
-      "CSV izvoz analitike",
+      "Shopify i WooCommerce integracija",
+      "Prioritetni QA + CSV izvoz",
     ],
     recommended: true,
   },
   {
     id: "studio",
     name: "Studio",
-    monthlyUsd: 179,
+    monthlyUsd: 149,
     publishedSkuLimit: 50,
+    includedGenerations: 50,
+    setupFeeEur: SETUP_FEE_EUR,
     storageGb: 50,
     monthlyViewLimit: 100000,
     positioning: "Za prodavnice koje šire AR kroz veći katalog.",
     includes: [
+      "50 generisanja modela mesečno",
       "Sve iz Growth plana",
       "White-label hostovane stranice",
-      "Napredni izveštaji o uređajima",
-      "Uvodni poziv pre lansiranja",
+      "Napredna analitika",
     ],
     recommended: false,
   },
@@ -76,17 +84,25 @@ const plans = [
     name: "Business",
     monthlyUsd: null,
     publishedSkuLimit: null,
+    includedGenerations: null,
+    setupFeeEur: null,
     storageGb: null,
     monthlyViewLimit: null,
-    positioning: "Za 100+ SKU-ova, prilagođeni SLA, uvođenje i podršku.",
+    positioning: "Za 100+ proizvoda, prilagođeni SLA, uvođenje i API.",
     includes: [
-      "Prilagođena kvota SKU-ova",
+      "Neograničeno generisanje",
       "Prilagođeni uslovi upotrebe",
       "Posvećeno uvođenje",
-      "Opcioni nabavni ugovor",
+      "API pristup + SLA",
     ],
     recommended: false,
   },
+]
+
+const topUps = [
+  { id: "topup-10", name: "10 generisanja", priceEur: 19, perModelEur: 1.9, note: "Osvežavanje malog kataloga ili nekoliko dodatnih proizvoda.", recommended: false },
+  { id: "topup-25", name: "25 generisanja", priceEur: 39, perModelEur: 1.56, note: "Najbolja vrednost za sezonsko širenje kataloga.", recommended: true },
+  { id: "topup-50", name: "50 generisanja", priceEur: 69, perModelEur: 1.38, note: "Masovno uvođenje većeg kataloga odjednom.", recommended: false },
 ]
 
 const modelAddons = [
@@ -116,15 +132,15 @@ const modelAddons = [
 const overages = [
   {
     id: "extra-sku",
-    name: "Dodatni objavljeni SKU",
-    price: 5,
-    unit: "po SKU-u/mesečno",
-    guardrail: "Čini proširenje objavljenog kataloga isplativim bez prisilnog prelaska na viši plan.",
+    name: "Dodatni objavljeni proizvod",
+    price: 3,
+    unit: "po proizvodu/mesečno",
+    guardrail: "Dodajte par proizvoda preko plana bez prelaska na viši nivo.",
   },
   {
     id: "view-pack",
     name: "Dodatni paket pregleda",
-    price: 10,
+    price: 9,
     unit: "na 10.000 3D/AR pregleda",
     guardrail: "Štiti propusnost, analitiku i podršku tokom naglih porasta saobraćaja.",
   },
@@ -154,16 +170,16 @@ export default function PricingPageSr() {
         type="application/ld+json"
         dangerouslySetInnerHTML={jsonLd(faqPageJsonLd([
           {
-            question: "Da li se kreacija modela naplaćuje odvojeno od hostinga?",
-            answer: "Da. Mesečna pretplata pokriva hostovane stranice, AR preglednik i analitiku. Kreacija modela je zasebna jednokratna naknada po odobrenom SKU-u.",
+            question: "Kako funkcionišu generisanja modela i top-up paketi?",
+            answer: "Svaki plan uključuje određeni broj generisanja modela mesečno — otpremite fotografije proizvoda i mi generišemo njegov 3D/AR model. Treba vam više nego što plan uključuje? Kupite top-up paket; krediti se prenose i ne ističu.",
           },
           {
-            question: "Šta ako model ne prođe pregled kvaliteta?",
-            answer: "Stranica ostaje neobjavljena i revidiramo ili regenerišemo model. Naplaćujemo samo odobrene, objavljene modele.",
+            question: "Da li naplaćujete naknadu na moju prodaju?",
+            answer: "Ne. Cena je fiksna mesečna pretplata plus opcioni top-up paketi. Nikada ne uzimamo procenat od vašeg prihoda.",
           },
           {
-            question: "Mogu li početi sa manjim brojem SKU-ova?",
-            answer: "Apsolutno. Starter plan pokriva do 5 objavljenih SKU-ova. Možete nadograditi u bilo kom trenutku kako vaš katalog raste.",
+            question: "Čemu služi naknada za uvođenje?",
+            answer: "Jednokratno uvođenje od €99: podešavanje naloga, pomoć pri integraciji i prvi modeli pregledani zajedno sa vama. Besplatno je uz godišnju pretplatu.",
           },
         ]))}
       />
@@ -176,10 +192,10 @@ export default function PricingPageSr() {
             Cene
           </p>
           <h1 className="text-4xl font-semibold md:text-5xl text-zinc-900 text-balance leading-tight mb-5">
-            Počnite sa 10 proizvoda nameštaja. Dokažite angažovanje pre skaliranja.
+            Samostalni AR za vaše proizvode. Otpremite fotografije, uživo za par dana.
           </h1>
           <p className="text-lg text-zinc-500 max-w-xl mx-auto leading-relaxed">
-            Mesečna pretplata za hostovane AR stranice plus naknada po odobrenom modelu za 3D kreaciju. Dovoljno jednostavno za pilot pre širenja na ceo katalog.
+            Svaki plan uključuje mesečna generisanja modela, hostovane AR stranice i analitiku. Treba vam više modela? Dodajte top-up paket bilo kada. Fiksna cena — nikada ne uzimamo procenat od vaše prodaje.
           </p>
         </section>
 
@@ -240,13 +256,24 @@ export default function PricingPageSr() {
                         Individualna ponuda
                       </span>
                     )}
+                    {tier.monthlyUsd && (
+                      <p className={`text-xs mt-1.5 ${tier.recommended ? "text-emerald-300" : "text-zinc-400"}`}>
+                        {tier.setupFeeEur ? `+ €${tier.setupFeeEur} jednokratno uvođenje · besplatno uz godišnju` : "Uvođenje uključeno"}
+                      </p>
+                    )}
                   </div>
 
                   <div className={`grid gap-2 mb-6 p-3 rounded-xl text-xs ${tier.recommended ? "bg-emerald-900" : "bg-zinc-50 border border-zinc-100"}`}>
                     {tier.publishedSkuLimit ? (
                       <>
+                        {tier.includedGenerations != null && (
+                          <div className="flex justify-between">
+                            <span className={tier.recommended ? "text-emerald-300" : "text-zinc-500"}>Generisanja / mes</span>
+                            <span className={`font-bold ${tier.recommended ? "text-white" : "text-zinc-800"}`}>{tier.includedGenerations}</span>
+                          </div>
+                        )}
                         <div className="flex justify-between">
-                          <span className={tier.recommended ? "text-emerald-300" : "text-zinc-500"}>Objavljeni SKU-ovi</span>
+                          <span className={tier.recommended ? "text-emerald-300" : "text-zinc-500"}>Objavljeni proizvodi</span>
                           <span className={`font-bold ${tier.recommended ? "text-white" : "text-zinc-800"}`}>{tier.publishedSkuLimit}</span>
                         </div>
                         <div className="flex justify-between">
@@ -299,17 +326,53 @@ export default function PricingPageSr() {
           </div>
         </section>
 
-        {/* ─── Model Creation Add-ons ──────────────────────────────────── */}
+        {/* ─── Generation Top-Up Packs ─────────────────────────────────── */}
         <section className="mx-auto max-w-5xl px-6 py-20">
           <div className="text-center mb-12">
             <p className="text-xs font-bold uppercase tracking-widest text-emerald-700 mb-3">
-              Naknada po modelu
+              Treba vam više modela?
             </p>
             <h2 className="text-3xl font-semibold text-zinc-900 mb-3">
-              Dodaci za kreiranje 3D modela
+              Top-up paketi za generisanje
             </h2>
             <p className="text-zinc-500 max-w-lg mx-auto">
-              Naplaćuje se jednom po odobrenom modelu. Odaberite nivo koji odgovara složenosti i kvalitetu vašeg proizvoda.
+              Potrošili ste mesečna generisanja? Dodajte paket — krediti ne ističu i prenose se u naredni mesec. Bez promene plana.
+            </p>
+          </div>
+
+          <div className="grid gap-6 sm:grid-cols-3 max-w-3xl mx-auto">
+            {topUps.map((pack) => (
+              <article
+                key={pack.id}
+                className={`relative rounded-2xl border p-6 shadow-sm transition-all ${
+                  pack.recommended ? "border-emerald-400 bg-emerald-50/40" : "border-zinc-200 bg-white hover:border-emerald-200"
+                }`}
+              >
+                {pack.recommended && (
+                  <span className="absolute -top-3 left-1/2 -translate-x-1/2 bg-emerald-500 text-white text-xs font-bold px-3 py-1 rounded-full">
+                    Najbolja vrednost
+                  </span>
+                )}
+                <h3 className="font-bold text-zinc-900 mb-1">{pack.name}</h3>
+                <p className="text-3xl font-bold text-zinc-900">€{pack.priceEur}</p>
+                <p className="text-xs font-semibold text-emerald-700 mb-3">€{pack.perModelEur.toFixed(2)} / generisanju</p>
+                <p className="text-sm text-zinc-500 leading-relaxed">{pack.note}</p>
+              </article>
+            ))}
+          </div>
+        </section>
+
+        {/* ─── Optional Premium Finishing ──────────────────────────────── */}
+        <section className="mx-auto max-w-5xl px-6 py-20">
+          <div className="text-center mb-12">
+            <p className="text-xs font-bold uppercase tracking-widest text-emerald-700 mb-3">
+              Opciono · radimo umesto vas
+            </p>
+            <h2 className="text-3xl font-semibold text-zinc-900 mb-3">
+              Premium dorada modela
+            </h2>
+            <p className="text-zinc-500 max-w-lg mx-auto">
+              Samostalno generisanje pokriva većinu proizvoda. Za složene ili luksuzne komade, naš tim može ručno doraditi model — naplaćuje se jednom, samo kada zatražite.
             </p>
           </div>
 
@@ -373,37 +436,41 @@ export default function PricingPageSr() {
               Tipičan pilot
             </p>
             <h2 className="text-2xl font-semibold text-zinc-900">
-              15 SKU-ova na Growth planu — koliko zapravo košta prvi mesec?
+              15 proizvoda na Growth planu — koliko zapravo košta prvi mesec?
             </h2>
           </div>
           <div className="rounded-2xl border border-zinc-200 shadow-sm overflow-hidden">
             <div className="divide-y divide-zinc-100 bg-white">
               <div className="flex items-center justify-between px-6 py-4">
-                <span className="text-zinc-600 text-sm">Growth plan (hosting)</span>
-                <span className="font-semibold text-zinc-900">€89</span>
+                <span className="text-zinc-600 text-sm">Growth plan (uključuje 20 generisanja)</span>
+                <span className="font-semibold text-zinc-900">€69</span>
               </div>
               <div className="flex items-center justify-between px-6 py-4">
-                <span className="text-zinc-600 text-sm">15 × kreacija modela (e-commerce nivo)</span>
-                <span className="font-semibold text-zinc-900">15 × €149 = €2.235</span>
+                <span className="text-zinc-600 text-sm">Jednokratno uvođenje i podešavanje</span>
+                <span className="font-semibold text-zinc-900">€{SETUP_FEE_EUR}</span>
+              </div>
+              <div className="flex items-center justify-between px-6 py-4">
+                <span className="text-zinc-600 text-sm">15 generisanja modela</span>
+                <span className="font-semibold text-emerald-700">Uključeno</span>
               </div>
               <div className="flex items-center justify-between px-6 py-4 bg-zinc-50">
                 <span className="font-bold text-zinc-900 text-sm">Ukupno prvi mesec</span>
-                <span className="font-bold text-zinc-900 text-xl">€2.324</span>
+                <span className="font-bold text-zinc-900 text-xl">€{69 + SETUP_FEE_EUR}</span>
               </div>
               <div className="flex items-center justify-between px-6 py-4">
                 <span className="text-zinc-500 text-sm">Od drugog meseca</span>
-                <span className="font-semibold text-zinc-400">€89 / mesec</span>
+                <span className="font-semibold text-zinc-400">€69 / mesec</span>
               </div>
             </div>
             <div className="px-6 py-5 bg-emerald-50 border-t border-emerald-100">
               <p className="text-sm text-emerald-800 leading-relaxed">
-                <strong>ROI kontekst:</strong> Jedan izbegnut povrat sofe od €500 štedi €75–125 u logistici i rukovanju.
-                Pilot obično nadoknađuje troškove kreacije modela unutar 2–4 izbegnuta povrata.
+                <strong>ROI kontekst:</strong> AR podiže konverziju do ~90% i smanjuje povrate nameštaja za 25–40%.
+                Jedan izbegnut povrat sofe od €500 štedi €75–125 — ceo pilot se isplati za 1–3 izbegnuta povrata.
               </p>
             </div>
           </div>
           <p className="text-xs text-zinc-400 mt-4 text-center">
-            Kreacija modela je jednokratna naknada po odobrenom SKU-u. Hosting se obnavlja mesečno.
+            Planovi uključuju mesečna generisanja. Uvođenje je jednokratno, besplatno uz godišnju pretplatu. Fiksna cena — bez naknada na transakcije.
           </p>
         </section>
 
@@ -415,16 +482,16 @@ export default function PricingPageSr() {
           <div className="space-y-3 max-w-2xl mx-auto">
             {[
               {
-                q: "Da li se kreacija modela naplaćuje odvojeno od hostinga?",
-                a: "Da. Mesečna pretplata pokriva hostovane stranice, AR preglednik i analitiku. Kreacija modela je zasebna jednokratna naknada po odobrenom SKU-u.",
+                q: "Kako funkcionišu generisanja modela i top-up paketi?",
+                a: "Svaki plan uključuje određeni broj generisanja modela mesečno — otpremite fotografije proizvoda i mi generišemo njegov 3D/AR model. Treba vam više nego što plan uključuje? Kupite top-up paket; krediti se prenose i ne ističu.",
               },
               {
-                q: "Šta ako model ne prođe pregled kvaliteta?",
-                a: "Stranica ostaje neobjavljena i revidiramo ili regenerišemo model. Naplaćujemo samo odobrene, objavljene modele.",
+                q: "Da li naplaćujete naknadu na moju prodaju?",
+                a: "Ne. Cena je fiksna mesečna pretplata plus opcioni top-up paketi. Nikada ne uzimamo procenat od vašeg prihoda.",
               },
               {
-                q: "Mogu li početi sa manjim brojem SKU-ova?",
-                a: "Apsolutno. Starter plan pokriva do 5 objavljenih SKU-ova. Možete nadograditi u bilo kom trenutku kako vaš katalog raste.",
+                q: "Čemu služi naknada za uvođenje?",
+                a: "Jednokratno uvođenje od €99: podešavanje naloga, pomoć pri integraciji i prvi modeli pregledani zajedno sa vama. Besplatno je uz godišnju pretplatu.",
               },
             ].map((item) => (
               <details

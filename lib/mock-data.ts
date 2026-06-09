@@ -18,9 +18,14 @@ import type {
   Product,
   QualityCheck,
   SalesObjection,
+  TopUpPack,
   UsageScenario,
   Review
 } from "./types";
+
+// One-time onboarding fee (EUR). Waived on annual billing. Keep in sync with
+// SETUP_FEE_EUR in lib/billing/plans.ts (the server-side source of truth).
+export const SETUP_FEE_EUR = 99;
 
 export const organization = {
   name: "Northline Home",
@@ -326,58 +331,97 @@ export const billingTiers: BillingTier[] = [
   {
     id: "starter",
     name: "Starter",
-    monthlyUsd: 39,
+    monthlyUsd: 29,
     publishedSkuLimit: 5,
+    includedGenerations: 5,
+    setupFeeEur: SETUP_FEE_EUR,
     storageGb: 2,
     monthlyViewLimit: 5000,
-    positioning: "First proof for a small Shopify store.",
-    includes: ["3D viewer and app-free AR", "Hosted product pages", "Basic engagement analytics", "Email support"]
+    positioning: "First proof for a small store, live in days.",
+    includes: ["5 model generations / month", "3D viewer and app-free AR", "Hosted product pages", "Basic engagement analytics"]
   },
   {
     id: "growth",
     name: "Growth",
-    monthlyUsd: 89,
+    monthlyUsd: 69,
     publishedSkuLimit: 20,
+    includedGenerations: 20,
+    setupFeeEur: SETUP_FEE_EUR,
     storageGb: 10,
     monthlyViewLimit: 25000,
-    positioning: "Best default for 10-25 SKU SMB pilots.",
-    includes: ["Everything in Starter", "Shopify embed guidance", "Priority model QA queue", "CSV analytics export"],
+    positioning: "Best default for a growing 10-25 product catalog.",
+    includes: ["20 model generations / month", "Everything in Starter", "Shopify & WooCommerce embed", "Priority QA + CSV export"],
     recommended: true
   },
   {
     id: "studio",
     name: "Studio",
-    monthlyUsd: 179,
+    monthlyUsd: 149,
     publishedSkuLimit: 50,
+    includedGenerations: 50,
+    setupFeeEur: SETUP_FEE_EUR,
     storageGb: 50,
     monthlyViewLimit: 100000,
     positioning: "For stores expanding AR across a meaningful catalog.",
-    includes: ["Everything in Growth", "White-label hosted pages", "Advanced device reporting", "Launch review call"]
+    includes: ["50 model generations / month", "Everything in Growth", "White-label hosted pages", "Advanced analytics"]
   },
   {
     id: "business",
     name: "Business",
     monthlyUsd: null,
     publishedSkuLimit: null,
+    includedGenerations: null,
+    setupFeeEur: null,
     storageGb: null,
     monthlyViewLimit: null,
-    positioning: "For 100+ SKUs, custom SLA, onboarding, and support.",
-    includes: ["Custom SKU allowance", "Custom usage terms", "Dedicated onboarding", "Optional procurement contract"]
+    positioning: "For 100+ products, custom SLA, onboarding, and API access.",
+    includes: ["Unlimited generations", "Custom usage terms", "Dedicated onboarding", "API access + SLA"]
+  }
+];
+
+// Generation top-up packs — bought on top of a plan when a merchant needs more
+// model generations than the plan includes this period. Pure-margin expansion
+// revenue (COGS ~€0.60/model). Purchased credits carry over and never expire.
+export const generationTopUps: TopUpPack[] = [
+  {
+    id: "topup-10",
+    name: "10 generations",
+    generations: 10,
+    priceEur: 19,
+    perModelEur: 1.9,
+    note: "Small catalog refresh or a few extra products."
+  },
+  {
+    id: "topup-25",
+    name: "25 generations",
+    generations: 25,
+    priceEur: 39,
+    perModelEur: 1.56,
+    note: "Best value for a seasonal catalog push.",
+    recommended: true
+  },
+  {
+    id: "topup-50",
+    name: "50 generations",
+    generations: 50,
+    priceEur: 69,
+    perModelEur: 1.38,
+    note: "Bulk onboarding of a larger catalog at once."
   }
 ];
 
 export const overagePrices: OveragePrice[] = [
   {
     id: "extra-sku",
-    name: "Extra published SKU",
-    priceUsd: 5,
-    unit: "per SKU/month",
-    guardrail: "Keeps published catalog expansion profitable without forcing an immediate plan upgrade."
+    name: "Extra published product",
+    priceUsd: 3,
+    unit: "per product/month",
+    guardrail: "Add a few products past your plan without jumping a full tier."
   },
   {
     id: "view-pack",
     name: "Extra view pack",
-    priceUsd: 10,
+    priceUsd: 9,
     unit: "per 10k 3D/AR views",
     guardrail: "Protects bandwidth, analytics, and support during traffic spikes."
   },

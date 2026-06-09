@@ -3,7 +3,7 @@ import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { MarketingNav } from "@/components/marketing-nav"
 import { BackToTop } from "@/components/BackToTop"
-import { billingTiers, modelCreationAddons, overagePrices } from "@/lib/mock-data"
+import { billingTiers, generationTopUps, modelCreationAddons, overagePrices, SETUP_FEE_EUR } from "@/lib/mock-data"
 import { CheckCircle2, ArrowRight } from "lucide-react"
 import {
   breadcrumbJsonLd,
@@ -40,16 +40,16 @@ export default function PricingPage() {
         type="application/ld+json"
         dangerouslySetInnerHTML={jsonLd(faqPageJsonLd([
           {
-            question: "Is model creation billed separately from hosting?",
-            answer: "Yes. The monthly subscription covers hosted pages, AR viewer, and analytics. Model creation is a separate one-time fee per approved SKU.",
+            question: "How do model generations and top-ups work?",
+            answer: "Each plan includes a set number of model generations per month — upload a product's photos and we generate its 3D/AR model. Need more than your plan includes? Buy a generation top-up pack; the credits carry over and never expire.",
           },
           {
-            question: "What if a model fails quality review?",
-            answer: "The page stays unpublished and we revise or regenerate the model. You are only charged for approved, published models.",
+            question: "Do you charge a fee on my sales?",
+            answer: "No. Pricing is a flat monthly plan plus optional top-ups. We never take a percentage of your revenue.",
           },
           {
-            question: "Can I start with fewer SKUs?",
-            answer: "Absolutely. The Starter plan covers up to 5 published SKUs. You can upgrade at any time as your catalog grows.",
+            question: "What is the setup fee for?",
+            answer: "A one-time €99 onboarding: account setup, embed install help, and your first models reviewed with you. It is waived when you pay annually.",
           },
         ]))}
       />
@@ -62,10 +62,10 @@ export default function PricingPage() {
             Pricing
           </p>
           <h1 className="text-4xl font-semibold md:text-5xl text-zinc-900 text-balance leading-tight mb-5">
-            Start with 10 furniture products. Prove engagement before scaling.
+            Self-serve AR for your products. Upload photos, go live in days.
           </h1>
           <p className="text-lg text-zinc-500 max-w-xl mx-auto leading-relaxed">
-            A monthly subscription for hosted AR pages plus a per-approved-model fee for 3D creation. Simple enough to test before you roll it across the catalog.
+            Every plan includes monthly model generations, hosted AR pages, and analytics. Need more models? Add a top-up pack anytime. Flat price — we never take a cut of your sales.
           </p>
         </section>
 
@@ -126,13 +126,25 @@ export default function PricingPage() {
                         Custom quote
                       </span>
                     )}
+                    {tier.monthlyUsd && (
+                      <p className={`text-xs mt-1.5 ${tier.recommended ? "text-emerald-300" : "text-zinc-400"}`}>
+                        {tier.setupFeeEur ? `+ €${tier.setupFeeEur} one-time setup` : "Setup included"}
+                        {tier.setupFeeEur ? " · waived on annual" : ""}
+                      </p>
+                    )}
                   </div>
 
                   {/* Limits */}
                   <div className={`grid grid-cols-1 gap-2 mb-6 p-3 rounded-xl text-xs ${tier.recommended ? "bg-emerald-900" : "bg-zinc-50 border border-zinc-100"}`}>
+                    {tier.includedGenerations != null && (
+                      <div className="flex justify-between">
+                        <span className={tier.recommended ? "text-emerald-300" : "text-zinc-500"}>Generations / mo</span>
+                        <span className={`font-bold ${tier.recommended ? "text-white" : "text-zinc-800"}`}>{tier.includedGenerations}</span>
+                      </div>
+                    )}
                     {tier.publishedSkuLimit && (
                       <div className="flex justify-between">
-                        <span className={tier.recommended ? "text-emerald-300" : "text-zinc-500"}>Published SKUs</span>
+                        <span className={tier.recommended ? "text-emerald-300" : "text-zinc-500"}>Published products</span>
                         <span className={`font-bold ${tier.recommended ? "text-white" : "text-zinc-800"}`}>{tier.publishedSkuLimit}</span>
                       </div>
                     )}
@@ -190,17 +202,53 @@ export default function PricingPage() {
           </div>
         </section>
 
-        {/* ─── Model Creation Add-ons ──────────────────────────────────── */}
+        {/* ─── Generation Top-Up Packs ─────────────────────────────────── */}
         <section className="mx-auto max-w-5xl px-6 py-20">
           <div className="text-center mb-12">
             <p className="text-xs font-bold uppercase tracking-widest text-emerald-700 mb-3">
-              Per-model fee
+              Need more models?
             </p>
             <h2 className="text-3xl font-semibold text-zinc-900 mb-3">
-              3D model creation add-ons
+              Generation top-up packs
             </h2>
             <p className="text-zinc-500 max-w-lg mx-auto">
-              Charged once per approved model. Pick the level that matches your product complexity and visual quality needs.
+              Used up your monthly generations? Add a pack — credits never expire and carry over to next month. No plan change required.
+            </p>
+          </div>
+
+          <div className="grid gap-6 sm:grid-cols-3 max-w-3xl mx-auto">
+            {generationTopUps.map((pack) => (
+              <article
+                key={pack.id}
+                className={`relative rounded-2xl border p-6 shadow-sm transition-all ${
+                  pack.recommended ? "border-emerald-400 bg-emerald-50/40" : "border-zinc-200 bg-white hover:border-emerald-200"
+                }`}
+              >
+                {pack.recommended && (
+                  <span className="absolute -top-3 left-1/2 -translate-x-1/2 bg-emerald-500 text-white text-xs font-bold px-3 py-1 rounded-full">
+                    Best value
+                  </span>
+                )}
+                <h3 className="font-bold text-zinc-900 mb-1">{pack.name}</h3>
+                <p className="text-3xl font-bold text-zinc-900">€{pack.priceEur}</p>
+                <p className="text-xs font-semibold text-emerald-700 mb-3">€{pack.perModelEur.toFixed(2)} / generation</p>
+                <p className="text-sm text-zinc-500 leading-relaxed">{pack.note}</p>
+              </article>
+            ))}
+          </div>
+        </section>
+
+        {/* ─── Optional Premium Finishing ──────────────────────────────── */}
+        <section className="mx-auto max-w-5xl px-6 py-20">
+          <div className="text-center mb-12">
+            <p className="text-xs font-bold uppercase tracking-widest text-emerald-700 mb-3">
+              Optional · done-for-you
+            </p>
+            <h2 className="text-3xl font-semibold text-zinc-900 mb-3">
+              Premium model finishing
+            </h2>
+            <p className="text-zinc-500 max-w-lg mx-auto">
+              Self-serve generation covers most products. For complex or luxury pieces, our team can hand-finish a model — charged once, only when you ask.
             </p>
           </div>
 
@@ -264,37 +312,41 @@ export default function PricingPage() {
               Typical pilot estimate
             </p>
             <h2 className="text-2xl font-semibold text-zinc-900">
-              15 SKUs on Growth — what does month one actually cost?
+              15 products on Growth — what does month one actually cost?
             </h2>
           </div>
           <div className="rounded-2xl border border-zinc-200 shadow-sm overflow-hidden">
             <div className="divide-y divide-zinc-100 bg-white">
               <div className="flex items-center justify-between px-6 py-4">
-                <span className="text-zinc-600 text-sm">Growth plan (hosting)</span>
-                <span className="font-semibold text-zinc-900">€89</span>
+                <span className="text-zinc-600 text-sm">Growth plan (includes 20 generations)</span>
+                <span className="font-semibold text-zinc-900">€69</span>
               </div>
               <div className="flex items-center justify-between px-6 py-4">
-                <span className="text-zinc-600 text-sm">15 × Commerce-ready model creation</span>
-                <span className="font-semibold text-zinc-900">15 × €149 = €2,235</span>
+                <span className="text-zinc-600 text-sm">One-time setup &amp; onboarding</span>
+                <span className="font-semibold text-zinc-900">€{SETUP_FEE_EUR}</span>
+              </div>
+              <div className="flex items-center justify-between px-6 py-4">
+                <span className="text-zinc-600 text-sm">15 model generations</span>
+                <span className="font-semibold text-emerald-700">Included</span>
               </div>
               <div className="flex items-center justify-between px-6 py-4 bg-zinc-50">
                 <span className="font-bold text-zinc-900 text-sm">First-month total</span>
-                <span className="font-bold text-zinc-900 text-xl">€2,324</span>
+                <span className="font-bold text-zinc-900 text-xl">€{69 + SETUP_FEE_EUR}</span>
               </div>
               <div className="flex items-center justify-between px-6 py-4">
                 <span className="text-zinc-500 text-sm">From month 2 onwards</span>
-                <span className="font-semibold text-zinc-400">€89 / month</span>
+                <span className="font-semibold text-zinc-400">€69 / month</span>
               </div>
             </div>
             <div className="px-6 py-5 bg-emerald-50 border-t border-emerald-100">
               <p className="text-sm text-emerald-800 leading-relaxed">
-                <strong>ROI context:</strong> A single avoided return on a €500 sofa saves €75–125 in logistics and handling.
-                The pilot typically recoups model creation cost within 2–4 avoided returns.
+                <strong>ROI context:</strong> AR lifts conversion up to ~90% and cuts furniture returns 25–40%.
+                A single avoided return on a €500 sofa saves €75–125 — the whole pilot pays for itself in 1–3 avoided returns.
               </p>
             </div>
           </div>
           <p className="text-xs text-zinc-400 mt-4 text-center">
-            Model creation is a one-time fee per approved SKU. Hosting renews monthly.
+            Plans include monthly generations. Setup is a one-time fee, waived on annual billing. Flat price — no transaction fees.
           </p>
         </section>
 
@@ -306,16 +358,16 @@ export default function PricingPage() {
           <div className="space-y-3 max-w-2xl mx-auto">
             {[
               {
-                q: "Is model creation billed separately from hosting?",
-                a: "Yes. The monthly subscription covers hosted pages, AR viewer, and analytics. Model creation is a separate one-time fee per approved SKU.",
+                q: "How do model generations and top-ups work?",
+                a: "Each plan includes a set number of model generations per month — upload a product's photos and we generate its 3D/AR model. Need more than your plan includes? Buy a generation top-up pack; the credits carry over and never expire.",
               },
               {
-                q: "What if a model fails quality review?",
-                a: "The page stays unpublished and we revise or regenerate the model. You are only charged for approved, published models.",
+                q: "Do you charge a fee on my sales?",
+                a: "No. Pricing is a flat monthly plan plus optional top-ups. We never take a percentage of your revenue.",
               },
               {
-                q: "Can I start with fewer SKUs?",
-                a: "Absolutely. The Starter plan covers up to 5 published SKUs. You can upgrade at any time as your catalog grows.",
+                q: "What is the setup fee for?",
+                a: "A one-time €99 onboarding: account setup, embed install help, and your first models reviewed with you. It is waived when you pay annually.",
               },
             ].map((item) => (
               <details

@@ -17,6 +17,7 @@ import { DEMO_ORG_ID, R2ConfigurationError, R2RequestError, createPresignedR2Get
 import { isSupabaseConfigured } from "@/lib/supabase/config";
 import { ensureCurrentOrganization } from "@/lib/supabase/data";
 import { createServerSupabaseClient, createServiceRoleSupabaseClient, isSupabaseServiceRoleConfigured } from "@/lib/supabase/server";
+import { getGenerationUsageSummary, type GenerationSource } from "@/lib/billing/usage";
 import type {
   GenerationPhotoContentType,
   GenerationUploadPhoto,
@@ -62,6 +63,10 @@ export async function POST(request: Request) {
       return NextResponse.json({ errorMessage: validationError }, { status: 400 });
     }
 
+    // Source of the credit this generation will consume ('included' first, then
+    // 'topup'). Recorded on the usage_event so carry-over top-ups are tracked.
+    let generationSource: GenerationSource = "included";
+
     if (organization) {
       const rateLimited = await isOrganizationRateLimited(adminClient ?? supabase!, organization.id);
 
@@ -74,6 +79,21 @@ export async function POST(request: Request) {
           { status: 429 }
         );
       }
+
+      const usage = await getGenerationUsageSummary(adminClient ?? supabase!, organization.id, organization.planKey);
+
+      if (!usage.canGenerate) {
+        return NextResponse.json(
+          {
+            errorMessage:
+              "You have used all model generations included in your plan. Buy a generation top-up pack or upgrade your plan to keep creating models.",
+            failureCode: "generation_quota_exceeded"
+          },
+          { status: 402 }
+        );
+      }
+
+      generationSource = usage.nextSource ?? "included";
 
       await persistUploadedPhotos(adminClient ?? supabase!, organization.id, productId, photos);
     }
@@ -96,7 +116,7 @@ export async function POST(request: Request) {
     }
 
     if (organization) {
-      await createGenerationJobRecord(adminClient ?? supabase!, organization.id, productId, taskId);
+      await createGenerationJobRecord(adminClient ?? supabase!, organization.id, productId, taskId, generationSource);
     }
 
     const response: StartGenerationResponse = {
@@ -206,7 +226,8 @@ async function createGenerationJobRecord(
   supabase: Awaited<ReturnType<typeof createServerSupabaseClient>> | ReturnType<typeof createServiceRoleSupabaseClient>,
   organizationId: string,
   productId: string,
-  taskId: string
+  taskId: string,
+  generationSource: GenerationSource
 ) {
   const { data } = await supabase
     .from("generation_jobs")
@@ -237,7 +258,7 @@ async function createGenerationJobRecord(
     product_id: productId,
     event_type: "generation_started",
     quantity: 1,
-    metadata: { taskId }
+    metadata: { taskId, source: generationSource }
   });
 }
 

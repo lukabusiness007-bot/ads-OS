@@ -6,6 +6,7 @@ import { formatMeters } from "@/lib/ui";
 import { isArCapable } from "@/lib/device";
 import type { Product } from "@/lib/types";
 import { ModelViewer } from "./ModelViewer";
+import { Smartphone, Monitor } from "lucide-react";
 
 type HostedProductExperienceProps = {
   merchantSlug: string;
@@ -118,9 +119,11 @@ export function HostedProductExperience({ merchantSlug, productSlug, product }: 
 
           {product.modelAsset && (
             <p className="arHint">
-              {arSupported
-                ? "📱 Tap “View in AR” inside the 3D viewer to place it in your room."
-                : "Rotate and zoom the 3D preview above — AR is available on mobile devices."}
+              {arSupported ? (
+                <><Smartphone className="inline-block h-4 w-4 mr-1.5 align-text-bottom" />Tap &ldquo;View in AR&rdquo; inside the 3D viewer to place it in your room.</>
+              ) : (
+                <><Monitor className="inline-block h-4 w-4 mr-1.5 align-text-bottom" />Rotate and zoom the 3D preview above — AR is available on mobile devices.</>
+              )}
             </p>
           )}
         </article>
