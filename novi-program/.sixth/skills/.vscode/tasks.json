@@ -1,0 +1,11 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"label": "Initialize React Frontend with Vite",
+			"type": "shell",
+			"command": "npm create vite@latest frontend -- --template react-ts",
+			"group": "build"
+		}
+	]
+}

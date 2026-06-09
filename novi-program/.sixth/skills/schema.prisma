@@ -1,0 +1,152 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// User model - salon/business owner
+model User {
+  id        String     @id @default(cuid())
+  email     String     @unique
+  password  String     // Will be hashed
+  role      String     @default("salon_owner")
+  salonName String
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+
+  clients      Client[]
+  services     Service[]
+  appointments Appointment[]
+  invoices     Invoice[]
+  payments     Payment[]
+
+  @@map("users")
+}
+
+// Client model - customers of the salon
+model Client {
+  id        String     @id @default(cuid())
+  userId    String
+  fullName  String
+  phone     String
+  email     String?
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+
+  user         User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  appointments Appointment[]
+  invoices     Invoice[]
+
+  @@unique([userId, email])
+  @@map("clients")
+}
+
+// Service model - services offered by salon
+model Service {
+  id              String     @id @default(cuid())
+  userId          String
+  name            String
+  durationMinutes Int        // Duration in minutes
+  price           Float      // Price in currency units
+  createdAt       DateTime   @default(now())
+  updatedAt       DateTime   @updatedAt
+
+  user            User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  appointments    Appointment[]
+  invoiceItems    InvoiceItem[]
+
+  @@unique([userId, name])
+  @@map("services")
+}
+
+// Appointment model - scheduled appointments
+model Appointment {
+  id        String     @id @default(cuid())
+  clientId  String
+  serviceId String
+  userId    String
+  startTime DateTime
+  endTime   DateTime
+  status    String     @default("pending") // pending, confirmed, completed, cancelled
+  notes     String?
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+
+  client  Client  @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  service Service @relation(fields: [serviceId], references: [id], onDelete: Cascade)
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([clientId])
+  @@index([userId])
+  @@index([startTime])
+  @@map("appointments")
+}
+
+// Invoice model - invoices for clients
+model Invoice {
+  id            String     @id @default(cuid())
+  invoiceNumber String     @unique
+  clientId      String
+  userId        String
+  total         Float
+  status        String     @default("draft") // draft, sent, paid, overdue, cancelled
+  notes         String?
+  paidAt        DateTime?
+  sentAt        DateTime?
+  dueDate       DateTime?
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
+
+  client        Client        @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  user          User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  items         InvoiceItem[]
+  payments      Payment[]
+
+  @@index([clientId])
+  @@index([userId])
+  @@map("invoices")
+}
+
+// InvoiceItem model - line items in an invoice
+model InvoiceItem {
+  id        String   @id @default(cuid())
+  invoiceId String
+  serviceId String
+  quantity  Int      @default(1)
+  unitPrice Float    // Price per unit
+  amount    Float    // quantity * unitPrice
+  createdAt DateTime @default(now())
+
+  invoice Invoice @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+  service Service @relation(fields: [serviceId], references: [id], onDelete: Cascade)
+
+  @@index([invoiceId])
+  @@map("invoice_items")
+}
+
+// Payment model - payment records
+model Payment {
+  id              String   @id @default(cuid())
+  invoiceId       String
+  userId          String
+  amount          Float
+  method          String   @default("stripe") // cash, card, bank_transfer, stripe
+  status          String   @default("pending") // pending, completed, failed
+  stripeSessionId String?  // Stripe checkout session ID
+  stripePaymentId String?  // Stripe payment ID
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  invoice Invoice @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([invoiceId])
+  @@index([userId])
+  @@map("payments")
+}
