@@ -66,7 +66,7 @@ const nextConfig: NextConfig = {
       },
       {
         source:
-          "/:path(api|admin|analytics|analytics-billing|approval|billing|create|dashboard|expansion|hosted-page|launch|preview|published-links|status|upload)(.*)",
+          "/:path(api|admin|analytics|analytics-billing|approval|ar-preview|billing|create|dashboard|expansion|hosted-page|launch|preview|published-links|status|upload)(.*)",
         headers: [
           { key: "X-Robots-Tag", value: "noindex, nofollow" },
         ],

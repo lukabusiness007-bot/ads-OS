@@ -929,6 +929,7 @@ export default function CreateProductPage() {
                   asset={modelAsset}
                   alt={`${metaName || storedProductData?.name || "Product"} 3D model`}
                   arShareUrl={null}
+                  arPreviewProductId={storedProductData?.productId}
                 />
 
                 {assetChecks.length > 0 && (

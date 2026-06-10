@@ -148,6 +148,7 @@ export function ProductDetail({ product }: { product: Product }) {
             asset={product.modelAsset}
             alt={`${product.name} 3D model`}
             arShareUrl={isPublished ? product.hostedPage!.publicUrl : null}
+            arPreviewProductId={product.id}
           />
 
           {product.modelAsset && (

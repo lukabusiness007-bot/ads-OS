@@ -10,7 +10,8 @@ import type {
   ModelPackageCheck
 } from "@/lib/types";
 import type { User } from "@supabase/supabase-js";
-import { createPresignedR2GetUrl, publicUrlForKey } from "@/lib/storage/r2";
+import { createPresignedR2GetUrl } from "@/lib/storage/r2";
+import { viewerAssetFromModelAssetRow } from "@/lib/model-asset-urls";
 import { runModelPackageChecks } from "@/lib/generation-pipeline";
 import { evaluateArGate } from "@/lib/admin/ar-gate";
 import { assertAdmin, db, escapeIlike, pageRange, type Paginated } from "./shared";
@@ -142,13 +143,7 @@ export async function getProductForReview(
   ).filter((url): url is string => url !== null);
 
   // Derive viewer-ready URLs from R2 keys (falling back to stored public URLs)
-  const modelAssetForViewer = modelAsset
-    ? {
-        glbUrl: (modelAsset.glb_r2_key ? publicUrlForKey(modelAsset.glb_r2_key) : null) ?? modelAsset.public_glb_url ?? "",
-        usdzUrl: (modelAsset.usdz_r2_key ? publicUrlForKey(modelAsset.usdz_r2_key) : null) ?? modelAsset.public_usdz_url ?? undefined,
-        posterUrl: (modelAsset.poster_r2_key ? publicUrlForKey(modelAsset.poster_r2_key) : null) ?? modelAsset.public_poster_url ?? "",
-      }
-    : undefined;
+  const modelAssetForViewer = modelAsset ? viewerAssetFromModelAssetRow(modelAsset) : undefined;
 
   // Run model package checks
   const modelChecks: ModelPackageCheck[] = modelAsset && modelAssetForViewer
@@ -323,9 +318,7 @@ export async function evaluateModelForAutoApproval(
   if (!asset) return "needs_human";
 
   const checks = runModelPackageChecks({
-    glbUrl: ((asset as AdminModelAsset).glb_r2_key ? publicUrlForKey((asset as AdminModelAsset).glb_r2_key!) : null) ?? (asset as AdminModelAsset).public_glb_url ?? "",
-    usdzUrl: ((asset as AdminModelAsset).usdz_r2_key ? publicUrlForKey((asset as AdminModelAsset).usdz_r2_key!) : null) ?? (asset as AdminModelAsset).public_usdz_url ?? undefined,
-    posterUrl: ((asset as AdminModelAsset).poster_r2_key ? publicUrlForKey((asset as AdminModelAsset).poster_r2_key!) : null) ?? (asset as AdminModelAsset).public_poster_url ?? "",
+    ...viewerAssetFromModelAssetRow(asset as AdminModelAsset),
     fileSizeMb: (asset as AdminModelAsset).file_size_mb ?? 0,
     triangleCount: (asset as AdminModelAsset).triangle_count,
     textureMax: (asset as AdminModelAsset).texture_max,

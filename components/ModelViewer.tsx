@@ -7,7 +7,7 @@ import type { ModelAsset } from "@/lib/types"
 import { QrCode } from "./QrCode"
 
 type ModelViewerProps = {
-  asset?: Pick<ModelAsset, "glbUrl" | "usdzUrl" | "posterUrl">
+  asset?: Pick<ModelAsset, "glbUrl" | "usdzUrl" | "posterUrl" | "dimensionsPresent">
   alt: string
   onInteract?: () => void
   onArClick?: () => void
@@ -24,6 +24,14 @@ type ModelViewerProps = {
    *   renders a disabled "available after publishing" state.
    */
   arShareUrl?: string | null
+  /**
+   * Product id used to mint a short-lived, signed AR preview link on demand
+   * when `arShareUrl` is `null` (unpublished products). When set, opening the
+   * QR modal fetches `/api/ar-preview/token` for a fresh ~30-minute link
+   * instead of showing the permanently-disabled "available after publishing"
+   * state.
+   */
+  arPreviewProductId?: string
 }
 
 type LoadError = { message: string; detail?: string }
@@ -39,6 +47,8 @@ function withArParam(rawUrl: string): string {
   }
 }
 
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://veridianar.com"
+
 const MODEL_VIEWER_SRC_VERSION = "decoder-v2"
 
 function versionModelViewerUrl(url: string) {
@@ -50,7 +60,7 @@ function versionModelViewerUrl(url: string) {
   return `${base}${separator}viewer=${MODEL_VIEWER_SRC_VERSION}${hash}`
 }
 
-export function ModelViewer({ asset, alt, onInteract, onArClick, arShareUrl }: ModelViewerProps) {
+export function ModelViewer({ asset, alt, onInteract, onArClick, arShareUrl, arPreviewProductId }: ModelViewerProps) {
   const [loadError, setLoadError] = React.useState<LoadError | null>(null)
   const [isFullscreen, setIsFullscreen] = React.useState(false)
   const [hasInteracted, setHasInteracted] = React.useState(false)
@@ -61,8 +71,14 @@ export function ModelViewer({ asset, alt, onInteract, onArClick, arShareUrl }: M
   const [shareUrl, setShareUrl] = React.useState("")
   const [showArPrompt, setShowArPrompt] = React.useState(false)
   const [copied, setCopied] = React.useState(false)
+  const [tokenStatus, setTokenStatus] = React.useState<"idle" | "loading" | "error">("idle")
+  const [retryNonce, setRetryNonce] = React.useState(0)
   const viewerRef = React.useRef<HTMLElement | null>(null)
   const wrapperRef = React.useRef<HTMLDivElement | null>(null)
+
+  // The product has no permanent public AR page (not published), but a
+  // short-lived signed preview link can be minted on demand.
+  const canMintPreview = arShareUrl === null && !!arPreviewProductId
 
   // Resolve device + the URL the QR should point at. Runs only on the client.
   React.useEffect(() => {
@@ -91,8 +107,42 @@ export function ModelViewer({ asset, alt, onInteract, onArClick, arShareUrl }: M
   }, [arShareUrl])
 
   const isDesktop = platform === "web"
-  // The product isn't published yet, so there is no phone-reachable AR page.
-  const arUnavailable = arShareUrl === null
+  // The product isn't published yet and has no mintable preview link either.
+  const arUnavailable = arShareUrl === null && !canMintPreview
+  const qrLoading = canMintPreview && tokenStatus === "loading"
+  const qrError = canMintPreview && tokenStatus === "error"
+
+  // Mint a fresh, short-lived AR preview link each time the QR modal opens —
+  // a stale tab never shows an expired QR.
+  React.useEffect(() => {
+    if (!showQr || !canMintPreview || !arPreviewProductId) return
+
+    let cancelled = false
+    // Deferred so the setState isn't called synchronously in the effect body.
+    queueMicrotask(() => {
+      if (!cancelled) setTokenStatus("loading")
+    })
+
+    fetch(`/api/ar-preview/token?productId=${encodeURIComponent(arPreviewProductId)}`)
+      .then(async (res) => {
+        if (!res.ok) throw new Error("Failed to mint AR preview token")
+        const data = (await res.json()) as { path?: string }
+        if (!data.path) throw new Error("Missing AR preview path")
+        return data.path
+      })
+      .then((path) => {
+        if (cancelled) return
+        setShareUrl(new URL(path, window.location.origin).toString())
+        setTokenStatus("idle")
+      })
+      .catch(() => {
+        if (!cancelled) setTokenStatus("error")
+      })
+
+    return () => {
+      cancelled = true
+    }
+  }, [showQr, canMintPreview, arPreviewProductId, retryNonce])
 
   function launchAr() {
     setShowArPrompt(false)
@@ -249,7 +299,10 @@ export function ModelViewer({ asset, alt, onInteract, onArClick, arShareUrl }: M
     alt,
     ar: true,
     "ar-modes": "webxr scene-viewer quick-look",
-    "ar-scale": "fixed",
+    // Models packaged with real product dimensions are baked to true scale —
+    // lock AR sizing so they appear life-size. Without dimensions, the model's
+    // size is arbitrary, so let the viewer allow pinch-to-resize instead.
+    "ar-scale": asset.dimensionsPresent === false ? "auto" : "fixed",
     "camera-controls": true,
     "touch-action": "pan-y",
     "auto-rotate": true,
@@ -331,24 +384,41 @@ export function ModelViewer({ asset, alt, onInteract, onArClick, arShareUrl }: M
                   This product’s AR page isn’t live yet. The QR code becomes available once the model is approved and published.
                 </p>
                 <div className="qrArCodeFrame qrArCodeDisabled" aria-hidden="true">
-                  <QrCode value="https://augmenta.ar" size={208} ecl="M" />
+                  <QrCode value={SITE_URL} size={208} ecl="M" />
                 </div>
                 <p className="qrArDisabledNote">Available after publishing</p>
               </>
             ) : (
               <>
-                <p className="qrArLead">Scan this QR code with your phone camera to launch augmented reality.</p>
-                <div className="qrArCodeFrame">
-                  <QrCode value={withArParam(shareUrl)} size={208} ecl="M" />
+                <p className="qrArLead">
+                  {qrError
+                    ? "We couldn’t prepare an AR link for this product."
+                    : "Scan this QR code with your phone camera to launch augmented reality."}
+                </p>
+                <div
+                  className={`qrArCodeFrame${qrLoading || qrError ? " qrArCodeDisabled" : ""}`}
+                  aria-hidden={qrLoading || qrError ? "true" : undefined}
+                >
+                  <QrCode value={qrLoading || qrError ? SITE_URL : withArParam(shareUrl)} size={208} ecl="M" />
                 </div>
-                <ol className="qrArSteps">
-                  <li>Open the Camera app on your phone</li>
-                  <li>Point it at the code above</li>
-                  <li>Tap the link, then tap “View in AR”</li>
-                </ol>
-                <button className="qrArCopy" type="button" onClick={copyShareLink}>
-                  {copied ? "Link copied" : "Copy link instead"}
-                </button>
+                {qrLoading && <p className="qrArDisabledNote">Preparing your AR link…</p>}
+                {qrError ? (
+                  <button className="qrArCopy" type="button" onClick={() => setRetryNonce((n) => n + 1)}>
+                    Try again
+                  </button>
+                ) : !qrLoading && (
+                  <>
+                    <ol className="qrArSteps">
+                      <li>Open the Camera app on your phone</li>
+                      <li>Point it at the code above</li>
+                      <li>Tap the link, then tap “View in AR”</li>
+                    </ol>
+                    <button className="qrArCopy" type="button" onClick={copyShareLink}>
+                      {copied ? "Link copied" : "Copy link instead"}
+                    </button>
+                    {canMintPreview && <p className="qrArDisabledNote">Link expires in ~30 minutes</p>}
+                  </>
+                )}
               </>
             )}
           </div>
