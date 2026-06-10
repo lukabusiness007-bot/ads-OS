@@ -1,6 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createServerClient } from "@supabase/ssr";
 import { isSupabaseConfigured, getSupabaseConfig } from "@/lib/supabase/config";
+import { buildContentSecurityPolicy } from "@/lib/security/csp";
+
+type EmbedSupabaseClient = ReturnType<typeof createServerClient>;
 
 const PROTECTED_PREFIXES = [
   "/admin",
@@ -31,14 +34,96 @@ const SR_DEFAULT_REDIRECTS: Record<string, string> = {
   "/pricing": "/sr/pricing",
 };
 
+// Only allow hosts that look like a bare domain or an https origin into the CSP
+// header, so a malicious/garbled `allowed_embed_domains` value can't inject
+// extra directives. Anything else is dropped.
+const EMBED_HOST_PATTERN = /^[a-zA-Z0-9.-]+(:\d+)?$/;
+
+function normalizeEmbedDomain(raw: string): string | null {
+  const value = raw.trim();
+  if (!value) {
+    return null;
+  }
+
+  // Accept either `https://host[:port]` or a bare `host[:port]`; force https.
+  let host = value;
+  if (value.includes("://")) {
+    try {
+      const parsed = new URL(value);
+      if (parsed.protocol !== "https:") {
+        return null;
+      }
+      host = parsed.host;
+    } catch {
+      return null;
+    }
+  }
+
+  return EMBED_HOST_PATTERN.test(host) ? `https://${host}` : null;
+}
+
+/**
+ * Resolve the `frame-ancestors` directive for an `/embed/{merchant}/{product}`
+ * request. Empty/missing allowlist = free-tier `*` (anyone can embed); a
+ * populated allowlist = `'self'` plus the sanitized https origins. Built only
+ * from the DB row, never from request input. Fails open to `*` on any error —
+ * framing control is a paid feature, not the auth boundary.
+ */
+async function resolveEmbedFrameAncestors(
+  supabase: EmbedSupabaseClient,
+  pathname: string
+): Promise<string> {
+  const segments = pathname.split("/").filter(Boolean); // ["embed", merchant, product]
+  const merchantSlug = segments[1] ? decodeURIComponent(segments[1]) : "";
+  const productSlug = segments[2] ? decodeURIComponent(segments[2]) : "";
+
+  if (!merchantSlug || !productSlug) {
+    return "*";
+  }
+
+  try {
+    const { data } = await supabase
+      .from("hosted_pages")
+      .select("allowed_embed_domains, organizations!inner(slug)")
+      .eq("status", "published")
+      .eq("slug", productSlug)
+      .eq("organizations.slug", merchantSlug)
+      .maybeSingle();
+
+    const domains = (data?.allowed_embed_domains as string[] | null | undefined) ?? [];
+    const allowed = domains
+      .map(normalizeEmbedDomain)
+      .filter((value): value is string => value !== null);
+
+    if (allowed.length === 0) {
+      return "*";
+    }
+
+    return ["'self'", ...allowed].join(" ");
+  } catch {
+    return "*";
+  }
+}
+
 export async function middleware(request: NextRequest) {
-  const srPath = SR_DEFAULT_REDIRECTS[request.nextUrl.pathname];
+  const { pathname } = request.nextUrl;
+
+  const srPath = SR_DEFAULT_REDIRECTS[pathname];
   if (srPath && request.cookies.get("lang")?.value !== "en") {
     return NextResponse.redirect(new URL(srPath, request.url));
   }
 
+  const isEmbed = pathname.startsWith("/embed/");
+
   if (!isSupabaseConfigured()) {
-    return NextResponse.next();
+    const response = NextResponse.next();
+    if (isEmbed) {
+      // No DB to read an allowlist from — fall back to free-tier framing so the
+      // route still works, and keep its CSP self-consistent.
+      response.headers.set("Content-Security-Policy", buildContentSecurityPolicy("*"));
+      response.headers.delete("X-Frame-Options");
+    }
+    return response;
   }
 
   const { url, anonKey } = getSupabaseConfig();
@@ -63,9 +148,19 @@ export async function middleware(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser();
 
-  if (!user && isProtectedPath(request.nextUrl.pathname)) {
+  if (isEmbed) {
+    // Public route — never redirected. Set a per-page CSP whose frame-ancestors
+    // come from the hosted page's allowlist. next.config deliberately omits the
+    // frame headers for /embed so this one isn't AND-combined with a stricter one.
+    const frameAncestors = await resolveEmbedFrameAncestors(supabase, pathname);
+    response.headers.set("Content-Security-Policy", buildContentSecurityPolicy(frameAncestors));
+    response.headers.delete("X-Frame-Options");
+    return response;
+  }
+
+  if (!user && isProtectedPath(pathname)) {
     const loginUrl = new URL("/login", request.url);
-    loginUrl.searchParams.set("next", request.nextUrl.pathname);
+    loginUrl.searchParams.set("next", pathname);
     return NextResponse.redirect(loginUrl);
   }
 

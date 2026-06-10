@@ -5,6 +5,8 @@ type TrackHostedPageEventInput = {
   productId: string;
   merchantSlug: string;
   productSlug: string;
+  /** True when fired from a cross-origin embed; tags metadata for the split. */
+  embedded?: boolean;
 };
 
 export function trackHostedPageEvent(input: TrackHostedPageEventInput) {
@@ -13,24 +15,24 @@ export function trackHostedPageEvent(input: TrackHostedPageEventInput) {
     browser: getBrowserName(),
     deviceType: getDeviceType(),
     path: window.location.pathname,
-    timestamp: new Date().toISOString()
+    timestamp: new Date().toISOString(),
+    ...(input.embedded
+      ? { embedded: true, referrer: document.referrer || undefined }
+      : {})
   };
+
+  const body = JSON.stringify({
+    merchantSlug: input.merchantSlug,
+    productSlug: input.productSlug,
+    event: input.event,
+    deviceType: payload.deviceType,
+    metadata: payload
+  });
 
   window.localStorage.setItem("lastHostedPageAnalyticsEvent", JSON.stringify(payload));
   const beaconSent = navigator.sendBeacon?.(
     "/api/analytics/hosted-page",
-    new Blob(
-      [
-        JSON.stringify({
-          merchantSlug: input.merchantSlug,
-          productSlug: input.productSlug,
-          event: input.event,
-          deviceType: payload.deviceType,
-          metadata: payload
-        })
-      ],
-      { type: "application/json" }
-    )
+    new Blob([body], { type: "application/json" })
   );
 
   if (!beaconSent) {
@@ -39,13 +41,7 @@ export function trackHostedPageEvent(input: TrackHostedPageEventInput) {
       headers: {
         "Content-Type": "application/json"
       },
-      body: JSON.stringify({
-        merchantSlug: input.merchantSlug,
-        productSlug: input.productSlug,
-        event: input.event,
-        deviceType: payload.deviceType,
-        metadata: payload
-      }),
+      body,
       keepalive: true
     }).catch(() => undefined);
   }

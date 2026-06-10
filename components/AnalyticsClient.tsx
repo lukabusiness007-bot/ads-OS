@@ -21,11 +21,16 @@ export function AnalyticsClient({ data }: { data: DashboardData }) {
         </Link>
       </header>
 
-      <section className="grid four">
+      <section className="grid metrics">
         <article className="card metric">
           <span className="sectionLabel">{a.pageViews}</span>
           <strong>{data.totals.pageViews}</strong>
           <span className="badge neutral">{a.allProducts}</span>
+        </article>
+        <article className="card metric">
+          <span className="sectionLabel">{a.embedViews}</span>
+          <strong>{data.totals.embedViews}</strong>
+          <span className="badge neutral">{a.embedded}</span>
         </article>
         <article className="card metric">
           <span className="sectionLabel">{a.viewerInteractions}</span>
@@ -55,6 +60,7 @@ export function AnalyticsClient({ data }: { data: DashboardData }) {
               <tr>
                 <th>{a.colProduct}</th>
                 <th>{a.colPageViews}</th>
+                <th>{a.colEmbedViews}</th>
                 <th>{a.colInteractions}</th>
                 <th>{a.colArClicks}</th>
                 <th>{a.colStoreClicks}</th>
@@ -63,7 +69,7 @@ export function AnalyticsClient({ data }: { data: DashboardData }) {
             <tbody>
               {data.products.length === 0 ? (
                 <tr>
-                  <td colSpan={5}>
+                  <td colSpan={6}>
                     <div className="emptyTableState">
                       <strong>{a.noData}</strong>
                       <p className="muted">{tr.dashboard.emptyProductsDesc}</p>
@@ -80,6 +86,7 @@ export function AnalyticsClient({ data }: { data: DashboardData }) {
                       </p>
                     </td>
                     <td data-label={a.colPageViews}>{product.analytics?.pageViews ?? 0}</td>
+                    <td data-label={a.colEmbedViews}>{product.analytics?.embedViews ?? 0}</td>
                     <td data-label={a.colInteractions}>{product.analytics?.viewerInteractions ?? 0}</td>
                     <td data-label={a.colArClicks}>{product.analytics?.arButtonClicks ?? 0}</td>
                     <td data-label={a.colStoreClicks}>{product.analytics?.ctaClicks ?? 0}</td>

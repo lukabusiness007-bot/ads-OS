@@ -155,7 +155,7 @@ const overages = [
 
 export default function PricingPageSr() {
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-[#fbfaf6]">
       <script type="application/ld+json" dangerouslySetInnerHTML={jsonLd(webApplicationJsonLd("sr", "/sr/pricing"))} />
       <script
         type="application/ld+json"
@@ -188,28 +188,28 @@ export default function PricingPageSr() {
       <main className="pt-24">
         {/* ─── Header ─────────────────────────────────────────────────── */}
         <section className="mx-auto max-w-5xl px-6 py-20 text-center">
-          <p className="text-xs font-bold uppercase tracking-widest text-emerald-700 mb-4">
+          <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-[#1f6f5b] mb-4">
             Cene
           </p>
-          <h1 className="text-4xl font-semibold md:text-5xl text-zinc-900 text-balance leading-tight mb-5">
+          <h1 className="text-4xl font-medium md:text-5xl text-[#17201a] text-balance leading-tight tracking-[-0.02em] mb-5" style={{ fontFamily: "var(--font-display)" }}>
             Samostalni AR za vaše proizvode. Otpremite fotografije, uživo za par dana.
           </h1>
-          <p className="text-lg text-zinc-500 max-w-xl mx-auto leading-relaxed">
+          <p className="text-lg text-[#697266] max-w-xl mx-auto leading-relaxed">
             Svaki plan uključuje mesečna generisanja modela, hostovane AR stranice i analitiku. Treba vam više modela? Dodajte top-up paket bilo kada. Fiksna cena — nikada ne uzimamo procenat od vaše prodaje.
           </p>
         </section>
 
         {/* ─── Subscription Plans ──────────────────────────────────────── */}
-        <section className="bg-zinc-50 border-y border-dashed border-zinc-200">
+        <section className="bg-[#f7f8f4] border-y border-[#dce2d5]">
           <div className="mx-auto max-w-5xl px-6 py-20">
             <div className="text-center mb-12">
-              <p className="text-xs font-bold uppercase tracking-widest text-emerald-700 mb-3">
+              <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-[#1f6f5b] mb-3">
                 Mesečna pretplata
               </p>
-              <h2 className="text-3xl font-semibold text-zinc-900 mb-3">
+              <h2 className="text-3xl font-medium text-[#17201a] mb-3 tracking-[-0.02em]" style={{ fontFamily: "var(--font-display)" }}>
                 Odaberite plan koji odgovara vašem katalogu
               </h2>
-              <p className="text-zinc-500 max-w-lg mx-auto">
+              <p className="text-[#697266] max-w-lg mx-auto">
                 Svi planovi uključuju hostovane stranice proizvoda, 3D preglednik, AR bez aplikacije i analitiku angažovanosti.
               </p>
             </div>
@@ -218,25 +218,25 @@ export default function PricingPageSr() {
               {plans.map((tier) => (
                 <article
                   key={tier.id}
-                  className={`relative flex flex-col rounded-2xl border p-6 shadow-sm transition-shadow hover:shadow-md ${
+                  className={`relative flex flex-col rounded-2xl border p-6 transition-shadow hover:shadow-[var(--shadow-raised)] ${
                     tier.recommended
-                      ? "border-emerald-400 bg-emerald-950 text-white"
-                      : "border-zinc-200 bg-white"
+                      ? "border-[#1f6f5b] bg-[#17201a] text-white"
+                      : "border-[#dce2d5] bg-white shadow-[var(--shadow-card)]"
                   }`}
                 >
                   {tier.recommended && (
                     <div className="absolute -top-3 left-1/2 -translate-x-1/2">
-                      <span className="bg-emerald-400 text-emerald-950 text-xs font-bold px-3 py-1 rounded-full">
+                      <span className="bg-[#6ee7b7] text-[#0c3b2e] text-xs font-bold px-3 py-1 rounded-full">
                         Najpopularnije
                       </span>
                     </div>
                   )}
 
                   <div className="mb-6">
-                    <h3 className={`font-bold text-lg mb-1 ${tier.recommended ? "text-white" : "text-zinc-900"}`}>
+                    <h3 className={`font-semibold text-lg mb-1 ${tier.recommended ? "text-white" : "text-[#17201a]"}`}>
                       {tier.name}
                     </h3>
-                    <p className={`text-xs leading-relaxed ${tier.recommended ? "text-emerald-200" : "text-zinc-500"}`}>
+                    <p className={`text-xs leading-relaxed ${tier.recommended ? "text-[#6ee7b7]/70" : "text-[#697266]"}`}>
                       {tier.positioning}
                     </p>
                   </div>
@@ -244,51 +244,51 @@ export default function PricingPageSr() {
                   <div className="mb-6">
                     {tier.monthlyUsd ? (
                       <>
-                        <span className={`text-4xl font-bold ${tier.recommended ? "text-white" : "text-zinc-900"}`}>
+                        <span className={`text-4xl font-bold ${tier.recommended ? "text-white" : "text-[#17201a]"}`}>
                           €{tier.monthlyUsd}
                         </span>
-                        <span className={`text-sm ml-1 ${tier.recommended ? "text-emerald-300" : "text-zinc-400"}`}>
+                        <span className={`text-sm ml-1 ${tier.recommended ? "text-[#6ee7b7]/80" : "text-[#697266]/70"}`}>
                           / mesec
                         </span>
                       </>
                     ) : (
-                      <span className={`text-2xl font-bold ${tier.recommended ? "text-white" : "text-zinc-900"}`}>
+                      <span className={`text-2xl font-bold ${tier.recommended ? "text-white" : "text-[#17201a]"}`}>
                         Individualna ponuda
                       </span>
                     )}
                     {tier.monthlyUsd && (
-                      <p className={`text-xs mt-1.5 ${tier.recommended ? "text-emerald-300" : "text-zinc-400"}`}>
+                      <p className={`text-xs mt-1.5 ${tier.recommended ? "text-[#6ee7b7]/70" : "text-[#697266]/70"}`}>
                         {tier.setupFeeEur ? `+ €${tier.setupFeeEur} jednokratno uvođenje · besplatno uz godišnju` : "Uvođenje uključeno"}
                       </p>
                     )}
                   </div>
 
-                  <div className={`grid gap-2 mb-6 p-3 rounded-xl text-xs ${tier.recommended ? "bg-emerald-900" : "bg-zinc-50 border border-zinc-100"}`}>
+                  <div className={`grid gap-2 mb-6 p-3 rounded-xl text-xs ${tier.recommended ? "bg-white/8" : "bg-[#f7f8f4] border border-[#dce2d5]"}`}>
                     {tier.publishedSkuLimit ? (
                       <>
                         {tier.includedGenerations != null && (
                           <div className="flex justify-between">
-                            <span className={tier.recommended ? "text-emerald-300" : "text-zinc-500"}>Generisanja / mes</span>
-                            <span className={`font-bold ${tier.recommended ? "text-white" : "text-zinc-800"}`}>{tier.includedGenerations}</span>
+                            <span className={tier.recommended ? "text-[#6ee7b7]/80" : "text-[#697266]"}>Generisanja / mes</span>
+                            <span className={`font-bold ${tier.recommended ? "text-white" : "text-[#17201a]"}`}>{tier.includedGenerations}</span>
                           </div>
                         )}
                         <div className="flex justify-between">
-                          <span className={tier.recommended ? "text-emerald-300" : "text-zinc-500"}>Objavljeni proizvodi</span>
-                          <span className={`font-bold ${tier.recommended ? "text-white" : "text-zinc-800"}`}>{tier.publishedSkuLimit}</span>
+                          <span className={tier.recommended ? "text-[#6ee7b7]/80" : "text-[#697266]"}>Objavljeni proizvodi</span>
+                          <span className={`font-bold ${tier.recommended ? "text-white" : "text-[#17201a]"}`}>{tier.publishedSkuLimit}</span>
                         </div>
                         <div className="flex justify-between">
-                          <span className={tier.recommended ? "text-emerald-300" : "text-zinc-500"}>Mesečni pregledi</span>
-                          <span className={`font-bold ${tier.recommended ? "text-white" : "text-zinc-800"}`}>{tier.monthlyViewLimit?.toLocaleString()}</span>
+                          <span className={tier.recommended ? "text-[#6ee7b7]/80" : "text-[#697266]"}>Mesečni pregledi</span>
+                          <span className={`font-bold ${tier.recommended ? "text-white" : "text-[#17201a]"}`}>{tier.monthlyViewLimit?.toLocaleString()}</span>
                         </div>
                         <div className="flex justify-between">
-                          <span className={tier.recommended ? "text-emerald-300" : "text-zinc-500"}>Prostor</span>
-                          <span className={`font-bold ${tier.recommended ? "text-white" : "text-zinc-800"}`}>{tier.storageGb} GB</span>
+                          <span className={tier.recommended ? "text-[#6ee7b7]/80" : "text-[#697266]"}>Prostor</span>
+                          <span className={`font-bold ${tier.recommended ? "text-white" : "text-[#17201a]"}`}>{tier.storageGb} GB</span>
                         </div>
                       </>
                     ) : (
                       <div className="flex justify-between">
-                        <span className={tier.recommended ? "text-emerald-300" : "text-zinc-500"}>SKU / Pregledi</span>
-                        <span className={`font-bold ${tier.recommended ? "text-white" : "text-zinc-800"}`}>Po dogovoru</span>
+                        <span className={tier.recommended ? "text-[#6ee7b7]/80" : "text-[#697266]"}>SKU / Pregledi</span>
+                        <span className={`font-bold ${tier.recommended ? "text-white" : "text-[#17201a]"}`}>Po dogovoru</span>
                       </div>
                     )}
                   </div>
@@ -296,8 +296,8 @@ export default function PricingPageSr() {
                   <ul className="space-y-2.5 mb-8 flex-1">
                     {tier.includes.map((feature) => (
                       <li key={feature} className="flex items-start gap-2">
-                        <CheckCircle2 className={`h-4 w-4 shrink-0 mt-0.5 ${tier.recommended ? "text-emerald-400" : "text-emerald-600"}`} />
-                        <span className={`text-sm ${tier.recommended ? "text-emerald-100" : "text-zinc-600"}`}>
+                        <CheckCircle2 className={`h-4 w-4 shrink-0 mt-0.5 ${tier.recommended ? "text-[#6ee7b7]" : "text-[#1f6f5b]"}`} />
+                        <span className={`text-sm ${tier.recommended ? "text-white/85" : "text-[#697266]"}`}>
                           {feature}
                         </span>
                       </li>
@@ -308,9 +308,9 @@ export default function PricingPageSr() {
                     asChild
                     className={
                       tier.recommended
-                        ? "bg-white text-emerald-950 hover:bg-emerald-50"
+                        ? "bg-white text-[#0c3b2e] hover:bg-[#f7f8f4]"
                         : tier.id === "business"
-                        ? "bg-zinc-900 text-white hover:bg-zinc-800"
+                        ? "bg-[#17201a] text-white hover:bg-[#17201a]/90"
                         : ""
                     }
                     variant={tier.recommended || tier.id === "business" ? "default" : "outline"}
@@ -329,13 +329,13 @@ export default function PricingPageSr() {
         {/* ─── Generation Top-Up Packs ─────────────────────────────────── */}
         <section className="mx-auto max-w-5xl px-6 py-20">
           <div className="text-center mb-12">
-            <p className="text-xs font-bold uppercase tracking-widest text-emerald-700 mb-3">
+            <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-[#1f6f5b] mb-3">
               Treba vam više modela?
             </p>
-            <h2 className="text-3xl font-semibold text-zinc-900 mb-3">
+            <h2 className="text-3xl font-medium text-[#17201a] mb-3 tracking-[-0.02em]" style={{ fontFamily: "var(--font-display)" }}>
               Top-up paketi za generisanje
             </h2>
-            <p className="text-zinc-500 max-w-lg mx-auto">
+            <p className="text-[#697266] max-w-lg mx-auto">
               Potrošili ste mesečna generisanja? Dodajte paket — krediti ne ističu i prenose se u naredni mesec. Bez promene plana.
             </p>
           </div>
@@ -344,19 +344,19 @@ export default function PricingPageSr() {
             {topUps.map((pack) => (
               <article
                 key={pack.id}
-                className={`relative rounded-2xl border p-6 shadow-sm transition-all ${
-                  pack.recommended ? "border-emerald-400 bg-emerald-50/40" : "border-zinc-200 bg-white hover:border-emerald-200"
+                className={`relative rounded-2xl border p-6 transition-all ${
+                  pack.recommended ? "border-[#1f6f5b] bg-[#1f6f5b]/5 shadow-[var(--shadow-raised)]" : "border-[#dce2d5] bg-white shadow-[var(--shadow-card)] hover:border-[#1f6f5b]/30"
                 }`}
               >
                 {pack.recommended && (
-                  <span className="absolute -top-3 left-1/2 -translate-x-1/2 bg-emerald-500 text-white text-xs font-bold px-3 py-1 rounded-full">
+                  <span className="absolute -top-3 left-1/2 -translate-x-1/2 bg-[#1f6f5b] text-white text-xs font-bold px-3 py-1 rounded-full">
                     Najbolja vrednost
                   </span>
                 )}
-                <h3 className="font-bold text-zinc-900 mb-1">{pack.name}</h3>
-                <p className="text-3xl font-bold text-zinc-900">€{pack.priceEur}</p>
-                <p className="text-xs font-semibold text-emerald-700 mb-3">€{pack.perModelEur.toFixed(2)} / generisanju</p>
-                <p className="text-sm text-zinc-500 leading-relaxed">{pack.note}</p>
+                <h3 className="font-semibold text-[#17201a] mb-1">{pack.name}</h3>
+                <p className="text-3xl font-bold text-[#17201a]">€{pack.priceEur}</p>
+                <p className="text-xs font-semibold text-[#1f6f5b] mb-3">€{pack.perModelEur.toFixed(2)} / generisanju</p>
+                <p className="text-sm text-[#697266] leading-relaxed">{pack.note}</p>
               </article>
             ))}
           </div>
@@ -365,13 +365,13 @@ export default function PricingPageSr() {
         {/* ─── Optional Premium Finishing ──────────────────────────────── */}
         <section className="mx-auto max-w-5xl px-6 py-20">
           <div className="text-center mb-12">
-            <p className="text-xs font-bold uppercase tracking-widest text-emerald-700 mb-3">
+            <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-[#1f6f5b] mb-3">
               Opciono · radimo umesto vas
             </p>
-            <h2 className="text-3xl font-semibold text-zinc-900 mb-3">
+            <h2 className="text-3xl font-medium text-[#17201a] mb-3 tracking-[-0.02em]" style={{ fontFamily: "var(--font-display)" }}>
               Premium dorada modela
             </h2>
-            <p className="text-zinc-500 max-w-lg mx-auto">
+            <p className="text-[#697266] max-w-lg mx-auto">
               Samostalno generisanje pokriva većinu proizvoda. Za složene ili luksuzne komade, naš tim može ručno doraditi model — naplaćuje se jednom, samo kada zatražite.
             </p>
           </div>
@@ -380,35 +380,35 @@ export default function PricingPageSr() {
             {modelAddons.map((addon, i) => (
               <article
                 key={addon.id}
-                className="bg-white border border-zinc-200 rounded-2xl p-6 shadow-sm hover:shadow-md hover:border-emerald-200 transition-all"
+                className="bg-white border border-[#dce2d5] rounded-2xl p-6 shadow-[var(--shadow-card)] hover:shadow-[var(--shadow-raised)] hover:border-[#1f6f5b]/30 transition-all"
               >
                 <div className="flex items-center justify-between mb-4">
-                  <span className="flex h-7 w-7 items-center justify-center rounded-md bg-zinc-100 text-xs font-bold text-zinc-700">
+                  <span className="flex h-7 w-7 items-center justify-center rounded-md bg-[#f7f8f4] text-xs font-bold text-[#697266]">
                     {i + 1}
                   </span>
-                  <span className="text-xs font-semibold text-emerald-700 bg-emerald-50 border border-emerald-100 rounded-full px-2.5 py-1">
+                  <span className="text-xs font-semibold text-[#1f6f5b] bg-[#1f6f5b]/8 border border-[#1f6f5b]/15 rounded-full px-2.5 py-1">
                     {addon.buyerFit}
                   </span>
                 </div>
-                <h3 className="font-bold text-zinc-900 mb-2">{addon.name}</h3>
-                <p className="text-2xl font-bold text-zinc-900 mb-1">{addon.price}</p>
-                <p className="text-sm text-zinc-500 leading-relaxed">{addon.useCase}</p>
+                <h3 className="font-semibold text-[#17201a] mb-2">{addon.name}</h3>
+                <p className="text-2xl font-bold text-[#17201a] mb-1">{addon.price}</p>
+                <p className="text-sm text-[#697266] leading-relaxed">{addon.useCase}</p>
               </article>
             ))}
           </div>
         </section>
 
         {/* ─── Overage Pricing ─────────────────────────────────────────── */}
-        <section className="bg-zinc-50 border-y border-dashed border-zinc-200">
+        <section className="bg-[#f7f8f4] border-y border-[#dce2d5]">
           <div className="mx-auto max-w-5xl px-6 py-20">
             <div className="text-center mb-12">
-              <p className="text-xs font-bold uppercase tracking-widest text-emerald-700 mb-3">
+              <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-[#1f6f5b] mb-3">
                 Prekoračenje upotrebe
               </p>
-              <h2 className="text-3xl font-semibold text-zinc-900 mb-3">
+              <h2 className="text-3xl font-medium text-[#17201a] mb-3 tracking-[-0.02em]" style={{ fontFamily: "var(--font-display)" }}>
                 Nadmašite plan kada je potrebno
               </h2>
-              <p className="text-zinc-500 max-w-lg mx-auto">
+              <p className="text-[#697266] max-w-lg mx-auto">
                 Prekoračenja se naplaćuju predvidivo — nikada niste blokirani niti iznenađeni.
               </p>
             </div>
@@ -417,12 +417,12 @@ export default function PricingPageSr() {
               {overages.map((overage) => (
                 <div
                   key={overage.id}
-                  className="bg-white border border-zinc-200 rounded-xl p-5 shadow-sm"
+                  className="bg-white border border-[#dce2d5] rounded-xl p-5 shadow-[var(--shadow-card)]"
                 >
-                  <h3 className="font-semibold text-zinc-900 mb-1 text-sm">{overage.name}</h3>
-                  <p className="text-2xl font-bold text-zinc-900 mb-1">€{overage.price}</p>
-                  <p className="text-xs text-emerald-700 font-semibold mb-3">{overage.unit}</p>
-                  <p className="text-xs text-zinc-500 leading-relaxed">{overage.guardrail}</p>
+                  <h3 className="font-semibold text-[#17201a] mb-1 text-sm">{overage.name}</h3>
+                  <p className="text-2xl font-bold text-[#17201a] mb-1">€{overage.price}</p>
+                  <p className="text-xs text-[#1f6f5b] font-semibold mb-3">{overage.unit}</p>
+                  <p className="text-xs text-[#697266] leading-relaxed">{overage.guardrail}</p>
                 </div>
               ))}
             </div>
@@ -432,44 +432,44 @@ export default function PricingPageSr() {
         {/* ─── Tipičan pilot ────────────────────────────────────────────── */}
         <section className="mx-auto max-w-3xl px-6 py-20">
           <div className="text-center mb-10">
-            <p className="text-xs font-bold uppercase tracking-widest text-emerald-700 mb-3">
+            <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-[#1f6f5b] mb-3">
               Tipičan pilot
             </p>
-            <h2 className="text-2xl font-semibold text-zinc-900">
+            <h2 className="text-2xl font-medium text-[#17201a] tracking-[-0.02em]" style={{ fontFamily: "var(--font-display)" }}>
               15 proizvoda na Growth planu — koliko zapravo košta prvi mesec?
             </h2>
           </div>
-          <div className="rounded-2xl border border-zinc-200 shadow-sm overflow-hidden">
-            <div className="divide-y divide-zinc-100 bg-white">
+          <div className="rounded-2xl border border-[#dce2d5] shadow-[var(--shadow-card)] overflow-hidden">
+            <div className="divide-y divide-[#dce2d5] bg-white">
               <div className="flex items-center justify-between px-6 py-4">
-                <span className="text-zinc-600 text-sm">Growth plan (uključuje 20 generisanja)</span>
-                <span className="font-semibold text-zinc-900">€69</span>
+                <span className="text-[#697266] text-sm">Growth plan (uključuje 20 generisanja)</span>
+                <span className="font-semibold text-[#17201a]">€69</span>
               </div>
               <div className="flex items-center justify-between px-6 py-4">
-                <span className="text-zinc-600 text-sm">Jednokratno uvođenje i podešavanje</span>
-                <span className="font-semibold text-zinc-900">€{SETUP_FEE_EUR}</span>
+                <span className="text-[#697266] text-sm">Jednokratno uvođenje i podešavanje</span>
+                <span className="font-semibold text-[#17201a]">€{SETUP_FEE_EUR}</span>
               </div>
               <div className="flex items-center justify-between px-6 py-4">
-                <span className="text-zinc-600 text-sm">15 generisanja modela</span>
-                <span className="font-semibold text-emerald-700">Uključeno</span>
+                <span className="text-[#697266] text-sm">15 generisanja modela</span>
+                <span className="font-semibold text-[#1f6f5b]">Uključeno</span>
               </div>
-              <div className="flex items-center justify-between px-6 py-4 bg-zinc-50">
-                <span className="font-bold text-zinc-900 text-sm">Ukupno prvi mesec</span>
-                <span className="font-bold text-zinc-900 text-xl">€{69 + SETUP_FEE_EUR}</span>
+              <div className="flex items-center justify-between px-6 py-4 bg-[#f7f8f4]">
+                <span className="font-bold text-[#17201a] text-sm">Ukupno prvi mesec</span>
+                <span className="font-bold text-[#17201a] text-xl">€{69 + SETUP_FEE_EUR}</span>
               </div>
               <div className="flex items-center justify-between px-6 py-4">
-                <span className="text-zinc-500 text-sm">Od drugog meseca</span>
-                <span className="font-semibold text-zinc-400">€69 / mesec</span>
+                <span className="text-[#697266] text-sm">Od drugog meseca</span>
+                <span className="font-semibold text-[#697266]/70">€69 / mesec</span>
               </div>
             </div>
-            <div className="px-6 py-5 bg-emerald-50 border-t border-emerald-100">
-              <p className="text-sm text-emerald-800 leading-relaxed">
+            <div className="px-6 py-5 bg-[#1f6f5b]/8 border-t border-[#1f6f5b]/15">
+              <p className="text-sm text-[#0c3b2e] leading-relaxed">
                 <strong>ROI kontekst:</strong> AR podiže konverziju do ~90% i smanjuje povrate nameštaja za 25–40%.
                 Jedan izbegnut povrat sofe od €500 štedi €75–125 — ceo pilot se isplati za 1–3 izbegnuta povrata.
               </p>
             </div>
           </div>
-          <p className="text-xs text-zinc-400 mt-4 text-center">
+          <p className="text-xs text-[#697266]/70 mt-4 text-center">
             Planovi uključuju mesečna generisanja. Uvođenje je jednokratno, besplatno uz godišnju pretplatu. Fiksna cena — bez naknada na transakcije.
           </p>
         </section>
@@ -477,7 +477,7 @@ export default function PricingPageSr() {
         {/* ─── FAQ ─────────────────────────────────────────────────────── */}
         <section className="mx-auto max-w-5xl px-6 py-20">
           <div className="text-center mb-10">
-            <h2 className="text-2xl font-semibold text-zinc-900">Česta pitanja o cenama</h2>
+            <h2 className="text-2xl font-medium text-[#17201a] tracking-[-0.02em]" style={{ fontFamily: "var(--font-display)" }}>Česta pitanja o cenama</h2>
           </div>
           <div className="space-y-3 max-w-2xl mx-auto">
             {[
@@ -496,41 +496,41 @@ export default function PricingPageSr() {
             ].map((item) => (
               <details
                 key={item.q}
-                className="group bg-white border border-zinc-200 rounded-xl px-6 py-5 shadow-sm open:shadow-md transition-shadow"
+                className="group bg-white border border-[#dce2d5] rounded-xl px-6 py-5 shadow-[var(--shadow-card)] open:shadow-[var(--shadow-raised)] transition-shadow"
               >
-                <summary className="cursor-pointer font-semibold text-zinc-900 list-none flex items-center justify-between gap-4 text-sm">
+                <summary className="cursor-pointer font-semibold text-[#17201a] list-none flex items-center justify-between gap-4 text-sm">
                   {item.q}
-                  <span className="shrink-0 text-zinc-400 group-open:rotate-180 transition-transform text-lg leading-none">
+                  <span className="shrink-0 text-[#697266] group-open:rotate-180 transition-transform text-lg leading-none">
                     ↓
                   </span>
                 </summary>
-                <p className="mt-4 text-zinc-500 leading-relaxed text-sm">{item.a}</p>
+                <p className="mt-4 text-[#697266] leading-relaxed text-sm">{item.a}</p>
               </details>
             ))}
           </div>
         </section>
 
         {/* ─── Final CTA ───────────────────────────────────────────────── */}
-        <section className="bg-emerald-950 text-white">
+        <section className="bg-[#17201a] text-white">
           <div className="mx-auto max-w-3xl px-6 py-24 text-center space-y-6">
-            <p className="text-xs font-bold uppercase tracking-widest text-emerald-400">
+            <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-[#6ee7b7]">
               Spremni za početak?
             </p>
-            <h2 className="text-3xl font-semibold leading-snug">
+            <h2 className="text-3xl font-medium leading-snug tracking-[-0.02em]" style={{ fontFamily: "var(--font-display)" }}>
               Zakažite pilot demo za prvih 10–25 proizvoda
             </h2>
-            <p className="text-emerald-200 leading-relaxed max-w-lg mx-auto">
+            <p className="text-white/60 leading-relaxed max-w-lg mx-auto">
               Pogledajte kako vođeno otpremanje fotografija, ljudska recenzija, hostovani linkovi i analitika se uklapaju u vaš postojeći e-commerce tok rada.
             </p>
             <div className="flex flex-wrap gap-3 justify-center pt-2">
-              <Button asChild size="lg" className="bg-white text-emerald-900 hover:bg-emerald-50">
+              <Button asChild size="lg" className="bg-white text-[#0c3b2e] hover:bg-[#f7f8f4]">
                 <Link href="/contact/demo?source=sr-pricing">Zakažite pilot demo</Link>
               </Button>
               <Button
                 asChild
                 variant="outline"
                 size="lg"
-                className="border-emerald-700 bg-transparent text-white hover:bg-emerald-900"
+                className="border-[#1f6f5b] bg-transparent text-white hover:bg-[#0c3b2e]/40"
               >
                 <Link href="/p/northline-home/arc-oak-dining-chair">
                   Pogledajte primer stranice

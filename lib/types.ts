@@ -154,6 +154,7 @@ export type HostedPage = {
 
 export type HostedPageAnalytics = {
   pageViews: number;
+  embedViews: number;
   viewerInteractions: number;
   arButtonClicks: number;
   ctaClicks: number;
@@ -165,6 +166,7 @@ export type HostedPageAnalytics = {
 
 export type HostedPageAnalyticsEvent =
   | "page_view"
+  | "embed_view"
   | "viewer_interaction"
   | "ar_button_click"
   | "cta_click";

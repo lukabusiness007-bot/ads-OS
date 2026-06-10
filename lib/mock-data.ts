@@ -68,6 +68,7 @@ export const products: Product[] = [
     },
     analytics: {
       pageViews: 1248,
+      embedViews: 327,
       viewerInteractions: 612,
       arButtonClicks: 188,
       ctaClicks: 94,

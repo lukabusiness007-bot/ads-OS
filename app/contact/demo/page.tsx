@@ -16,7 +16,7 @@ export const metadata: Metadata = buildSeoMetadata({
 
 export default function DemoContactPage() {
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-[#fbfaf6]">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={jsonLd(faqPageJsonLd([
@@ -39,19 +39,19 @@ export default function DemoContactPage() {
       <main className="pt-24">
         <section className="mx-auto grid max-w-5xl gap-10 px-6 py-20 lg:grid-cols-[1fr_0.85fr] lg:items-start">
           <div>
-            <p className="mb-4 text-xs font-bold uppercase tracking-widest text-emerald-700">
+            <p className="mb-4 text-[11px] font-bold uppercase tracking-[0.14em] text-[#1f6f5b]">
               Pilot demo
             </p>
-            <h1 className="mb-5 text-4xl font-semibold leading-tight text-zinc-900 text-balance md:text-5xl">
+            <h1 className="mb-5 text-4xl font-medium leading-tight text-[#17201a] text-balance md:text-5xl tracking-[-0.02em]" style={{ fontFamily: "var(--font-display)" }}>
               See how AR product pages would work for your first 10-25 furniture SKUs.
             </h1>
-            <p className="mb-8 max-w-2xl text-lg leading-relaxed text-zinc-500">
+            <p className="mb-8 max-w-2xl text-lg leading-relaxed text-[#697266]">
               We will review your catalog fit, photo workflow, model quality expectations, hosted links, and the
               analytics you need before you publish a paid pilot.
             </p>
             <div className="flex flex-wrap gap-3">
               <Button asChild size="lg">
-                <a href="mailto:hello@veridianar.com?subject=Augmenta%20pilot%20demo">
+                <a href="mailto:hello@augmenta3d.com?subject=Augmenta%20pilot%20demo">
                   Email us
                   <ArrowRight className="ml-2 h-4 w-4" />
                 </a>
@@ -62,8 +62,8 @@ export default function DemoContactPage() {
             </div>
           </div>
 
-          <aside className="rounded-lg border border-zinc-200 bg-zinc-50 p-6 shadow-sm">
-            <h2 className="mb-4 text-xl font-semibold text-zinc-900">What we cover</h2>
+          <aside className="rounded-xl border border-[#dce2d5] bg-[#f7f8f4] p-6 shadow-[var(--shadow-card)]">
+            <h2 className="mb-4 text-xl font-medium text-[#17201a] tracking-[-0.02em]" style={{ fontFamily: "var(--font-display)" }}>What we cover</h2>
             <div className="grid gap-3">
               {[
                 "Which products are best for a first pilot",
@@ -72,9 +72,9 @@ export default function DemoContactPage() {
                 "Where hosted links fit into your store, ads, emails, or QR codes",
                 "How to read AR clicks and store CTA clicks"
               ].map((item) => (
-                <div className="flex gap-3 rounded-md border border-zinc-200 bg-white p-3" key={item}>
-                  <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-emerald-600" />
-                  <span className="text-sm font-medium leading-relaxed text-zinc-700">{item}</span>
+                <div className="flex gap-3 rounded-lg border border-[#dce2d5] bg-white p-3" key={item}>
+                  <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-[#1f6f5b]" />
+                  <span className="text-sm font-medium leading-relaxed text-[#697266]">{item}</span>
                 </div>
               ))}
             </div>
