@@ -83,6 +83,7 @@ export type ModelAsset = {
   triangleCount: number;
   textureMax: number;
   dimensionsPresent?: boolean;
+  appliedScale?: number;
   metadataUrl?: string;
 };
 

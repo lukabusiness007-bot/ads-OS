@@ -528,7 +528,8 @@ function mapModelAsset(row: DbRow): ModelAsset {
     fileSizeMb: toNumber(row.file_size_mb),
     triangleCount: toNumber(row.triangle_count),
     textureMax: Number(row.texture_max ?? 4096),
-    dimensionsPresent: row.dimensions_present !== false
+    dimensionsPresent: row.dimensions_present !== false,
+    appliedScale: typeof row.applied_scale === "number" ? row.applied_scale : undefined
   };
 }
 

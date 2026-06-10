@@ -18,6 +18,8 @@ import {
   uploadR2Object
 } from "@/lib/storage/r2";
 import { getGlbMetadata, optimizeGlb } from "@/lib/storage/optimize-glb";
+import { scaleGlbToDimensions, type ProductDimensions } from "@/lib/storage/scale-glb";
+import { scaleUsdzToDimensions } from "@/lib/storage/scale-usdz";
 import { sendGenerationFailedEmail, sendGenerationReadyEmail } from "@/lib/email/send";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
 import { getCurrentOrganization, getOrganizationOwnerEmail } from "@/lib/supabase/data";
@@ -162,10 +164,13 @@ export async function GET(request: Request) {
       } satisfies GenerationStatusResponse);
     }
 
+    const dimensions =
+      writeClient && organization ? await fetchProductDimensions(writeClient, organization.id, productId) : null;
+
     let asset: ModelAsset;
 
     try {
-      asset = await storeMeshyTaskAssets(productId, taskId, task, organization?.id);
+      asset = await storeMeshyTaskAssets(productId, taskId, task, organization?.id, dimensions);
     } catch (error) {
       const failureMessage = getPackagingFailureMessage(error);
 
@@ -225,7 +230,8 @@ async function storeMeshyTaskAssets(
   productId: string,
   taskId: string,
   task: MeshyTask,
-  organizationId?: string
+  organizationId?: string,
+  dimensions?: ProductDimensions | null
 ): Promise<ModelAsset> {
   const glbUrl = task.model_urls?.glb;
 
@@ -234,9 +240,17 @@ async function storeMeshyTaskAssets(
   }
 
   const glb = await downloadRemoteAsset(glbUrl, "model/gltf-binary");
-  const optimizedGlb = await optimizeGlb(glb.body);
-  const modelBody = optimizedGlb?.buffer ?? glb.body;
-  const modelMetadata = optimizedGlb ?? await getGlbMetadata(glb.body);
+
+  // Meshy's `auto_size: true` normalizes the model to an arbitrary bounding
+  // box, not real-world meters. If the merchant provided product dimensions,
+  // rescale the GLB so 1 unit = 1 meter matches the real product before
+  // optimizing/uploading — both Quick Look and Scene Viewer rely on this.
+  const scaled = dimensions ? await scaleGlbToDimensions(glb.body, dimensions) : null;
+  const glbForOptimization = scaled?.buffer ?? glb.body;
+
+  const optimizedGlb = await optimizeGlb(glbForOptimization);
+  const modelBody = optimizedGlb?.buffer ?? glbForOptimization;
+  const modelMetadata = optimizedGlb ?? await getGlbMetadata(glbForOptimization);
 
   const glbUpload = await uploadR2Object({
     key: createAssetKey(productId, taskId, "model.glb", organizationId),
@@ -248,7 +262,7 @@ async function storeMeshyTaskAssets(
     try {
       await uploadR2Object({
         key: createAssetKey(productId, taskId, "model-source.glb", organizationId),
-        body: glb.body,
+        body: glbForOptimization,
         contentType: "model/gltf-binary"
       });
     } catch (error) {
@@ -259,10 +273,15 @@ async function storeMeshyTaskAssets(
   const usdz = task.model_urls?.usdz
     ? await downloadRemoteAsset(task.model_urls.usdz, "model/vnd.usdz+zip")
     : null;
+
+  // Quick Look reads ios-src directly, so the USDZ needs the same real-world
+  // scale baked in via a metersPerUnit override.
+  const usdzBody = usdz && scaled ? scaleUsdzToDimensions(usdz.body, scaled.appliedScale)?.buffer ?? usdz.body : usdz?.body;
+
   const usdzUpload = usdz
     ? await uploadR2Object({
         key: createAssetKey(productId, taskId, "model.usdz", organizationId),
-        body: usdz.body,
+        body: usdzBody!,
         contentType: usdz.contentType
       })
     : null;
@@ -285,8 +304,34 @@ async function storeMeshyTaskAssets(
     fileSizeMb: modelMetadata.fileSizeMb,
     triangleCount: modelMetadata.triangleCount,
     textureMax: modelMetadata.textureMax,
-    dimensionsPresent: true
+    dimensionsPresent: scaled !== null,
+    appliedScale: scaled?.appliedScale
   };
+}
+
+async function fetchProductDimensions(
+  supabase: Awaited<ReturnType<typeof createServerSupabaseClient>> | ReturnType<typeof createServiceRoleSupabaseClient>,
+  organizationId: string,
+  productId: string
+): Promise<ProductDimensions | null> {
+  const { data } = await supabase
+    .from("products")
+    .select("width_m, height_m, depth_m")
+    .eq("organization_id", organizationId)
+    .eq("id", productId)
+    .maybeSingle();
+
+  if (!data) {
+    return null;
+  }
+
+  const row = data as { width_m: number | null; height_m: number | null; depth_m: number | null };
+
+  if (row.width_m == null && row.height_m == null && row.depth_m == null) {
+    return null;
+  }
+
+  return { width: row.width_m, height: row.height_m, depth: row.depth_m };
 }
 
 function createAssetKey(productId: string, taskId: string, fileName: string, organizationId?: string) {
@@ -375,7 +420,8 @@ async function persistCompletedGeneration(
       file_size_mb: asset.fileSizeMb,
       triangle_count: asset.triangleCount,
       texture_max: asset.textureMax,
-      dimensions_present: asset.dimensionsPresent ?? true
+      dimensions_present: asset.dimensionsPresent ?? true,
+      applied_scale: asset.appliedScale ?? null
     });
   }
 
