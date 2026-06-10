@@ -22,6 +22,12 @@ export type PlanLimits = {
   monthlyViewLimit: number | null;
   /** Included storage in GB. null = unlimited. */
   storageGb: number | null;
+  /**
+   * Over monthlyViewLimit: false = viewer degrades to poster + upgrade prompt;
+   * true = views keep serving and the excess is billed as Stripe metered usage
+   * (requires STRIPE_PRICE_VIEW_OVERAGE — without it, every plan degrades).
+   */
+  meteredViewOverage: boolean;
 };
 
 // One-time onboarding/setup fee in EUR. Waived on annual billing. Mirrors
@@ -36,7 +42,8 @@ export const PLAN_LIMITS: Record<PlanKey, PlanLimits> = {
     includedGenerations: 5,
     publishedSkuLimit: 5,
     monthlyViewLimit: 5_000,
-    storageGb: 2
+    storageGb: 2,
+    meteredViewOverage: false
   },
   growth: {
     key: "growth",
@@ -45,7 +52,8 @@ export const PLAN_LIMITS: Record<PlanKey, PlanLimits> = {
     includedGenerations: 20,
     publishedSkuLimit: 20,
     monthlyViewLimit: 25_000,
-    storageGb: 10
+    storageGb: 10,
+    meteredViewOverage: true
   },
   studio: {
     key: "studio",
@@ -54,7 +62,8 @@ export const PLAN_LIMITS: Record<PlanKey, PlanLimits> = {
     includedGenerations: 50,
     publishedSkuLimit: 50,
     monthlyViewLimit: 100_000,
-    storageGb: 50
+    storageGb: 50,
+    meteredViewOverage: true
   },
   business: {
     key: "business",
@@ -63,7 +72,8 @@ export const PLAN_LIMITS: Record<PlanKey, PlanLimits> = {
     includedGenerations: null,
     publishedSkuLimit: null,
     monthlyViewLimit: null,
-    storageGb: null
+    storageGb: null,
+    meteredViewOverage: false
   }
 };
 

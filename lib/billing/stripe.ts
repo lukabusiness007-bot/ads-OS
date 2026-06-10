@@ -54,6 +54,29 @@ export function getSetupFeePriceId(): string | null {
   return process.env.STRIPE_PRICE_SETUP_FEE ?? null;
 }
 
+// ── Metered view overage (Plan 2, step 4) ───────────────────────────────────
+// Stripe setup (dashboard): create a Billing Meter whose event name matches
+// getViewOverageMeterEvent(), then a metered recurring Price on that meter
+// (e.g. €X per 1,000 views), and paste its ID into the env:
+//   STRIPE_PRICE_VIEW_OVERAGE        price_...  (metered; attached at checkout)
+//   STRIPE_METER_VIEW_OVERAGE_EVENT  optional override of the meter event name
+// Unset = overage billing disabled everywhere; over-quota plans degrade to
+// poster exactly like before.
+
+export const DEFAULT_VIEW_OVERAGE_METER_EVENT = "ar_view_overage";
+
+export function getViewOveragePriceId(): string | null {
+  return process.env.STRIPE_PRICE_VIEW_OVERAGE ?? null;
+}
+
+export function getViewOverageMeterEvent(): string {
+  return process.env.STRIPE_METER_VIEW_OVERAGE_EVENT || DEFAULT_VIEW_OVERAGE_METER_EVENT;
+}
+
+export function isViewOverageConfigured(): boolean {
+  return isStripeConfigured() && Boolean(getViewOveragePriceId());
+}
+
 // Top-up packs: maps pack id (lib/mock-data.ts `generationTopUps`) -> Stripe
 // one-time Price ID + the number of generation credits the pack grants.
 export const TOPUP_PACKS: Record<string, { priceEnv: string; generations: number }> = {

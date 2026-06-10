@@ -7,13 +7,14 @@ import {
   createServiceRoleSupabaseClient,
   isSupabaseServiceRoleConfigured
 } from "@/lib/supabase/server";
-import { isPlanKey, type PlanKey } from "@/lib/billing/plans";
+import { getPlanLimits, isPlanKey, type PlanKey } from "@/lib/billing/plans";
 import {
   getPlanPriceId,
   getSetupFeePriceId,
   getSiteUrl,
   getStripe,
   getTopupPack,
+  getViewOveragePriceId,
   isStripeConfigured
 } from "@/lib/billing/stripe";
 
@@ -110,12 +111,20 @@ export async function POST(request: Request) {
         );
       }
 
-      const lineItems: { price: string; quantity: number }[] = [{ price: priceId, quantity: 1 }];
+      const lineItems: { price: string; quantity?: number }[] = [{ price: priceId, quantity: 1 }];
       const setupFeePriceId = getSetupFeePriceId();
 
       if (body.withSetupFee && setupFeePriceId) {
         // One-time price added to the first subscription invoice.
         lineItems.push({ price: setupFeePriceId, quantity: 1 });
+      }
+
+      // Overage-enabled plans (Plan 2, step 4) also carry the metered view-overage
+      // price, so over-quota views can bill through Billing Meter events instead of
+      // degrading to poster. Metered line items must not set a quantity.
+      const viewOveragePriceId = getViewOveragePriceId();
+      if (viewOveragePriceId && getPlanLimits(planKey).meteredViewOverage) {
+        lineItems.push({ price: viewOveragePriceId });
       }
 
       const session = await stripe.checkout.sessions.create({

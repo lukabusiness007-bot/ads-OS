@@ -1,8 +1,9 @@
-import { NextResponse } from "next/server";
+import { NextResponse, after } from "next/server";
 import { verifyModelAccessToken } from "@/lib/model-access-token";
 import { createPresignedModelGetUrl } from "@/lib/storage/r2";
 import { checkRateLimit, clientIpFromHeaders } from "@/lib/rate-limit";
 import { checkViewQuota } from "@/lib/billing/view-quota";
+import { planServesOverage, reportViewOverage } from "@/lib/billing/view-overage";
 import { isOrgSuspended, type SubscriptionBillingRow } from "@/lib/billing/suspension";
 import {
   createServiceRoleSupabaseClient,
@@ -114,12 +115,22 @@ export async function GET(request: Request, { params }: RouteParams) {
     // keeps its poster and the merchant is nudged to upgrade. Backed by a cached
     // per-org counter (lib/billing/view-quota.ts) so this stays cheap per request,
     // and fails OPEN — a broken quota store must never dark a paying merchant.
+    //
+    // Overage-enabled plans (step 4) don't degrade: the view keeps serving and
+    // the month-to-date excess is pushed to Stripe as metered usage after the
+    // response (claim/dedupe in lib/billing/view-overage.ts keeps this to at
+    // most ~one Stripe call per org per cache window, never per view).
     const quota = await checkViewQuota(organizationId, planKey);
     if (!quota.allowed) {
-      return NextResponse.json(
-        { error: "quota_exceeded" },
-        { status: 402, headers: { "Cache-Control": "private, no-store" } }
-      );
+      const limit = quota.limit;
+      if (limit !== null && planServesOverage(planKey)) {
+        after(() => reportViewOverage(organizationId, quota.count - limit));
+      } else {
+        return NextResponse.json(
+          { error: "quota_exceeded" },
+          { status: 402, headers: { "Cache-Control": "private, no-store" } }
+        );
+      }
     }
   }
 
