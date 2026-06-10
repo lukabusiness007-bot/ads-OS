@@ -297,7 +297,7 @@ export function getMeshyTaskFailureDetails(task: MeshyTask): MeshyFailureDetails
 
 export function getFriendlyMeshyRequestErrorMessage(error: MeshyRequestError) {
   if (error.statusCode === 401 || error.statusCode === 403) {
-    return "The generation service rejected the API key. Check the server MESHY_API_KEY before trying again.";
+    return "The generation service rejected the API key. Check the server API key configuration before trying again.";
   }
 
   if (error.statusCode === 402) {

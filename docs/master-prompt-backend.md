@@ -6,7 +6,7 @@ Copy the full prompt below into an AI app builder (Claude Code / Cursor / v0).
 
 - **Backend:** Supabase (Postgres + Auth + Realtime + Edge Functions + RLS).
 - **File storage:** Cloudflare R2 (S3-compatible) for all photos and 3D assets — zero egress cost; Postgres stores only metadata + R2 keys. Future upgrade: larger R2 + CDN/image-resizing layer, no architecture change.
-- **3D engine:** Polycam (hybrid: photo→3D via Polycam API, finished-model upload, and companion mobile app scanning) behind the existing `GenerationProvider` interface, with meshy/tripo as invisible fallbacks.
+- **3D engine:** Polycam (hybrid: photo→3D via Polycam API, finished-model upload, and companion mobile app scanning) behind the existing `GenerationProvider` interface, with the existing providers as invisible fallbacks.
 - **Auth:** Email + Google OAuth.
 - **Language:** Bilingual EN + SR.
 
@@ -19,7 +19,7 @@ Copy the full prompt below into an AI app builder (Claude Code / Cursor / v0).
 5. **Emersya / Sayduck** — high-fidelity web 3D/AR viewer + embeds. Lesson: hosted page + `<model-viewer>` + AR Quick Look must be flawless on mobile.
    - Baseline: **Shopify native 3D media** — win on creation, QA, hosting, analytics, simplicity.
 
-Capture-side competitors to Polycam (UX lessons for scanning): Luma AI, Kiri Engine, RealityScan, Scaniverse, Meshy/Tripo. Guide the user like Polycam (orbit the object, 60–80% overlap, even lighting, 20–80+ photos) with a clear reshoot loop on preflight failure.
+Capture-side competitors to Polycam (UX lessons for scanning): Luma AI, Kiri Engine, RealityScan, Scaniverse. Guide the user like Polycam (orbit the object, 60–80% overlap, even lighting, 20–80+ photos) with a clear reshoot loop on preflight failure.
 
 ## Five demanding-client questions (used only to improve UX)
 
@@ -40,7 +40,7 @@ Build the real backend and an authenticated merchant dashboard for "Veridian AR 
 NON-NEGOTIABLE CONTEXT (reuse, do not recreate)
 - Stack already present: Next.js 16 (App Router), React 19, TypeScript, Tailwind. Components in `components/`, domain types in `lib/types.ts`, pipeline in `lib/generation-pipeline.ts`, mock data in `lib/mock-data.ts`, shell in `components/AppShell.tsx`.
 - Reuse the existing domain types verbatim where possible: Product, ProductStatus, PhotoSet, PhotoAsset, PhotoAngle, GenerationJob, ModelAsset, Review, HostedPage, HostedPageAnalytics, HostedPageAnalyticsEvent.
-- Reuse the existing `GenerationProvider` interface (createJob / getJob / getResult). Add a NEW provider `polycam` that implements it. Keep meshy/tripo as fallbacks behind the same interface. The merchant-facing workflow must not change shape.
+- Reuse the existing `GenerationProvider` interface (createJob / getJob / getResult). Add a NEW provider `polycam` that implements it. Keep the existing providers as fallbacks behind the same interface. The merchant-facing workflow must not change shape.
 - Reuse `runPhotoPreflight`, `requiredPhotoAngles`, `photoAngleLabels`, `pipelineStages` from `lib/generation-pipeline.ts`.
 
 BACKEND PLATFORM: SUPABASE (data/auth) + CLOUDFLARE R2 (file storage)
@@ -59,7 +59,7 @@ The merchant has THREE ways to get a 3D model; all converge on the same `generat
   2. Direct upload of a finished GLB/USDZ exported from the Polycam mobile app -> skip generation, go straight to automated checks + review.
   3. Scan from the COMPANION MOBILE APP (see below) which uses Polycam API/SDK on-device, then pushes the capture to the same backend (same org session) -> same pipeline.
 - Implement `lib/providers/polycam.ts` matching `GenerationProvider`. Wrap all Polycam credentials in server-only env vars; NEVER expose provider names, raw errors, or API keys to merchants. Surface only friendly statuses ("Processing scan", "Quality review", "Ready to publish").
-- Use Supabase Edge Function for the Polycam webhook/poll worker; update `generation_jobs.status` and broadcast via Realtime so the dashboard updates live. Implement retry + meshy/tripo fallback if Polycam fails, automatically and invisibly to the merchant.
+- Use Supabase Edge Function for the Polycam webhook/poll worker; update `generation_jobs.status` and broadcast via Realtime so the dashboard updates live. Implement retry + existing-provider fallback if Polycam fails, automatically and invisibly to the merchant.
 - Replace `ViewerMock` with `<model-viewer>` for preview + hosted pages once real GLB/USDZ exist (lazy-loaded). iOS AR via USDZ Quick Look, Android via Scene Viewer.
 
 SIMPLEST POSSIBLE UPLOAD UX (mirror how Polycam works) — this is the priority
@@ -68,7 +68,7 @@ SIMPLEST POSSIBLE UPLOAD UX (mirror how Polycam works) — this is the priority
     a) "Upload photos" — large drag-and-drop / multi-select that accepts MANY images at once; show a live capture-guidance card like Polycam: "Walk around the object, 60-80% overlap between shots, even lighting, 20-80+ photos", a live counter, and the required-angle checklist (front/back/left/right/top/material/scale). Run client+server preflight (blur, duplicates, file type, count, missing angles) and show a clear RESHOOT loop when something fails.
     b) "Scan with your phone" — show a QR code that deep-links the companion mobile app to this exact product (signed token), so the scan lands back in this product automatically.
     c) "Upload finished 3D model" — accept GLB/USDZ from Polycam app.
-- After submit: a single status timeline (Photos uploaded -> Processing scan -> Quality checks -> Review -> Ready), realtime, with friendly copy. Never show meshy/tripo/polycam names or raw errors.
+- After submit: a single status timeline (Photos uploaded -> Processing scan -> Quality checks -> Review -> Ready), realtime, with friendly copy. Never show provider names or raw errors.
 - Resumable, multipart uploads directly to Cloudflare R2 via server-minted presigned URLs (S3 multipart) with progress bars; mobile-friendly; files never pass through the app server.
 
 DASHBOARD LAYOUT (authenticated, extend AppShell)
@@ -91,7 +91,7 @@ SECURITY & TRUST (answer the 5 demanding-client questions in the UX)
 
 HARD CONSTRAINTS
 - Do NOT promise CAD precision, instant generation, fully automated publishing, or live Shopify/Woo/Magento integrations as current features.
-- Do NOT expose meshy/tripo/polycam names or raw errors to merchants.
+- Do NOT expose provider names or raw errors to merchants.
 - Keep human review as a visible gate before publish.
 - Do NOT introduce unnecessary dependencies; prefer existing patterns and CSS.
 - Bilingual EN+SR, responsive, no horizontal overflow on mobile; tables collapse to cards.
@@ -100,7 +100,7 @@ DELIVERABLES
 1. Supabase schema (SQL migrations) + RLS policies + seed mirroring current mock data.
 2. Auth (email + Google) with `/login`, protected `/dashboard/**`, middleware, session helpers.
 3. `lib/storage/r2.ts` (presigned PUT/GET, multipart, delete) + R2 bucket/CORS setup notes.
-4. `lib/providers/polycam.ts` implementing GenerationProvider + Edge Function webhook/poll worker + meshy/tripo fallback.
+4. `lib/providers/polycam.ts` implementing GenerationProvider + Edge Function webhook/poll worker + fallback to the existing providers.
 5. Hybrid upload UX (photos / phone QR / finished model) with reuse of runPhotoPreflight and the angle checklist, resumable direct-to-R2 uploads.
 6. Dashboard: sidebar (logo+name top), Overview (stats home), Products, Create AR Page wizard, Published Links, Analytics, Settings & Billing.
 7. `<model-viewer>` on preview + hosted pages; analytics events wired from hosted pages.

@@ -35,7 +35,7 @@ Core data represented:
 ## Implementation Notes
 
 - Product categories are limited to the Phase 0 scope: chairs, tables, sofas, lamps, shelves, and small decor.
-- Generation providers are represented as mocked `meshy` and `tripo` states.
+- Generation providers are represented as mocked primary/fallback provider states.
 - Public hosted pages are visually present but remain part of the prototype until Phase 2 supplies real model assets and review persistence.
 - The model viewer is represented by a stable visual mock. Phase 2 should replace it with `<model-viewer>` once real GLB/USDZ assets are available.
 - Manual approval remains a visible gate before publishing.
@@ -57,8 +57,8 @@ Next implementation work should add:
 - Persistent database schema for the Phase 1 entities.
 - Real file upload storage.
 - Preflight image checks.
-- `GenerationProvider` implementation for Meshy.
-- Fallback provider implementation for Tripo.
+- `GenerationProvider` implementation for the primary provider.
+- Fallback provider implementation for the secondary provider.
 - Real GLB/USDZ asset storage.
 - `<model-viewer>` integration on preview and public pages.
 - Review actions backed by server mutations.

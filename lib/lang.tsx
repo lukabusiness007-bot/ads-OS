@@ -234,7 +234,7 @@ export const t = {
     upload: {
       eyebrow: "Čarobnjak za vođeni upload fotografija",
       heading: "Otpremite 4 fotografije proizvoda",
-      subtitle: "Provera fotografija se pokreće pre nego što proizvod uđe u Meshy generisanje.",
+      subtitle: "Provera fotografija se pokreće pre nego što proizvod uđe u 3D generisanje.",
       productImages: "Slike proizvoda",
       uploaded: "otpremljeno",
       formats: "JPG, PNG",
@@ -599,7 +599,7 @@ export const t = {
     upload: {
       eyebrow: "Guided photo upload wizard",
       heading: "Upload 4 product photos",
-      subtitle: "Preflight checks run before a product can enter Meshy generation.",
+      subtitle: "Preflight checks run before a product can enter 3D generation.",
       productImages: "Product images",
       uploaded: "uploaded",
       formats: "JPG, PNG",

@@ -14,7 +14,7 @@ Core implementation:
 - Required photo angle definitions for front, back, left, right, top/angle, material, scale/context, and extra angles.
 - Preflight checks for photo count, file type, image size, blur score, duplicates, and missing angles.
 - `GenerationProvider` interface matching the Phase 0 contract.
-- Mock Meshy and Tripo providers behind the same interface.
+- Mock primary and fallback providers behind the same interface.
 - Model package checks for GLB presence, file size, dimensions metadata, texture limits, poster readiness, and USDZ/iOS AR readiness.
 - Mock provider job metadata, raw payload storage shape, provider job IDs, and fallback availability.
 
@@ -31,7 +31,7 @@ This phase is intentionally still local/prototype-only:
 
 - No database persistence yet.
 - No real file storage yet.
-- No live Meshy or Tripo API calls yet.
+- No live third-party generation API calls yet.
 - No queue worker yet.
 - No real GLB/USDZ optimization worker yet.
 
@@ -42,7 +42,7 @@ The code now defines the interfaces and app behavior needed for those pieces, so
 - Add persistent database schema for `PhotoSet`, `PhotoAsset`, `GenerationJob`, `ModelAsset`, and `Review`.
 - Add object storage for uploaded photos and generated/raw provider assets.
 - Add queue-backed generation worker.
-- Implement Meshy API calls behind `GenerationProvider`.
-- Implement Tripo fallback behind `GenerationProvider`.
+- Implement the primary provider's API calls behind `GenerationProvider`.
+- Implement the fallback provider behind `GenerationProvider`.
 - Add server mutations for starting generation, polling job status, retrying fallback, and submitting review decisions.
 - Replace `ViewerMock` with `<model-viewer>` once sample GLB/USDZ assets are present.

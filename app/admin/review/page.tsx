@@ -19,7 +19,7 @@ const EMPTY_COPY: Record<string, { title: string; body: string }> = {
   },
   generating: {
     title: "No models generating right now",
-    body: "Products move here while Meshy builds their 3D model. Check back once a merchant kicks off a new generation."
+    body: "Products move here while the 3D model is being built. Check back once a merchant kicks off a new generation."
   },
   generation_failed: {
     title: "No failed generations",

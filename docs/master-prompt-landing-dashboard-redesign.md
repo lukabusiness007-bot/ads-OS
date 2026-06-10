@@ -195,7 +195,7 @@ Product statuses must be obvious and merchant-friendly:
 - Approved
 - Published
 
-Do not expose internal provider names like Meshy or Tripo to merchants. Use plain status copy such as `Generating model`, `Quality review`, or `Ready to publish`.
+Do not expose internal provider names to merchants. Use plain status copy such as `Generating model`, `Quality review`, or `Ready to publish`.
 
 Product table columns:
 

@@ -51,39 +51,39 @@ These exclusions protect the MVP from scope drift. The initial product promise i
 
 ## Provider Validation
 
-### Primary Provider: Meshy
+### Primary Provider
 
-Decision: use Meshy as the primary image-to-3D provider for the first implementation.
+Decision: use a third-party image-to-3D API as the primary generation provider for the first implementation.
 
 Validation notes:
 
-- Meshy exposes an Image to 3D API suitable for converting product images into model assets.
-- Current public docs list export support for formats including GLB and USDZ, which matches the MVP output stack.
+- The selected provider exposes an Image to 3D API suitable for converting product images into model assets.
+- Its docs list export support for formats including GLB and USDZ, which matches the MVP output stack.
 - API integration should be treated as asynchronous job orchestration, not a blocking request.
 - Store provider-specific task IDs, status payloads, raw model URLs, and error responses for support/debugging.
 
-Source: https://docs.meshy.ai/api/image-to-3d
+Source: provider API documentation (internal reference).
 
-### Secondary Provider: Tripo
+### Secondary Provider
 
-Decision: keep Tripo as the first fallback provider behind the same internal abstraction.
+Decision: keep a second image-to-3D provider as the first fallback behind the same internal abstraction.
 
 Validation notes:
 
-- Tripo exposes an image-to-model API through task creation.
+- The fallback provider exposes an image-to-model API through task creation.
 - The documented flow supports uploading or referencing an image file, creating an image-to-model task, and polling/retrieving results.
-- Use it as a fallback if Meshy output quality, pricing, throughput, or availability becomes a blocker.
+- Use it as a fallback if the primary provider's output quality, pricing, throughput, or availability becomes a blocker.
 
-Source: https://docs.tripo3d.ai/model-generation/image-to-model-v1-4-20240625.html
+Source: provider API documentation (internal reference).
 
 ### Provider Strategy
 
-Do not let product, job, or hosted-page code call Meshy or Tripo directly. Route generation through an internal provider interface so the app can switch providers without changing merchant workflows.
+Do not let product, job, or hosted-page code call generation providers directly. Route generation through an internal provider interface so the app can switch providers without changing merchant workflows.
 
 Recommended TypeScript contract:
 
 ```ts
-export type GenerationProviderName = "meshy" | "tripo";
+export type GenerationProviderName = "primary" | "fallback";
 
 export type GenerationProviderInput = {
   productId: string;
@@ -127,7 +127,7 @@ Implementation notes:
 
 - Persist `provider`, `providerJobId`, `providerStatus`, and `rawProviderPayload` on `GenerationJob`.
 - Persist raw provider output before optimization.
-- Add a manual admin-only fallback trigger from Meshy to Tripo.
+- Add a manual admin-only fallback trigger from the primary provider to the fallback provider.
 - Do not expose provider names or raw errors on public hosted pages.
 
 ## Output Stack Validation
@@ -210,7 +210,7 @@ Before Phase 1 starts, run one manual product through the target flow:
 
 1. Select one chair, table, lamp, shelf, or small decor item.
 2. Capture 8-20 photos with front, back, left, right, angled/top, and material/detail shots.
-3. Submit the images to Meshy manually or through a small script/spike.
+3. Submit the images to the chosen provider manually or through a small script/spike.
 4. Download or store the returned GLB and USDZ if available.
 5. Load the GLB in a minimal `<model-viewer>` page.
 6. Open the page on desktop Chrome/Safari.
@@ -232,8 +232,8 @@ Acceptance criteria:
 
 - Build the MVP for furniture and home decor only.
 - Start with hosted public product pages, not embeds or e-commerce plugins.
-- Use Meshy as the primary generation provider.
-- Keep Tripo as the fallback provider.
+- Use a third-party image-to-3D API as the primary generation provider.
+- Keep a second provider as the fallback.
 - Hide all providers behind `GenerationProvider`.
 - Store GLB as the primary web asset.
 - Store or generate USDZ for iOS AR.

@@ -166,7 +166,7 @@ export default async function ReviewInspectorPage({
                     <td className="muted" style={{ padding: "4px 8px 4px 0" }}>Gen job</td>
                     <td style={{ padding: "4px 0" }}>
                       <span className={`badge ${latest_job.status === "succeeded" ? "success" : latest_job.status === "failed" ? "danger" : "warning"}`}>
-                        {latest_job.provider} · {latest_job.status}
+                        3D engine · {latest_job.status}
                       </span>
                       {latest_job.error_message && (
                         <p className="muted" style={{ margin: "2px 0 0", fontSize: 12 }}>{latest_job.error_message}</p>

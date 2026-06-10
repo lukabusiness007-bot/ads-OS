@@ -299,7 +299,7 @@ function handleStartError(error: unknown) {
 
   if (error instanceof MeshyConfigurationError) {
     return NextResponse.json(
-      { errorMessage: "The generation service is not configured yet. Add the Meshy API key and try again." },
+      { errorMessage: "The generation service is not configured yet. Add the required API key and try again." },
       { status: 500 }
     );
   }

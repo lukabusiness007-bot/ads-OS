@@ -55,7 +55,7 @@ export function runPhotoPreflight(photoSet: PhotoSet): PreflightCheck[] {
         photoSet.photos.length >= MIN_GENERATION_PHOTOS && photoSet.photos.length <= MAX_GENERATION_PHOTOS
           ? "pass"
           : "fail",
-      detail: `${photoSet.photos.length} photos uploaded; the HD Meshy flow needs exactly ${MAX_GENERATION_PHOTOS}.`
+      detail: `${photoSet.photos.length} photos uploaded; the HD generation flow needs exactly ${MAX_GENERATION_PHOTOS}.`
     },
     {
       id: "file-types",

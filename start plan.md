@@ -8,7 +8,7 @@ Locked decisions:
 - MVP market: e-commerce first, especially furniture/home goods.
 - MVP output: hosted public product page link on our platform.
 - MVP input: web upload wizard with guided photo upload.
-- 3D generation: API providers first, primarily Meshy/Tripo-style image-to-3D APIs.
+- 3D generation: API providers first, image-to-3D APIs behind an internal provider interface.
 - Publishing: manual approval required before public hosted link goes live.
 - Quality promise: "Verified AR preview," not exact CAD/manufacturing precision.
 - Revenue v1: charge per approved model + monthly hosted-page subscription.
@@ -27,8 +27,8 @@ Sub-phases:
 2. Define supported product types for v1: chairs, tables, sofas, lamps, shelves, small decor.
 3. Exclude for v1: buildings, rooms, kitchens with many modules, reflective glass, transparent objects, complex fabric physics, animated products.
 4. Validate AI providers:
-   - Primary: Meshy image-to-3D API.
-   - Secondary fallback: Tripo image-to-model API.
+   - Primary: a third-party image-to-3D API.
+   - Secondary fallback: an alternate image-to-model API.
    - Store provider behind an internal `GenerationProvider` interface so the app can switch later.
 5. Validate output stack:
    - GLB as primary web model format.
@@ -225,7 +225,7 @@ Recommended stack:
 - Storage: Cloudflare R2 or AWS S3.
 - CDN: Cloudflare.
 - 3D viewer: `<model-viewer>`.
-- 3D generation: Meshy primary, Tripo fallback.
+- 3D generation: third-party image-to-3D provider primary, second provider fallback, both behind `GenerationProvider`.
 - Payments: Stripe for international/EU readiness; manual invoices acceptable during first pilots.
 
 Minimum API surface:
@@ -291,5 +291,4 @@ Technical references used:
 - Apple RealityKit PhotogrammetrySession for photo-based 3D creation: https://developer.apple.com/documentation/RealityKit/PhotogrammetrySession
 - Google Scene Viewer for Android AR display: https://developers.google.com/ar/develop/scene-viewer
 - `<model-viewer>` web 3D/AR component: https://modelviewer.dev/docs/
-- Meshy Image to 3D API: https://docs.meshy.ai/api/image-to-3d
-- Tripo image-to-model API: https://docs.tripo3d.ai/model-generation/image-to-model-v1-4-20240625.html
+- Provider API documentation: see internal provider integration notes (kept out of source control).

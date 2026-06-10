@@ -40,7 +40,7 @@ export const translations = {
     workflow: [
       { step: "Add product", copy: "Enter the product name, dimensions, category, and store URL." },
       { step: "Upload photos", copy: "Use 4 clean product photos: front, side or angle, back, and material detail." },
-      { step: "Generate model", copy: "Meshy creates the 3D asset while Augmenta packages the web and AR files." },
+      { step: "Generate model", copy: "Our AI engine creates the 3D asset while Augmenta packages the web and AR files." },
       { step: "Review before live", copy: "Approve the visual preview before shoppers can see it." },
       { step: "Publish anywhere", copy: "Use the hosted link on product pages, ads, emails, or QR codes." },
       { step: "Track results", copy: "Track page views, AR clicks, and clicks back to your store." },
@@ -196,7 +196,7 @@ export const translations = {
     workflow: [
       { step: "Dodajte proizvod", copy: "Unesite naziv, dimenzije, kategoriju i URL prodavnice." },
       { step: "Otpremite slike", copy: "Koristite 4 jasne fotografije: prednju, bočnu ili ugaonu, zadnju i detalj materijala ako postoji." },
-      { step: "Generišite model", copy: "Meshy kreira 3D asset, a Augmenta pakuje web i AR fajlove." },
+      { step: "Generišite model", copy: "Naš AI mehanizam kreira 3D asset, a Augmenta pakuje web i AR fajlove." },
       { step: "Pregled pre objave", copy: "Odobrite vizuelni pregled pre nego što ga kupci vide." },
       { step: "Objavite bilo gde", copy: "Koristite hostovani link na product page-u, u oglasima, emailovima ili QR kodovima." },
       { step: "Pratite rezultate", copy: "Pratite preglede stranica, AR klikove i klikove nazad u vašu prodavnicu." },

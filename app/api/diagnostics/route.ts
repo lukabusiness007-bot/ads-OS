@@ -24,7 +24,7 @@ export const dynamic = "force-dynamic";
 const requiredEnvChecks: EnvCheck[] = [
   {
     key: "MESHY_API_KEY",
-    label: "Meshy API key",
+    label: "3D generation API key",
     requiredFor: "starting 3D generation jobs"
   },
   {

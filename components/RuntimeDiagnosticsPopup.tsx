@@ -204,8 +204,8 @@ export function RuntimeDiagnosticsPopup({
               </div>
             ) : (
               <p className="diagnosticsOk">
-                No missing deployment environment variables were detected. Live Meshy, R2, and Supabase requests can
-                still fail if credentials, permissions, credits, CORS, or bucket settings are wrong.
+                No missing deployment environment variables were detected. Live 3D generation, storage, and Supabase
+                requests can still fail if credentials, permissions, credits, CORS, or bucket settings are wrong.
               </p>
             )}
           </div>

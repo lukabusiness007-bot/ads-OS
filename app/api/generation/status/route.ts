@@ -594,7 +594,7 @@ function handleStatusError(error: unknown) {
         status: "failed",
         progress: 0,
         message: "The generation service is not configured yet.",
-        errorMessage: "Add the Meshy API key and try again."
+        errorMessage: "Add the required API key and try again."
       } satisfies GenerationStatusResponse,
       { status: 500 }
     );
