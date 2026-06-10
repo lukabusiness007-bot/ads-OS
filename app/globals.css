@@ -1495,7 +1495,7 @@ h3 {
   min-width: 154px;
 }
 
-.publicActions .button:disabled {
+.button:disabled {
   cursor: not-allowed;
   opacity: 0.55;
 }

@@ -68,6 +68,20 @@ export function ReviewActions({
 
   const disabled = !!pending
 
+  // The button stays clickable while the gate blocks approval so the click
+  // always gets feedback — a silently disabled button reads as "broken".
+  function handleApprove() {
+    if (gate.status === "blocked") {
+      toast("Approval is blocked while checks are failing — see the list above.", "danger")
+      return
+    }
+    if (gate.status === "needs_reason" && !reasonGiven) {
+      toast("Add an override reason above before approving.", "danger")
+      return
+    }
+    void decide("approved")
+  }
+
   return (
     <div className="panel stack">
       <h2 style={{ margin: 0 }}>Decision</h2>
@@ -127,7 +141,9 @@ export function ReviewActions({
         <button
           className="button accent"
           type="button"
-          disabled={disabled || currentStatus === "approved" || approveBlocked}
+          disabled={disabled || currentStatus === "approved"}
+          aria-disabled={approveBlocked || undefined}
+          style={approveBlocked ? { opacity: 0.55, cursor: "not-allowed" } : undefined}
           title={
             gate.status === "blocked"
               ? "Resolve the failing checks before approving"
@@ -135,7 +151,7 @@ export function ReviewActions({
                 ? "Add an override reason before approving"
                 : undefined
           }
-          onClick={() => decide("approved")}
+          onClick={handleApprove}
         >
           {pending === "approved" ? "Approving…" : "✓ Approve"}
         </button>

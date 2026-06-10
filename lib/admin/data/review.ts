@@ -233,22 +233,22 @@ export async function decideReview(
 
   const now = new Date().toISOString();
 
-  // All writes are independent — run in parallel.
-  await Promise.all([
+  // All writes are independent — run in parallel. Reviews are append-only:
+  // each generation cycle inserts a fresh "pending" row and readers take the
+  // latest by created_at. reviews.product_id has no unique constraint, so an
+  // upsert keyed on it would be rejected by Postgres.
+  const [reviewRes, productRes, jobRes, pageRes] = await Promise.all([
     supabase
       .from("reviews")
-      .upsert(
-        {
-          product_id: productId,
-          organization_id,
-          status: reviewStatus,
-          reviewer_id: admin.id,
-          reviewer_kind: reviewerKind,
-          notes: notes ?? null,
-          updated_at: now
-        },
-        { onConflict: "product_id" }
-      ),
+      .insert({
+        product_id: productId,
+        organization_id,
+        status: reviewStatus,
+        reviewer_id: admin.id,
+        reviewer_kind: reviewerKind,
+        notes: notes ?? null,
+        updated_at: now
+      }),
     supabase
       .from("products")
       .update({ status: productStatus, updated_at: now })
@@ -260,21 +260,42 @@ export async function decideReview(
           provider: "meshy",
           status: "queued"
         })
-      : Promise.resolve(),
+      : Promise.resolve({ error: null }),
     decision === "approved"
       ? supabase
           .from("hosted_pages")
           .update({ status: "ready" })
           .eq("product_id", productId)
           .eq("status", "locked")
-      : Promise.resolve(),
-    recordAuditEvent(admin, {
-      action: decision === "regenerate" ? "regenerate" : decision,
-      targetType: "product",
-      targetId: productId,
-      metadata: { notes, reviewerKind, decision }
-    })
+      : Promise.resolve({ error: null })
   ]);
+
+  const failedSteps: string[] = [];
+  for (const [step, error] of [
+    ["review record", reviewRes.error],
+    ["product status", productRes.error],
+    ["regeneration job", jobRes.error],
+    ["hosted page unlock", pageRes.error]
+  ] as const) {
+    if (!error) continue;
+    failedSteps.push(step);
+    console.error(`decideReview: ${step} write failed`, {
+      productId,
+      decision,
+      code: error.code,
+      message: error.message
+    });
+  }
+  if (failedSteps.length > 0) {
+    throw new Error(`Could not save the decision — failed to write: ${failedSteps.join(", ")}.`);
+  }
+
+  await recordAuditEvent(admin, {
+    action: decision === "regenerate" ? "regenerate" : decision,
+    targetType: "product",
+    targetId: productId,
+    metadata: { notes, reviewerKind, decision }
+  });
 }
 
 export async function evaluateModelForAutoApproval(
