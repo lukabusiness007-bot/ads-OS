@@ -1,19 +1,45 @@
 "use client"
 
+import { useEffect, useState } from "react"
 import Link from "next/link"
 import { CopyButton } from "@/components/CopyButton"
 import { StatusBadge } from "@/components/StatusBadge"
 import { useLang } from "@/lib/lang"
 import type { DashboardData } from "@/lib/supabase/data"
-import type { ProductStatus } from "@/lib/types"
+import type { Product, ProductStatus } from "@/lib/types"
 
 const COMPLETE_STATUSES: ProductStatus[] = ["awaiting_review", "approved", "published", "unpublished"]
+
+/** Build the iframe snippet a merchant pastes into their own store. */
+function embedSnippet(origin: string, hostedSlug: string): string {
+  return (
+    `<iframe src="${origin}/embed/${hostedSlug}" width="100%" height="480" ` +
+    `frameborder="0" allow="xr-spatial-tracking; fullscreen" loading="lazy" ` +
+    `style="border:0;border-radius:16px;"></iframe>`
+  )
+}
 
 export function PublishedLinksClient({ data }: { data: DashboardData }) {
   const { tr } = useLang()
   const pl = tr.publishedLinks
 
+  // Snippets need an absolute origin. Prefer the configured public site URL;
+  // fall back to the current origin once mounted (avoids an SSR/CSR mismatch).
+  const [origin, setOrigin] = useState(
+    (process.env.NEXT_PUBLIC_SITE_URL ?? "").replace(/\/$/, "")
+  )
+  useEffect(() => {
+    if (!origin) {
+      setOrigin(window.location.origin)
+    }
+  }, [origin])
+
   const products = data.products.filter((p) => COMPLETE_STATUSES.includes(p.status))
+
+  // hostedPage.slug is "{merchant}/{product}"; the embed route mirrors it.
+  function hostedSlugFor(product: Product): string {
+    return product.hostedPage?.slug ?? ""
+  }
 
   return (
     <>
@@ -68,6 +94,18 @@ export function PublishedLinksClient({ data }: { data: DashboardData }) {
                       >
                         {pl.preview} ↗
                       </Link>
+                    </div>
+                    <div className="embedSnippetBlock">
+                      <span className="sectionLabel">{pl.embedHeading}</span>
+                      <p className="muted">{pl.embedHint}</p>
+                      <code className="embedSnippet">
+                        {embedSnippet(origin, hostedSlugFor(product))}
+                      </code>
+                      <CopyButton
+                        value={embedSnippet(origin, hostedSlugFor(product))}
+                        className="button secondary sm"
+                        label={pl.copyEmbed}
+                      />
                     </div>
                   </>
                 ) : (

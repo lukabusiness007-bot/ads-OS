@@ -37,6 +37,7 @@ export type DashboardData = {
     products: number;
     published: number;
     pageViews: number;
+    embedViews: number;
     viewerInteractions: number;
     arClicks: number;
     storeClicks: number;
@@ -332,6 +333,7 @@ export async function getDashboardData(): Promise<DashboardData> {
       acc.products += 1;
       acc.published += product.hostedPage?.status === "published" ? 1 : 0;
       acc.pageViews += product.analytics?.pageViews ?? 0;
+      acc.embedViews += product.analytics?.embedViews ?? 0;
       acc.viewerInteractions += product.analytics?.viewerInteractions ?? 0;
       acc.arClicks += product.analytics?.arButtonClicks ?? 0;
       acc.storeClicks += product.analytics?.ctaClicks ?? 0;
@@ -342,6 +344,7 @@ export async function getDashboardData(): Promise<DashboardData> {
       products: 0,
       published: 0,
       pageViews: 0,
+      embedViews: 0,
       viewerInteractions: 0,
       arClicks: 0,
       storeClicks: 0,
@@ -449,6 +452,7 @@ function createEmptyDashboardData(isConfigured: boolean, setupErrorMessage?: str
       products: 0,
       published: 0,
       pageViews: 0,
+      embedViews: 0,
       viewerInteractions: 0,
       arClicks: 0,
       storeClicks: 0,
@@ -465,6 +469,7 @@ function buildAnalyticsByProduct(rows: Array<{ product_id: string | null; event_
 
     acc[row.product_id] ??= {
       pageViews: 0,
+      embedViews: 0,
       viewerInteractions: 0,
       arButtonClicks: 0,
       ctaClicks: 0,
@@ -474,6 +479,7 @@ function buildAnalyticsByProduct(rows: Array<{ product_id: string | null; event_
     const analytics = acc[row.product_id];
 
     if (row.event_type === "page_view") analytics.pageViews += 1;
+    if (row.event_type === "embed_view") analytics.embedViews += 1;
     if (row.event_type === "viewer_interaction") analytics.viewerInteractions += 1;
     if (row.event_type === "ar_button_click") analytics.arButtonClicks += 1;
     if (row.event_type === "cta_click") analytics.ctaClicks += 1;

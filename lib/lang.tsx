@@ -76,6 +76,8 @@ export const t = {
       viewBilling: "Pogledaj naplatu",
       pageViews: "Pregledi stranica",
       allProducts: "Svi proizvodi",
+      embedViews: "Pregledi ugradnje",
+      embedded: "Ugrađeno na prodavnicama",
       viewerInteractions: "Interakcije sa pregledačem",
       engagements3d: "3D angažovanost",
       arClicks: "AR klikovi",
@@ -86,6 +88,7 @@ export const t = {
       breakdownDesc: "Metrike angažovanosti za svaku objavljenu stranicu proizvoda.",
       colProduct: "Proizvod",
       colPageViews: "Pregledi",
+      colEmbedViews: "Pregledi ugradnje",
       colInteractions: "Interakcije",
       colArClicks: "AR klikovi",
       colStoreClicks: "Klikovi na prodavnicu",
@@ -182,6 +185,9 @@ export const t = {
       preview: "Pregled",
       availableAfter: "Dostupno nakon odobrenja i objavljivanja.",
       ctaDestination: "CTA odredište:",
+      embedHeading: "Ugradi na svoju prodavnicu",
+      embedHint: "Nalepite ovaj kod na stranicu proizvoda (Shopify, WooCommerce, Wix ili sopstveni sajt).",
+      copyEmbed: "Kopiraj kod za ugradnju",
     },
 
     approval: {
@@ -435,6 +441,8 @@ export const t = {
       viewBilling: "View billing",
       pageViews: "Page views",
       allProducts: "All products",
+      embedViews: "Embed views",
+      embedded: "Embedded on stores",
       viewerInteractions: "Viewer interactions",
       engagements3d: "3D engagements",
       arClicks: "AR clicks",
@@ -445,6 +453,7 @@ export const t = {
       breakdownDesc: "Engagement metrics for each published product page.",
       colProduct: "Product",
       colPageViews: "Page views",
+      colEmbedViews: "Embed views",
       colInteractions: "Interactions",
       colArClicks: "AR clicks",
       colStoreClicks: "Store clicks",
@@ -541,6 +550,9 @@ export const t = {
       preview: "Preview",
       availableAfter: "Available after approval and publishing.",
       ctaDestination: "CTA destination:",
+      embedHeading: "Embed on your store",
+      embedHint: "Paste this code into your product page (Shopify, WooCommerce, Wix, or a custom site).",
+      copyEmbed: "Copy embed code",
     },
 
     approval: {

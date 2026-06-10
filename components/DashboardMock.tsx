@@ -3,25 +3,25 @@
 
 export function DashboardMock() {
   return (
-    <div className="w-full rounded-xl border border-zinc-200 shadow-2xl overflow-hidden bg-white">
+    <div className="w-full rounded-xl border border-[#dce2d5] shadow-2xl overflow-hidden bg-white">
       {/* Browser / app bar */}
-      <div className="flex items-center gap-2 bg-zinc-900 px-4 py-3">
+      <div className="flex items-center gap-2 bg-[#17201a] px-4 py-3">
         <span className="h-2.5 w-2.5 rounded-full bg-red-400/80" />
         <span className="h-2.5 w-2.5 rounded-full bg-yellow-400/80" />
-        <span className="h-2.5 w-2.5 rounded-full bg-emerald-400/80" />
-        <div className="ml-3 flex-1 h-5 rounded-md bg-zinc-700/60 max-w-[220px]" />
+        <span className="h-2.5 w-2.5 rounded-full bg-[#6ee7b7]/80" />
+        <div className="ml-3 flex-1 h-5 rounded-md bg-white/10 max-w-[220px]" />
       </div>
 
       {/* Top metric strip */}
-      <div className="grid grid-cols-3 gap-3 p-4 border-b border-zinc-100 bg-zinc-50/60">
+      <div className="grid grid-cols-3 gap-3 p-4 border-b border-[#dce2d5] bg-[#f7f8f4]/60">
         {[
           { label: "Page views", value: "1,248" },
           { label: "AR clicks", value: "312" },
           { label: "Store clicks", value: "189" },
         ].map((m) => (
-          <div key={m.label} className="rounded-lg border border-zinc-200 bg-white px-3 py-2.5 shadow-sm">
-            <p className="text-[10px] font-bold uppercase tracking-widest text-zinc-400 mb-0.5">{m.label}</p>
-            <p className="text-lg font-bold text-zinc-900 leading-none">{m.value}</p>
+          <div key={m.label} className="rounded-lg border border-[#dce2d5] bg-white px-3 py-2.5 shadow-sm">
+            <p className="text-[10px] font-bold uppercase tracking-widest text-[#697266] mb-0.5">{m.label}</p>
+            <p className="text-lg font-bold text-[#17201a] leading-none">{m.value}</p>
           </div>
         ))}
       </div>
@@ -33,17 +33,17 @@ export function DashboardMock() {
           { name: "Como Linen Sofa 3-seat", status: "Live", bar: 65 },
           { name: "Murano Side Table", status: "Review", bar: 0 },
         ].map((p) => (
-          <div key={p.name} className="flex items-center gap-3 rounded-lg border border-zinc-100 bg-white px-3 py-2.5">
+          <div key={p.name} className="flex items-center gap-3 rounded-lg border border-[#dce2d5] bg-white px-3 py-2.5">
             {/* Thumbnail placeholder */}
-            <div className="h-8 w-8 rounded-md bg-emerald-50 border border-emerald-100 shrink-0 flex items-center justify-center">
-              <span className="text-[8px] font-bold text-emerald-600">3D</span>
+            <div className="h-8 w-8 rounded-md bg-[#1f6f5b]/8 border border-[#1f6f5b]/15 shrink-0 flex items-center justify-center">
+              <span className="text-[8px] font-bold text-[#1f6f5b]">3D</span>
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-xs font-semibold text-zinc-800 truncate">{p.name}</p>
+              <p className="text-xs font-semibold text-[#17201a] truncate">{p.name}</p>
               {p.bar > 0 && (
-                <div className="mt-1 h-1 rounded-full bg-zinc-100 overflow-hidden">
+                <div className="mt-1 h-1 rounded-full bg-[#dce2d5] overflow-hidden">
                   <div
-                    className="h-full rounded-full bg-emerald-500"
+                    className="h-full rounded-full bg-[#1f6f5b]"
                     style={{ width: `${p.bar}%` }}
                   />
                 </div>
@@ -52,7 +52,7 @@ export function DashboardMock() {
             <span
               className={`shrink-0 text-[10px] font-bold rounded-full px-2 py-0.5 ${
                 p.status === "Live"
-                  ? "bg-emerald-50 text-emerald-700 border border-emerald-200"
+                  ? "bg-[#1f6f5b]/8 text-[#1f6f5b] border border-[#1f6f5b]/20"
                   : "bg-amber-50 text-amber-700 border border-amber-200"
               }`}
             >
@@ -64,8 +64,8 @@ export function DashboardMock() {
 
       {/* Bottom bar */}
       <div className="px-4 pb-4">
-        <div className="h-8 rounded-lg bg-emerald-900 flex items-center justify-center">
-          <span className="text-[11px] font-bold text-emerald-100 tracking-wide">+ Add product</span>
+        <div className="h-8 rounded-lg bg-[#1f6f5b] flex items-center justify-center">
+          <span className="text-[11px] font-bold text-white/90 tracking-wide">+ Add product</span>
         </div>
       </div>
     </div>
