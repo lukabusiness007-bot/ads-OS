@@ -78,6 +78,10 @@ export function MarketingNav({ lang = "en" }: { lang?: Lang }) {
                 {/* Language switcher — shows only the other language */}
                 <Link
                   href={lang === "sr" ? "/" : "/sr"}
+                  onClick={() => {
+                    const next = lang === "sr" ? "en" : "sr"
+                    document.cookie = `lang=${next}; path=/; max-age=31536000; samesite=lax`
+                  }}
                   className="px-2.5 py-1.5 border border-[#dce2d5] rounded-md text-sm font-semibold text-[#697266] hover:text-[#17201a] transition-colors"
                 >
                   {lang === "sr" ? "EN" : "SR"}

@@ -24,7 +24,19 @@ function isProtectedPath(pathname: string): boolean {
   );
 }
 
+// Marketing pages default to Serbian. Visitors stay on the English routes
+// only after explicitly choosing EN (the nav switcher sets the "lang" cookie).
+const SR_DEFAULT_REDIRECTS: Record<string, string> = {
+  "/": "/sr",
+  "/pricing": "/sr/pricing",
+};
+
 export async function middleware(request: NextRequest) {
+  const srPath = SR_DEFAULT_REDIRECTS[request.nextUrl.pathname];
+  if (srPath && request.cookies.get("lang")?.value !== "en") {
+    return NextResponse.redirect(new URL(srPath, request.url));
+  }
+
   if (!isSupabaseConfigured()) {
     return NextResponse.next();
   }
