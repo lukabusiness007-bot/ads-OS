@@ -1,8 +1,13 @@
-import { NodeIO, Primitive, type Document } from "@gltf-transform/core";
+import { NodeIO, Primitive, type Document, type Transform } from "@gltf-transform/core";
 import { EXTTextureWebP, KHRDracoMeshCompression } from "@gltf-transform/extensions";
 import { dedup, draco, prune, textureCompress, weld } from "@gltf-transform/functions";
 import draco3d from "draco3dgltf";
 import sharp from "sharp";
+import {
+  stampWatermarkMetadata,
+  vertexFingerprintTransform,
+  type GlbWatermark
+} from "./glb-watermark";
 
 export type OptimizedGlb = {
   buffer: Buffer;
@@ -11,7 +16,7 @@ export type OptimizedGlb = {
   fileSizeMb: number;
 };
 
-export async function optimizeGlb(input: Buffer): Promise<OptimizedGlb | null> {
+export async function optimizeGlb(input: Buffer, watermark?: GlbWatermark): Promise<OptimizedGlb | null> {
   try {
     const io = new NodeIO()
       .registerExtensions([EXTTextureWebP, KHRDracoMeshCompression])
@@ -22,10 +27,16 @@ export async function optimizeGlb(input: Buffer): Promise<OptimizedGlb | null> {
 
     const document = await io.readBinary(input);
 
+    // Insert the per-org vertex fingerprint after weld (so it's baked into the
+    // welded geometry) and before draco (so it's preserved through, not erased
+    // by, quantization). Metadata extras are stamped after the pass, below.
+    const geometry: Transform[] = [dedup(), prune(), weld()];
+    if (watermark?.organizationId) {
+      geometry.push(vertexFingerprintTransform(watermark.organizationId));
+    }
+
     await document.transform(
-      dedup(),
-      prune(),
-      weld(),
+      ...geometry,
       draco({
         quantizePosition: 14,
         quantizeNormal: 10,
@@ -38,6 +49,10 @@ export async function optimizeGlb(input: Buffer): Promise<OptimizedGlb | null> {
         // resize: [2048, 2048]
       })
     );
+
+    if (watermark?.organizationId) {
+      stampWatermarkMetadata(document, watermark);
+    }
 
     const output = Buffer.from(await io.writeBinary(document));
 

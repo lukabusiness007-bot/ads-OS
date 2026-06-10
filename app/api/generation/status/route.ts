@@ -248,7 +248,13 @@ async function storeMeshyTaskAssets(
   const scaled = dimensions ? await scaleGlbToDimensions(glb.body, dimensions) : null;
   const glbForOptimization = scaled?.buffer ?? glb.body;
 
-  const optimizedGlb = await optimizeGlb(glbForOptimization);
+  // Watermark only the SERVED model (model.glb): a per-org vertex fingerprint +
+  // license metadata for leak traceability. The model-source.glb backup below is
+  // uploaded from glbForOptimization and stays clean for the paid buyout export.
+  const optimizedGlb = await optimizeGlb(
+    glbForOptimization,
+    organizationId ? { organizationId, productId, taskId } : undefined
+  );
   const modelBody = optimizedGlb?.buffer ?? glbForOptimization;
   const modelMetadata = optimizedGlb ?? await getGlbMetadata(glbForOptimization);
 
