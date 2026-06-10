@@ -6,6 +6,7 @@ import {
 } from "./server";
 import type { HostedPageAnalyticsEvent, ModelAsset, Product, ProductCategory, ProductStatus } from "@/lib/types";
 import { publicUrlForKey } from "@/lib/storage/r2";
+import { modelAccessPath } from "@/lib/model-access-token";
 
 type SupabaseClient = Awaited<ReturnType<typeof createServerSupabaseClient>>;
 type SupabaseAdminClient = ReturnType<typeof createServiceRoleSupabaseClient>;
@@ -390,7 +391,7 @@ export async function getPublishedProduct(merchantSlug: string, productSlug: str
   const organization = Array.isArray(data.organizations) ? data.organizations[0] : data.organizations;
   const productRow = Array.isArray(data.products) ? data.products[0] : data.products;
 
-  return mapProductRow(
+  const product = mapProductRow(
     {
       ...productRow,
       hosted_pages: [data]
@@ -402,6 +403,35 @@ export async function getPublishedProduct(merchantSlug: string, productSlug: str
       planKey: "starter"
     }
   );
+
+  return tokenizePublicModelDelivery(product, firstRelated(productRow.model_assets));
+}
+
+/**
+ * Public model delivery must never hand out permanent, hotlinkable file URLs.
+ * Swap a published product's GLB/USDZ URLs for opaque, short-lived
+ * `/api/model-access/<token>` paths (Plan 2 kill switch); poster/thumbnail stay
+ * public. Only formats backed by an R2 key the signing endpoint can resolve are
+ * tokenized — legacy assets with only a stored public URL keep their direct URL
+ * so they don't 404.
+ */
+function tokenizePublicModelDelivery(product: Product, assetRow: unknown): Product {
+  const asset = product.modelAsset;
+  if (!asset || !isDbRow(assetRow)) {
+    return product;
+  }
+
+  const hasGlbKey = typeof assetRow.glb_r2_key === "string" && assetRow.glb_r2_key.length > 0;
+  const hasUsdzKey = typeof assetRow.usdz_r2_key === "string" && assetRow.usdz_r2_key.length > 0;
+
+  return {
+    ...product,
+    modelAsset: {
+      ...asset,
+      glbUrl: hasGlbKey ? modelAccessPath(product.id, "glb") : asset.glbUrl,
+      usdzUrl: hasUsdzKey ? modelAccessPath(product.id, "usdz") : asset.usdzUrl
+    }
+  };
 }
 
 export async function recordHostedPageEvent(input: {
