@@ -127,6 +127,44 @@ export async function createPresignedR2GetUrl(key: string, expiresIn = 15 * 60) 
   }
 }
 
+/** Short expiry for model GET URLs minted just-in-time by /api/model-access. */
+export const MODEL_GET_URL_TTL_SECONDS = 5 * 60;
+
+/**
+ * Bucket that stores private GLB/USDZ model objects. Prefer a dedicated private
+ * bucket (no public domain bound) so model files are reachable ONLY via the
+ * presigned URLs this module mints; fall back to the main bucket when one isn't
+ * configured yet.
+ */
+function modelBucket(config: R2Config): string {
+  return process.env.R2_PRIVATE_BUCKET_NAME?.trim() || config.bucket;
+}
+
+/**
+ * Mint a short-lived presigned GET URL for a private model object, signed
+ * against the S3 API endpoint (so it works even when the bucket has no public
+ * domain). This is the only sanctioned way to read GLB/USDZ bytes.
+ */
+export async function createPresignedModelGetUrl(
+  key: string,
+  expiresIn: number = MODEL_GET_URL_TTL_SECONDS
+): Promise<string> {
+  const config = getR2Config();
+
+  try {
+    return await getSignedUrl(
+      config.client,
+      new GetObjectCommand({
+        Bucket: modelBucket(config),
+        Key: key
+      }),
+      { expiresIn }
+    );
+  } catch (error) {
+    throw new R2RequestError("creating a signed model download URL", error);
+  }
+}
+
 export function createProductPhotoKey(productId: string, fileName: string, index: number) {
   return `product-photos/${DEMO_ORG_ID}/${productId}/${String(index + 1).padStart(2, "0")}-${sanitizeObjectKeyPart(fileName)}`;
 }

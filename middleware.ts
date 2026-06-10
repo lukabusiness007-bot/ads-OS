@@ -177,8 +177,9 @@ export const config = {
      * - common image extensions
      * - Public auth surface: /login, /auth/callback
      * - Public APIs: /api/public, /api/analytics, /api/auth, /api/diagnostics
+     * - Public model delivery: /api/model-access (self-gating; needs no session)
      * - Hosted AR product pages: /hosted-page
      */
-    "/((?!_next/static|_next/image|favicon\\.ico|sitemap\\.xml|robots\\.txt|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico|glb|usdz)$|login|auth/callback|hosted-page|api/public|api/analytics|api/auth|api/diagnostics).*)",
+    "/((?!_next/static|_next/image|favicon\\.ico|sitemap\\.xml|robots\\.txt|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico|glb|usdz)$|login|auth/callback|hosted-page|api/public|api/analytics|api/auth|api/diagnostics|api/model-access).*)",
   ],
 };
