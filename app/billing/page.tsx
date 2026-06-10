@@ -145,7 +145,7 @@ export default function BillingPage() {
                   </button>
                 )}
                 {tier.id === "business" && (
-                  <a className="button secondary" href="mailto:hello@veridianar.com" style={{ width: "100%", textAlign: "center" }}>
+                  <a className="button secondary" href="mailto:hello@augmenta3d.com" style={{ width: "100%", textAlign: "center" }}>
                     {b.talkToUs}
                   </a>
                 )}

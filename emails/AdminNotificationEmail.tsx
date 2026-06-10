@@ -34,7 +34,7 @@ AdminNotificationEmail.PreviewProps = {
   productName: "Walnut Lounge Chair",
   merchantName: "Nordic Living",
   action: "awaiting_review",
-  reviewUrl: "https://veridianar.com/admin/review/123"
+  reviewUrl: "https://augmenta3d.com/admin/review/123"
 } satisfies AdminNotificationEmailProps;
 
 export default AdminNotificationEmail;

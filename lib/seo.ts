@@ -5,10 +5,10 @@ export type SeoLang = "en" | "sr";
 export const siteConfig = {
   name: "Augmenta",
   fullName: "Augmenta",
-  url: (process.env.NEXT_PUBLIC_SITE_URL ?? "https://veridianar.com").replace(/\/$/, ""),
+  url: (process.env.NEXT_PUBLIC_SITE_URL ?? "https://augmenta3d.com").replace(/\/$/, ""),
   ogImagePath: "/opengraph-image",
   logoPath: "/img/augmenta-logo.png",
-  contactEmail: "hello@veridianar.com"
+  contactEmail: "hello@augmenta3d.com"
 };
 
 export const localeByLang: Record<SeoLang, string> = {

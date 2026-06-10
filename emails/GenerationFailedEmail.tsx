@@ -30,7 +30,7 @@ export function GenerationFailedEmail({ productName, dashboardUrl, reason }: Gen
 
 GenerationFailedEmail.PreviewProps = {
   productName: "Walnut Lounge Chair",
-  dashboardUrl: "https://veridianar.com/dashboard",
+  dashboardUrl: "https://augmenta3d.com/dashboard",
   reason: "The uploaded photos didn't have enough detail to reconstruct the shape."
 } satisfies GenerationFailedEmailProps;
 

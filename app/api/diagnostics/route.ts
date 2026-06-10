@@ -125,7 +125,7 @@ export async function GET(request: Request) {
     issues.push({
       severity: "warning",
       title: "Site URL is using the default",
-      message: "NEXT_PUBLIC_SITE_URL is not set, so metadata falls back to https://veridianar.com.",
+      message: "NEXT_PUBLIC_SITE_URL is not set, so metadata falls back to https://augmenta3d.com.",
       fix: "Set NEXT_PUBLIC_SITE_URL to the deployed Vercel URL or production domain."
     });
   }

@@ -52,8 +52,8 @@ AnalyticsDigestEmail.PreviewProps = {
     { label: "Store clicks", value: "97" },
     { label: "New models", value: "3" }
   ],
-  dashboardUrl: "https://veridianar.com/analytics",
-  unsubscribeUrl: "https://veridianar.com/unsubscribe?token=demo"
+  dashboardUrl: "https://augmenta3d.com/analytics",
+  unsubscribeUrl: "https://augmenta3d.com/unsubscribe?token=demo"
 } satisfies AnalyticsDigestEmailProps;
 
 export default AnalyticsDigestEmail;

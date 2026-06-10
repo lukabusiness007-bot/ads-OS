@@ -29,7 +29,7 @@ export function WelcomeEmail({ name, dashboardUrl }: WelcomeEmailProps) {
 
 WelcomeEmail.PreviewProps = {
   name: "Sam",
-  dashboardUrl: "https://veridianar.com/dashboard"
+  dashboardUrl: "https://augmenta3d.com/dashboard"
 } satisfies WelcomeEmailProps;
 
 export default WelcomeEmail;

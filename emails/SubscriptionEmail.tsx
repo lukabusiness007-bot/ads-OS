@@ -49,7 +49,7 @@ export function SubscriptionEmail({ change, planName, billingUrl, periodEnd }: S
 SubscriptionEmail.PreviewProps = {
   change: "trial_ending",
   planName: "Growth",
-  billingUrl: "https://veridianar.com/billing",
+  billingUrl: "https://augmenta3d.com/billing",
   periodEnd: "June 16, 2026"
 } satisfies SubscriptionEmailProps;
 

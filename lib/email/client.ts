@@ -19,11 +19,11 @@ export function getResendClient(): Resend | null {
 }
 
 export function getFromAddress(): string {
-  return process.env.EMAIL_FROM ?? "Augmenta <noreply@veridianar.com>";
+  return process.env.EMAIL_FROM ?? "Augmenta <noreply@augmenta3d.com>";
 }
 
 export function getSiteUrl(): string {
-  return process.env.NEXT_PUBLIC_SITE_URL ?? "https://veridianar.com";
+  return process.env.NEXT_PUBLIC_SITE_URL ?? "https://augmenta3d.com";
 }
 
 type SendEmailInput = {

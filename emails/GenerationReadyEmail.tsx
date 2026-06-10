@@ -30,7 +30,7 @@ export function GenerationReadyEmail({ productName, dashboardUrl }: GenerationRe
 
 GenerationReadyEmail.PreviewProps = {
   productName: "Walnut Lounge Chair",
-  dashboardUrl: "https://veridianar.com/dashboard"
+  dashboardUrl: "https://augmenta3d.com/dashboard"
 } satisfies GenerationReadyEmailProps;
 
 export default GenerationReadyEmail;
