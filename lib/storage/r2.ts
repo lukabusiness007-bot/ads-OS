@@ -1,4 +1,4 @@
-import { GetObjectCommand, PutObjectCommand, S3Client } from "@aws-sdk/client-s3";
+import { GetObjectCommand, HeadObjectCommand, PutObjectCommand, S3Client } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 
 type R2Config = {
@@ -162,6 +162,65 @@ export async function createPresignedModelGetUrl(
     );
   } catch (error) {
     throw new R2RequestError("creating a signed model download URL", error);
+  }
+}
+
+/**
+ * Derive the clean pre-watermark source key from a served model key.
+ * The pipeline uploads the served file as `.../model.glb` and its clean,
+ * pre-optimize/pre-watermark backup as `.../model-source.glb` in the same prefix.
+ */
+export function deriveSourceGlbKey(glbKey: string): string {
+  const parts = glbKey.split("/");
+  if (parts[parts.length - 1] === "model.glb") {
+    parts[parts.length - 1] = "model-source.glb";
+    return parts.join("/");
+  }
+  return glbKey.replace(/\.glb$/i, "-source.glb");
+}
+
+/** Strip anything that could break a Content-Disposition filename header. */
+function sanitizeDownloadFilename(name: string): string {
+  const cleaned = name.replace(/[\r\n"\\]/g, "").replace(/[^\w.\- ]+/g, "-").trim();
+  return cleaned || "model.glb";
+}
+
+/**
+ * Presigned GET that downloads as an attachment with a friendly filename — used
+ * by the paid buyout export so the buyer gets a saved `.glb` rather than an
+ * in-browser load. Short-lived like every other model URL.
+ */
+export async function createPresignedModelDownloadUrl(
+  key: string,
+  downloadFilename: string,
+  expiresIn: number = MODEL_GET_URL_TTL_SECONDS
+): Promise<string> {
+  const config = getR2Config();
+
+  try {
+    return await getSignedUrl(
+      config.client,
+      new GetObjectCommand({
+        Bucket: modelBucket(config),
+        Key: key,
+        ResponseContentType: "model/gltf-binary",
+        ResponseContentDisposition: `attachment; filename="${sanitizeDownloadFilename(downloadFilename)}"`
+      }),
+      { expiresIn }
+    );
+  } catch (error) {
+    throw new R2RequestError("creating a signed model download URL", error);
+  }
+}
+
+/** Whether a model object exists in the (private) model bucket. */
+export async function modelObjectExists(key: string): Promise<boolean> {
+  const config = getR2Config();
+  try {
+    await config.client.send(new HeadObjectCommand({ Bucket: modelBucket(config), Key: key }));
+    return true;
+  } catch {
+    return false;
   }
 }
 

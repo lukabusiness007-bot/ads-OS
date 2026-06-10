@@ -4,6 +4,7 @@ import { createServiceRoleSupabaseClient, isSupabaseServiceRoleConfigured } from
 import { getPlanPriceId, getStripe, isStripeConfigured } from "@/lib/billing/stripe";
 import { isPlanKey, PLAN_LIMITS, type PlanKey } from "@/lib/billing/plans";
 import { recordTopupPurchase } from "@/lib/billing/usage";
+import { recordModelBuyout } from "@/lib/billing/buyout";
 import { beginGracePeriod, clearGracePeriod } from "@/lib/billing/suspension";
 import { getOrganizationOwnerEmail } from "@/lib/supabase/data";
 import { getSiteUrl } from "@/lib/email/client";
@@ -110,6 +111,18 @@ async function handleCheckoutCompleted(admin: AdminClient, stripe: Stripe, sessi
       sessionId: session.id,
       topupId: session.metadata?.topup_id ?? null
     });
+  } else if (kind === "buyout") {
+    const productId = session.metadata?.product_id;
+    if (productId) {
+      await recordModelBuyout(admin, organizationId, productId, {
+        source: "stripe_checkout",
+        sessionId: session.id,
+        amount: session.amount_total ?? null,
+        currency: session.currency ?? null
+      });
+    } else {
+      console.warn("buyout checkout completed without a product_id", { sessionId: session.id });
+    }
   } else if (kind === "subscription" && typeof session.subscription === "string") {
     // Subscription checkout: fetch the created subscription and sync it now so the
     // plan is active immediately (the subscription.created event also arrives).
@@ -124,7 +137,9 @@ async function handleCheckoutCompleted(admin: AdminClient, stripe: Stripe, sessi
       const planName =
         kind === "topup"
           ? `Generation top-up (${session.metadata?.generations ?? "?"} models)`
-          : planDisplayName(session.metadata?.plan_key);
+          : kind === "buyout"
+            ? `Model file buyout${session.metadata?.product_name ? ` — ${session.metadata.product_name}` : ""}`
+            : planDisplayName(session.metadata?.plan_key);
       await sendReceiptEmail(owner.email, {
         planName,
         amount: formatAmount(session.amount_total, session.currency),

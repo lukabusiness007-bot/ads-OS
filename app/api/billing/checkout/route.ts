@@ -9,6 +9,7 @@ import {
 } from "@/lib/supabase/server";
 import { getPlanLimits, isPlanKey, type PlanKey } from "@/lib/billing/plans";
 import {
+  getBuyoutPriceId,
   getPlanPriceId,
   getSetupFeePriceId,
   getSiteUrl,
@@ -28,6 +29,8 @@ const checkoutSchema = z.object({
   plan: z.string().trim().max(64).optional(),
   /** Top-up pack id, e.g. "topup-25" (one-time payment checkout). */
   topup: z.string().trim().max(64).optional(),
+  /** Product id to buy out the watermark-free file for (one-time payment). */
+  buyout: z.uuid().optional(),
   /** Include the one-time setup fee on the first invoice (subscription only). */
   withSetupFee: z.boolean().optional()
 });
@@ -93,6 +96,61 @@ export async function POST(request: Request) {
           organization_id: organization.id,
           topup_id: body.topup,
           generations: String(pack.generations)
+        }
+      });
+
+      return NextResponse.json({ url: session.url });
+    }
+
+    // ── Model buyout (one-time payment) ─────────────────────────────────────
+    if (body.buyout) {
+      const priceId = getBuyoutPriceId();
+      if (!priceId) {
+        return NextResponse.json(
+          { errorMessage: "File buyout isn't available yet. Contact us to purchase the model file." },
+          { status: 400 }
+        );
+      }
+
+      // Ownership: you can only buy out a model your own org owns, and only if a
+      // model asset actually exists. RLS also scopes these reads to the org.
+      const { data: product } = await supabase
+        .from("products")
+        .select("id, name")
+        .eq("id", body.buyout)
+        .eq("organization_id", organization.id)
+        .maybeSingle();
+
+      if (!product) {
+        return NextResponse.json({ errorMessage: "Product not found." }, { status: 404 });
+      }
+
+      const { data: asset } = await supabase
+        .from("model_assets")
+        .select("id")
+        .eq("organization_id", organization.id)
+        .eq("product_id", body.buyout)
+        .limit(1)
+        .maybeSingle();
+
+      if (!asset) {
+        return NextResponse.json(
+          { errorMessage: "This product has no generated model to buy out yet." },
+          { status: 400 }
+        );
+      }
+
+      const session = await stripe.checkout.sessions.create({
+        mode: "payment",
+        customer: customerId,
+        line_items: [{ price: priceId, quantity: 1 }],
+        success_url: successUrl,
+        cancel_url: cancelUrl,
+        metadata: {
+          kind: "buyout",
+          organization_id: organization.id,
+          product_id: body.buyout,
+          product_name: (product as { name?: string }).name ?? ""
         }
       });
 

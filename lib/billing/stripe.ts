@@ -77,6 +77,20 @@ export function isViewOverageConfigured(): boolean {
   return isStripeConfigured() && Boolean(getViewOveragePriceId());
 }
 
+// ── Model buyout (Plan 2, step 6) ────────────────────────────────────────────
+// One-time payment that licenses a merchant to export the clean, watermark-free
+// GLB of one of their own models. Create a one-time Price in Stripe (€150–300)
+// and paste its id here. Unset = buyout disabled (checkout returns 400).
+//   STRIPE_PRICE_BUYOUT        price_...  (one-time)
+
+export function getBuyoutPriceId(): string | null {
+  return process.env.STRIPE_PRICE_BUYOUT ?? null;
+}
+
+export function isBuyoutConfigured(): boolean {
+  return isStripeConfigured() && Boolean(getBuyoutPriceId());
+}
+
 // Top-up packs: maps pack id (lib/mock-data.ts `generationTopUps`) -> Stripe
 // one-time Price ID + the number of generation credits the pack grants.
 export const TOPUP_PACKS: Record<string, { priceEnv: string; generations: number }> = {
