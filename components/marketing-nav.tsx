@@ -60,12 +60,12 @@ export function MarketingNav({ lang = "en" }: { lang?: Lang }) {
 
             <div className={`group-data-[state=active]:block lg:group-data-[state=active]:flex mb-6 hidden w-full flex-wrap items-center justify-end space-y-8 rounded-2xl border border-[#dce2d5] bg-[#fbfaf6] p-6 shadow-xl shadow-[#17201a]/8 md:flex-nowrap lg:m-0 lg:flex lg:w-fit lg:space-y-0 lg:border-transparent lg:bg-transparent lg:p-0 lg:shadow-none ${lang === "sr" ? "lg:gap-2" : "lg:gap-6"}`}>
               <div className={lang === "sr" ? "lg:pr-2" : "lg:pr-4"}>
-                <ul className={`space-y-6 text-base lg:flex lg:space-y-0 lg:text-sm ${lang === "sr" ? "lg:gap-2" : "lg:gap-4"}`}>
+                <ul className={`space-y-4 text-base lg:flex lg:items-center lg:space-y-0 lg:text-[0.92rem] ${lang === "sr" ? "lg:gap-0" : "lg:gap-1"}`}>
                   {menuItems.map((item, i) => (
                     <li key={i}>
                       <Link
                         href={item.href}
-                        className="text-[#697266] hover:text-[#17201a] block duration-150"
+                        className="font-display block rounded-full px-3 py-1.5 -mx-3 lg:mx-0 text-[#697266] transition-colors duration-200 hover:bg-[#1f6f5b]/[0.08] hover:text-[#17201a]"
                       >
                         {item.name}
                       </Link>
