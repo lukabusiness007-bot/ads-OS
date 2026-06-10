@@ -2,6 +2,8 @@ import { NextResponse } from "next/server";
 import { verifyModelAccessToken } from "@/lib/model-access-token";
 import { createPresignedModelGetUrl } from "@/lib/storage/r2";
 import { checkRateLimit, clientIpFromHeaders } from "@/lib/rate-limit";
+import { checkViewQuota } from "@/lib/billing/view-quota";
+import { isOrgSuspended, type SubscriptionBillingRow } from "@/lib/billing/suspension";
 import {
   createServiceRoleSupabaseClient,
   isSupabaseServiceRoleConfigured
@@ -65,7 +67,9 @@ export async function GET(request: Request, { params }: RouteParams) {
   // rather than trusting RLS, because the service-role client bypasses it.
   const { data: page } = await admin
     .from("hosted_pages")
-    .select("allowed_embed_domains")
+    .select(
+      "organization_id, allowed_embed_domains, organizations(plan_key, subscriptions(status, grace_period_ends_at))"
+    )
     .eq("product_id", grant.productId)
     .eq("status", "published")
     .maybeSingle();
@@ -83,8 +87,41 @@ export async function GET(request: Request, { params }: RouteParams) {
     );
   }
 
-  // Step 3 (view-limit enforcement) slots in here: a cached per-org counter that
-  // degrades to poster + upgrade prompt once monthlyViewLimit is exceeded.
+  const organizationId =
+    typeof page.organization_id === "string" ? page.organization_id : null;
+
+  if (organizationId) {
+    const org = Array.isArray(page.organizations)
+      ? page.organizations[0]
+      : page.organizations;
+    const planKey = (org as { plan_key?: string | null } | null)?.plan_key ?? null;
+
+    // Billing kill switch (Plan 2, step 4). When the org's payment has failed and
+    // the grace window has elapsed (or the subscription is unpaid/canceled), stop
+    // minting: the merchant's models — page and embeds — go dark until they pay.
+    // Restores instantly once invoice.paid clears the grace clock. Fails OPEN:
+    // see lib/billing/suspension.ts.
+    const subscriptions = (org as { subscriptions?: SubscriptionBillingRow[] | null } | null)?.subscriptions;
+    if (Array.isArray(subscriptions) && isOrgSuspended(subscriptions)) {
+      return NextResponse.json(
+        { error: "billing_suspended" },
+        { status: 402, headers: { "Cache-Control": "private, no-store" } }
+      );
+    }
+
+    // View-limit enforcement (Plan 2, step 3). Once the org has spent its plan's
+    // monthlyViewLimit for the calendar month, stop minting signed URLs: the viewer
+    // keeps its poster and the merchant is nudged to upgrade. Backed by a cached
+    // per-org counter (lib/billing/view-quota.ts) so this stays cheap per request,
+    // and fails OPEN — a broken quota store must never dark a paying merchant.
+    const quota = await checkViewQuota(organizationId, planKey);
+    if (!quota.allowed) {
+      return NextResponse.json(
+        { error: "quota_exceeded" },
+        { status: 402, headers: { "Cache-Control": "private, no-store" } }
+      );
+    }
+  }
 
   const { data: asset } = await admin
     .from("model_assets")

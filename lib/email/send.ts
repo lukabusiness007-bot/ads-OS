@@ -44,7 +44,8 @@ export async function sendSubscriptionEmail(to: string, props: SubscriptionEmail
     renewed: "Your Augmenta subscription renewed",
     updated: "Your Augmenta plan was updated",
     canceled: "Your Augmenta subscription was canceled",
-    trial_ending: "Your Augmenta trial is ending soon"
+    trial_ending: "Your Augmenta trial is ending soon",
+    payment_failed: "Action needed: your Augmenta payment failed"
   };
   await sendEmail({ to, subject: subjects[props.change], react: SubscriptionEmail(props) });
 }

@@ -1,7 +1,7 @@
 import { Button, Section, Text } from "@react-email/components";
 import { EmailLayout, styles } from "./EmailLayout";
 
-export type SubscriptionChange = "renewed" | "updated" | "canceled" | "trial_ending";
+export type SubscriptionChange = "renewed" | "updated" | "canceled" | "trial_ending" | "payment_failed";
 
 export type SubscriptionEmailProps = {
   change: SubscriptionChange;
@@ -28,6 +28,13 @@ const COPY: Record<SubscriptionChange, { heading: string; body: (plan: string, e
     heading: "Your trial is ending soon",
     body: (plan, end) =>
       `Your ${plan} trial${end ? ` ends on ${end}` : " is ending soon"}. Add a payment method to keep your AR pages live.`
+  },
+  payment_failed: {
+    heading: "We couldn't process your payment",
+    body: (plan, end) =>
+      `We weren't able to charge your card for the ${plan} plan. Please update your payment method${
+        end ? ` before ${end}` : " soon"
+      } to keep your AR pages and embeds live — after that they'll go dark until payment succeeds.`
   }
 };
 

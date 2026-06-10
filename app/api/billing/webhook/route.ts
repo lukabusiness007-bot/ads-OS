@@ -4,6 +4,7 @@ import { createServiceRoleSupabaseClient, isSupabaseServiceRoleConfigured } from
 import { getPlanPriceId, getStripe, isStripeConfigured } from "@/lib/billing/stripe";
 import { isPlanKey, PLAN_LIMITS, type PlanKey } from "@/lib/billing/plans";
 import { recordTopupPurchase } from "@/lib/billing/usage";
+import { beginGracePeriod, clearGracePeriod } from "@/lib/billing/suspension";
 import { getOrganizationOwnerEmail } from "@/lib/supabase/data";
 import { getSiteUrl } from "@/lib/email/client";
 import { sendReceiptEmail, sendSubscriptionEmail } from "@/lib/email/send";
@@ -68,6 +69,15 @@ export async function POST(request: Request) {
             () => undefined
           );
         }
+        break;
+      }
+      case "invoice.payment_failed": {
+        await handleInvoicePaymentFailed(admin, event.data.object as Stripe.Invoice);
+        break;
+      }
+      case "invoice.paid":
+      case "invoice.payment_succeeded": {
+        await handleInvoicePaid(admin, event.data.object as Stripe.Invoice);
         break;
       }
       default:
@@ -168,6 +178,68 @@ async function syncSubscription(admin: AdminClient, subscription: Stripe.Subscri
     .from("organizations")
     .update({ plan_key: effectivePlanKey, updated_at: new Date().toISOString() })
     .eq("id", organizationId);
+
+  // Payment recovered (Stripe moved the subscription back to active/trialing):
+  // clear any grace clock so the model-access kill switch resumes minting at once.
+  if (subscription.status === "active" || subscription.status === "trialing") {
+    await clearGracePeriod(admin, organizationId);
+  }
+}
+
+/**
+ * A subscription invoice failed to charge (Plan 2, step 4). Start the grace clock
+ * — models keep serving during the window — and email the owner once. When the
+ * window elapses with the subscription still unpaid, /api/model-access stops
+ * minting and the merchant's hosted page + embeds go dark until payment succeeds.
+ */
+async function handleInvoicePaymentFailed(admin: AdminClient, invoice: Stripe.Invoice) {
+  if (!invoiceSubscriptionId(invoice)) return; // ignore one-off (e.g. top-up) invoices
+
+  const organizationId = await orgIdForCustomer(admin, invoice.customer);
+  if (!organizationId) {
+    console.warn("invoice.payment_failed without an organization_id", { invoiceId: invoice.id });
+    return;
+  }
+
+  const { deadline, started } = await beginGracePeriod(admin, organizationId);
+
+  // Email the owner only when grace first starts — not on every Stripe retry.
+  if (!started) return;
+
+  const owner = await getOrganizationOwnerEmail(admin, organizationId);
+  if (!owner?.email) return;
+
+  const { data: sub } = await admin
+    .from("subscriptions")
+    .select("plan_key")
+    .eq("organization_id", organizationId)
+    .order("created_at", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+
+  await sendSubscriptionEmail(owner.email, {
+    change: "payment_failed",
+    planName: planDisplayName((sub as { plan_key?: string | null } | null)?.plan_key),
+    billingUrl: `${getSiteUrl()}/billing`,
+    periodEnd: formatDate(new Date(deadline))
+  }).catch(() => undefined);
+}
+
+/** A subscription invoice was paid (incl. a successful dunning retry): clear grace. */
+async function handleInvoicePaid(admin: AdminClient, invoice: Stripe.Invoice) {
+  if (!invoiceSubscriptionId(invoice)) return; // top-up / one-off invoices don't gate serving
+
+  const organizationId = await orgIdForCustomer(admin, invoice.customer);
+  if (!organizationId) return;
+
+  await clearGracePeriod(admin, organizationId);
+}
+
+/** Read the related subscription id off an invoice across Stripe API shapes. */
+function invoiceSubscriptionId(invoice: Stripe.Invoice): string | null {
+  const ref = (invoice as Stripe.Invoice & { subscription?: string | { id?: string } | null }).subscription;
+  if (typeof ref === "string") return ref;
+  return ref?.id ?? null;
 }
 
 async function orgIdForCustomer(admin: AdminClient, customer: string | Stripe.Customer | Stripe.DeletedCustomer | null) {

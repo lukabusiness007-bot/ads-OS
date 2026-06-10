@@ -7,6 +7,7 @@ import {
 import type { HostedPageAnalyticsEvent, ModelAsset, Product, ProductCategory, ProductStatus } from "@/lib/types";
 import { publicUrlForKey } from "@/lib/storage/r2";
 import { modelAccessPath } from "@/lib/model-access-token";
+import { getOrgBillingSuspension } from "@/lib/billing/suspension";
 
 type SupabaseClient = Awaited<ReturnType<typeof createServerSupabaseClient>>;
 type SupabaseAdminClient = ReturnType<typeof createServiceRoleSupabaseClient>;
@@ -390,6 +391,15 @@ export async function getPublishedProduct(merchantSlug: string, productSlug: str
 
   const organization = Array.isArray(data.organizations) ? data.organizations[0] : data.organizations;
   const productRow = Array.isArray(data.products) ? data.products[0] : data.products;
+
+  // Billing kill switch (Plan 2, step 4). If the org's payment has failed and the
+  // grace window has elapsed, the public page, its embeds, and the public product
+  // API all go dark — same as not-found — until payment recovers. Checked via the
+  // service role because anonymous viewers can't read the subscriptions table
+  // under RLS; fails OPEN (a billing-store hiccup must never dark a paying store).
+  if (await getOrgBillingSuspension(organization.id)) {
+    return null;
+  }
 
   const product = mapProductRow(
     {
