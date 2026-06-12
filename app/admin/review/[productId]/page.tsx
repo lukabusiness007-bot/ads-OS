@@ -4,6 +4,7 @@ import { getProductForReview } from "@/lib/admin/data";
 import { StatusBadge } from "@/components/StatusBadge";
 import { ModelViewer } from "@/components/ModelViewer";
 import { ReviewActions } from "./ReviewActions";
+import { StatusEditor } from "./StatusEditor";
 import type { ProductStatus } from "@/lib/types";
 
 export default async function ReviewInspectorPage({
@@ -198,6 +199,8 @@ export default async function ReviewInspectorPage({
             currentStatus={product.status as ProductStatus}
             modelChecks={modelChecks}
           />
+
+          <StatusEditor productId={product.id} currentStatus={product.status as ProductStatus} />
         </div>
       </div>
     </>

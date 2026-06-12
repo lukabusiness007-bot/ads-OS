@@ -43,6 +43,7 @@ export async function getOrganizationDetail(
   org: AdminOrg;
   members: AdminOrgMember[];
   subscription: AdminSubscription | null;
+  stripeCustomerId: string | null;
   products: AdminProduct[];
   recentAudit: AdminAuditEntry[];
 }> {
@@ -53,6 +54,7 @@ export async function getOrganizationDetail(
     { data: org, error: orgErr },
     { data: members },
     { data: subscription },
+    { data: billingCustomer },
     { data: products }
   ] = await Promise.all([
     supabase.from("organizations").select("*").eq("id", orgId).single(),
@@ -66,6 +68,11 @@ export async function getOrganizationDetail(
       .eq("organization_id", orgId)
       .order("created_at", { ascending: false })
       .limit(1)
+      .maybeSingle(),
+    supabase
+      .from("billing_customers")
+      .select("stripe_customer_id")
+      .eq("organization_id", orgId)
       .maybeSingle(),
     supabase
       .from("products")
@@ -87,6 +94,7 @@ export async function getOrganizationDetail(
     org: org as AdminOrg,
     members: (members ?? []) as AdminOrgMember[],
     subscription: subscription as AdminSubscription | null,
+    stripeCustomerId: (billingCustomer?.stripe_customer_id as string | null) ?? null,
     products: (products ?? []) as AdminProduct[],
     recentAudit: (recentAudit ?? []) as AdminAuditEntry[]
   };

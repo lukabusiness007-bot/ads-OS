@@ -6,6 +6,7 @@ import { PageHeader } from "@/components/admin/PageHeader";
 import { DataTable, type DataTableColumn } from "@/components/admin/DataTable";
 import { SuspendButton } from "./SuspendButton";
 import { ImpersonateButton } from "./ImpersonateButton";
+import { AdminRoleButton } from "./AdminRoleButton";
 import type { ProductStatus } from "@/lib/types";
 
 type UserDetail = Awaited<ReturnType<typeof getUserDetail>>;
@@ -133,6 +134,7 @@ export default async function AdminUserDetailPage({
             )}
             <SuspendButton userId={userId} suspended={!!profile.suspended_at} />
             <ImpersonateButton userId={userId} userName={displayName} />
+            <AdminRoleButton userId={userId} isAdmin={profile.is_platform_admin} isSelf={profile.id === admin.id} />
           </div>
         }
       />

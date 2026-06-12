@@ -115,7 +115,7 @@ export default async function AdminOrgDetailPage({
     );
   }
 
-  const { org, members, subscription, products, recentAudit } = detail;
+  const { org, members, subscription, stripeCustomerId, products, recentAudit } = detail;
 
   return (
     <>
@@ -173,6 +173,21 @@ export default async function AdminOrgDetailPage({
                       </tr>
                     )}
                   </>
+                )}
+                {stripeCustomerId && (
+                  <tr>
+                    <td className="muted" style={{ padding: "4px 8px 4px 0" }}>Stripe</td>
+                    <td style={{ padding: "4px 0" }}>
+                      <a
+                        href={`https://dashboard.stripe.com/customers/${stripeCustomerId}`}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="textLink"
+                      >
+                        View customer in Stripe →
+                      </a>
+                    </td>
+                  </tr>
                 )}
               </tbody>
             </table>

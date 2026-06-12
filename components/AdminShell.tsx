@@ -3,7 +3,7 @@
 import { useState } from "react"
 import Link from "next/link"
 import { usePathname, useRouter } from "next/navigation"
-import { LayoutGrid, CheckSquare, Users, Building2, ScrollText, LogOut, Menu, X } from "lucide-react"
+import { LayoutGrid, CheckSquare, Users, Building2, ScrollText, Settings, LogOut, Menu, X } from "lucide-react"
 import { isSupabaseConfigured } from "@/lib/supabase/config"
 import { createBrowserSupabaseClient } from "@/lib/supabase/client"
 import { NotificationBell } from "@/components/NotificationBell"
@@ -17,6 +17,7 @@ const navItems = [
   { href: "/admin/users",  label: "Users",        icon: Users       },
   { href: "/admin/orgs",   label: "Orgs",         icon: Building2   },
   { href: "/admin/audit",  label: "Audit Log",    icon: ScrollText  },
+  { href: "/admin/settings", label: "Settings",   icon: Settings    },
 ]
 
 export function AdminShell({

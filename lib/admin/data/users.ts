@@ -157,3 +157,35 @@ export async function unsuspendUser(admin: User, targetUserId: string): Promise<
     metadata: {}
   });
 }
+
+export async function setPlatformAdmin(admin: User, targetUserId: string, isAdmin: boolean): Promise<void> {
+  assertAdmin(admin);
+  const supabase = db();
+
+  if (!isAdmin) {
+    if (targetUserId === admin.id) {
+      throw new Error("You cannot remove your own admin access.");
+    }
+
+    const { count } = await supabase
+      .from("profiles")
+      .select("id", { count: "exact", head: true })
+      .eq("is_platform_admin", true);
+
+    if ((count ?? 0) <= 1) {
+      throw new Error("Cannot remove the last platform admin.");
+    }
+  }
+
+  await supabase
+    .from("profiles")
+    .update({ is_platform_admin: isAdmin })
+    .eq("id", targetUserId);
+
+  await recordAuditEvent(admin, {
+    action: isAdmin ? "grant_admin" : "revoke_admin",
+    targetType: "user",
+    targetId: targetUserId,
+    metadata: {}
+  });
+}

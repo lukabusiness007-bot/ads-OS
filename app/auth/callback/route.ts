@@ -32,7 +32,9 @@ export async function GET(request: Request) {
       });
     }
 
-    if (profile?.is_platform_admin) {
+    // Password-recovery links always continue to /update-password, even for
+    // platform admins — they need to land on the password form, not /admin.
+    if (profile?.is_platform_admin && next !== "/update-password") {
       return NextResponse.redirect(new URL("/admin", url.origin));
     }
   }

@@ -19,6 +19,9 @@ const ACTION_OPTIONS: AuditFilterOption[] = [
   { value: "impersonate_stop",  label: "Impersonate stop" },
   { value: "edit_product",      label: "Edit product" },
   { value: "edit_plan",         label: "Edit plan" },
+  { value: "edit_config",       label: "Edit settings" },
+  { value: "grant_admin",       label: "Grant admin" },
+  { value: "revoke_admin",      label: "Revoke admin" },
 ];
 
 const TARGET_OPTIONS: AuditFilterOption[] = [
@@ -26,6 +29,7 @@ const TARGET_OPTIONS: AuditFilterOption[] = [
   { value: "product",      label: "Products" },
   { value: "user",         label: "Users" },
   { value: "organization", label: "Organizations" },
+  { value: "config",       label: "Settings" },
 ];
 
 const ACTION_VERBS: Record<string, string> = {
@@ -38,12 +42,16 @@ const ACTION_VERBS: Record<string, string> = {
   impersonate_stop: "stopped impersonating",
   edit_product: "edited",
   edit_plan: "changed the plan for",
+  edit_config: "updated",
+  grant_admin: "granted platform admin to",
+  revoke_admin: "revoked platform admin from",
 };
 
 const TARGET_NOUNS: Record<string, string> = {
   product: "product",
   user: "user",
   organization: "organization",
+  config: "the platform settings",
 };
 
 const ACTION_BADGE: Record<string, "danger" | "success" | "neutral"> = {

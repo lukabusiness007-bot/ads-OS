@@ -1,7 +1,7 @@
 "use client";
 
 import { Suspense, useState } from "react";
-import { useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { SignInPage, type Testimonial } from "@/components/ui/sign-in";
 import { Logo } from "@/components/Logo";
 import { createBrowserSupabaseClient } from "@/lib/supabase/client";
@@ -44,6 +44,7 @@ function isEmailAddress(value: string) {
 }
 
 function LoginPageContent() {
+  const router = useRouter();
   const searchParams = useSearchParams();
   const next = searchParams.get("next") || "/dashboard";
 
@@ -154,7 +155,7 @@ function LoginPageContent() {
   }
 
   function handleResetPassword() {
-    setError("Enter your email above, then contact support to reset your password.");
+    router.push("/reset-password");
   }
 
   const isRegister = view === "register";

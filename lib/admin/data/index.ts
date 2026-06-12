@@ -14,7 +14,8 @@ export {
   listUsers,
   getUserDetail,
   suspendUser,
-  unsuspendUser
+  unsuspendUser,
+  setPlatformAdmin
 } from "./users";
 
 export {
@@ -48,3 +49,9 @@ export {
   listAdminNotifications,
   markNotificationsRead
 } from "./notifications";
+
+export type { AdminConfig } from "./config";
+export {
+  getAdminConfig,
+  setAutoReviewEnabled
+} from "./config";
